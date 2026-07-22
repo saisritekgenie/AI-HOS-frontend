@@ -1,0 +1,53 @@
+import React from "react";
+import { Activity, Bell, ShieldCheck, LogOut, Building } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+
+const Navbar = () => {
+  const { user, logout } = useAuth();
+  const hospitalName = user?.hospital?.name || "SaaS Master HQ";
+
+  return (
+    <header className="navbar">
+      <div className="navbar-brand">
+        <Activity className="w-6 h-6 text-sky-600" />
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <span>AI Hospital System</span>
+          <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 600, display: "flex", alignItems: "center", gap: "0.25rem" }}>
+            <Building size={12} />
+            {hospitalName}
+          </span>
+        </div>
+      </div>
+
+      <div className="navbar-user">
+        <button className="action-btn" title="Notifications">
+          <Bell size={20} />
+        </button>
+
+        <div className="user-badge">
+          <div className="user-avatar">
+            {user ? user.firstName.charAt(0).toUpperCase() : <ShieldCheck size={18} />}
+          </div>
+          <div className="user-info">
+            <span className="user-name">
+              {user ? `${user.firstName} ${user.lastName}` : "Super Admin"}
+            </span>
+            <span className="user-role">{user ? user.role : "SUPER_ADMIN"}</span>
+          </div>
+        </div>
+
+        <button
+          className="btn btn-secondary"
+          onClick={logout}
+          title="Sign Out"
+          style={{ padding: "0.5rem 0.85rem", gap: "0.4rem" }}
+        >
+          <LogOut size={16} />
+          <span>Logout</span>
+        </button>
+      </div>
+    </header>
+  );
+};
+
+export default Navbar;
