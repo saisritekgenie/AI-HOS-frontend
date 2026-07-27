@@ -44,6 +44,48 @@ const UserManagement = () => {
     setTimeout(() => setToast(null), 4000);
   };
 
+  const [roleCounts, setRoleCounts] = useState({
+    ALL: 0,
+    ADMIN: 0,
+    DOCTOR: 0,
+    NURSE: 0,
+    RECEPTIONIST: 0,
+    LAB_TECHNICIAN: 0,
+    PHARMACIST: 0,
+    CASHIER: 0
+  });
+
+  const loadRoleCounts = useCallback(async () => {
+    try {
+      const res = await fetchUsers({ limit: 500 });
+      const allUsers = res.data || [];
+      const counts = {
+        ALL: allUsers.length,
+        ADMIN: allUsers.filter(u => u.role === "ADMIN").length,
+        DOCTOR: allUsers.filter(u => u.role === "DOCTOR").length,
+        NURSE: allUsers.filter(u => u.role === "NURSE").length,
+        RECEPTIONIST: allUsers.filter(u => u.role === "RECEPTIONIST").length,
+        LAB_TECHNICIAN: allUsers.filter(u => u.role === "LAB_TECHNICIAN").length,
+        PHARMACIST: allUsers.filter(u => u.role === "PHARMACIST").length,
+        CASHIER: allUsers.filter(u => u.role === "CASHIER").length
+      };
+      setRoleCounts(counts);
+    } catch (err) {
+      console.error("Failed to load role counts", err);
+    }
+  }, []);
+
+  const handleRoleFilterChange = (val) => {
+    setRoleFilter(val);
+    if (val) {
+      localStorage.setItem("staff_role_filter", val);
+      localStorage.setItem("sidebar_active_sub", `role-${val.toLowerCase()}`);
+    } else {
+      localStorage.removeItem("staff_role_filter");
+      localStorage.removeItem("sidebar_active_sub");
+    }
+  };
+
   const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -59,6 +101,9 @@ const UserManagement = () => {
       const res = await fetchUsers(queryParams);
       setUsers(res.data || []);
       setPagination(res.meta || null);
+      
+      // Refresh count details on main navigation sidebar
+      window.dispatchEvent(new CustomEvent("staff_list_updated"));
     } catch (err) {
       console.error("Failed to load users", err);
       showToast("error", err.response?.data?.message || "Failed to load users from backend");
@@ -75,12 +120,26 @@ const UserManagement = () => {
     setCurrentPage(1);
   }, [search, roleFilter, deptFilter, statusFilter]);
 
+  useEffect(() => {
+    const handleFilterChange = (e) => {
+      if (e.detail !== undefined) {
+        setRoleFilter(e.detail);
+      }
+    };
+    window.addEventListener("staff_role_filter_changed", handleFilterChange);
+    return () => {
+      window.removeEventListener("staff_role_filter_changed", handleFilterChange);
+    };
+  }, []);
+
   const resetFilters = () => {
     setSearch("");
     setRoleFilter("");
     setDeptFilter("");
     setStatusFilter("");
     setCurrentPage(1);
+    localStorage.removeItem("staff_role_filter");
+    localStorage.removeItem("sidebar_active_sub");
   };
 
   const handleOpenAddModal = () => {
@@ -193,7 +252,7 @@ const UserManagement = () => {
         search={search}
         setSearch={setSearch}
         roleFilter={roleFilter}
-        setRoleFilter={setRoleFilter}
+        setRoleFilter={handleRoleFilterChange}
         deptFilter={deptFilter}
         setDeptFilter={setDeptFilter}
         statusFilter={statusFilter}

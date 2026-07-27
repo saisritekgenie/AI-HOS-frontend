@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { loginUser, fetchMe } from "../services/api";
+import { loginUser, fetchMe, patientLogin } from "../services/api";
 
 const AuthContext = createContext();
 
@@ -39,6 +39,16 @@ export const AuthProvider = ({ children }) => {
     return newUser;
   };
 
+  const loginPatient = async (credentials) => {
+    const res = await patientLogin(credentials);
+    const { token: newToken, user: newUser } = res.data;
+    setToken(newToken);
+    setUser(newUser);
+    localStorage.setItem("hospital_token", newToken);
+    localStorage.setItem("hospital_user", JSON.stringify(newUser));
+    return newUser;
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -54,6 +64,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         isAuthenticated: !!token && !!user,
         login,
+        loginPatient,
         logout,
       }}
     >

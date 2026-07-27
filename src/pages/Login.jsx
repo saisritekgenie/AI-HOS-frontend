@@ -1,18 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Activity, Lock, Mail, Eye, EyeOff, LogIn, AlertCircle, KeyRound, Smartphone, Clock, ShieldOff } from "lucide-react";
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, loginPatient } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [uhid, setUhid] = useState("");
+  const [mobile, setMobile] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState("email"); // "email" or "otp"
+  const [activeTab, setActiveTab] = useState("staff"); // "staff" or "patient"
 
   // Placeholder alert modal state for requested future buttons
   const [placeholderNotice, setPlaceholderNotice] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlUhid = params.get("uhid");
+    if (urlUhid) {
+      setUhid(urlUhid);
+      setActiveTab("patient");
+    }
+  }, []);
 
   const handlePlaceholderClick = (featureName) => {
     setPlaceholderNotice(`${featureName} is configured as a UI placeholder for Phase 2 integration.`);
@@ -22,8 +33,20 @@ const Login = () => {
     e.preventDefault();
     setErrorMsg("");
 
-    if (activeTab === "otp") {
-      handlePlaceholderClick("OTP Login");
+    if (activeTab === "patient") {
+      if (!uhid || !mobile) {
+        setErrorMsg("Please enter both Patient ID (UHID) and Mobile number.");
+        return;
+      }
+      try {
+        setSubmitting(true);
+        await loginPatient({ uhid, mobile });
+      } catch (err) {
+        const msg = err.response?.data?.message || err.message || "Invalid Patient ID or Mobile number.";
+        setErrorMsg(msg);
+      } finally {
+        setSubmitting(false);
+      }
       return;
     }
 
@@ -92,7 +115,7 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Tab Switcher for Email vs OTP Login */}
+        {/* Tab Switcher for Staff vs Patient Portal */}
         <div
           style={{
             display: "flex",
@@ -109,15 +132,15 @@ const Login = () => {
               padding: "0.6rem",
               borderRadius: "9px",
               border: "none",
-              background: activeTab === "email" ? "#ffffff" : "transparent",
-              color: activeTab === "email" ? "#0284c7" : "#64748b",
+              background: activeTab === "staff" ? "#ffffff" : "transparent",
+              color: activeTab === "staff" ? "#0284c7" : "#64748b",
               fontWeight: 700,
               cursor: "pointer",
-              boxShadow: activeTab === "email" ? "0 2px 5px rgba(0,0,0,0.05)" : "none",
+              boxShadow: activeTab === "staff" ? "0 2px 5px rgba(0,0,0,0.05)" : "none",
             }}
-            onClick={() => setActiveTab("email")}
+            onClick={() => setActiveTab("staff")}
           >
-            Email Login
+            Staff Portal
           </button>
           <button
             type="button"
@@ -126,15 +149,15 @@ const Login = () => {
               padding: "0.6rem",
               borderRadius: "9px",
               border: "none",
-              background: activeTab === "otp" ? "#ffffff" : "transparent",
-              color: activeTab === "otp" ? "#0284c7" : "#64748b",
+              background: activeTab === "patient" ? "#ffffff" : "transparent",
+              color: activeTab === "patient" ? "#0284c7" : "#64748b",
               fontWeight: 700,
               cursor: "pointer",
-              boxShadow: activeTab === "otp" ? "0 2px 5px rgba(0,0,0,0.05)" : "none",
+              boxShadow: activeTab === "patient" ? "0 2px 5px rgba(0,0,0,0.05)" : "none",
             }}
-            onClick={() => setActiveTab("otp")}
+            onClick={() => setActiveTab("patient")}
           >
-            OTP Login
+            Patient Portal
           </button>
         </div>
 
@@ -187,7 +210,7 @@ const Login = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-          {activeTab === "email" ? (
+          {activeTab === "staff" ? (
             <>
               <div className="form-group">
                 <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#475569" }}>
@@ -239,15 +262,39 @@ const Login = () => {
               </div>
             </>
           ) : (
-            <div className="form-group">
-              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#475569" }}>
-                Mobile Number for 6-Digit OTP
-              </label>
-              <div className="search-box" style={{ minWidth: "auto", background: "#f8fafc" }}>
-                <Smartphone size={18} className="text-slate-400" />
-                <input type="text" placeholder="Enter 10-digit mobile number..." />
+            <>
+              <div className="form-group">
+                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#475569" }}>
+                  Patient ID (UHID) *
+                </label>
+                <div className="search-box" style={{ minWidth: "auto", background: "#f8fafc" }}>
+                  <KeyRound size={18} className="text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="E.g. KIMS-W-10001"
+                    value={uhid}
+                    onChange={(e) => setUhid(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
-            </div>
+
+              <div className="form-group">
+                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#475569" }}>
+                  Registered Mobile Number *
+                </label>
+                <div className="search-box" style={{ minWidth: "auto", background: "#f8fafc" }}>
+                  <Smartphone size={18} className="text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Enter 10-digit mobile number..."
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            </>
           )}
 
           <button
@@ -264,7 +311,7 @@ const Login = () => {
             }}
           >
             <LogIn size={20} />
-            <span>{submitting ? "Signing in..." : activeTab === "email" ? "Sign In to Dashboard" : "Request OTP Code"}</span>
+            <span>{submitting ? "Signing in..." : activeTab === "staff" ? "Sign In to Dashboard" : "Sign In to Patient Portal"}</span>
           </button>
         </form>
 

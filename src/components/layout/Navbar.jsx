@@ -1,21 +1,43 @@
 import React from "react";
-import { Activity, Bell, ShieldCheck, LogOut, Building } from "lucide-react";
+import { Activity, Bell, ShieldCheck, LogOut, Building, Menu } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-const Navbar = () => {
+const Navbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
   const hospitalName = user?.hospital?.name || "SaaS Master HQ";
 
   return (
     <header className="navbar">
-      <div className="navbar-brand">
-        <Activity className="w-6 h-6 text-sky-600" />
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <span>AI Hospital System</span>
-          <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 600, display: "flex", alignItems: "center", gap: "0.25rem" }}>
-            <Building size={12} />
-            {hospitalName}
-          </span>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <button 
+          className="menu-toggle-btn" 
+          onClick={(e) => {
+            console.log("Hamburger Menu Button Clicked!");
+            if (onMenuClick) onMenuClick();
+          }}
+          style={{
+            background: "none",
+            border: "none",
+            color: "var(--text-secondary)",
+            cursor: "pointer",
+            display: "none", // Block displays this on mobile via CSS
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "0.25rem"
+          }}
+        >
+          <Menu size={24} />
+        </button>
+
+        <div className="navbar-brand">
+          <Activity className="w-6 h-6 text-sky-600" />
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span className="brand-title-main">AI Hospital System</span>
+            <span className="brand-title-sub" style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 600, display: "flex", alignItems: "center", gap: "0.25rem" }}>
+              <Building size={12} />
+              {hospitalName}
+            </span>
+          </div>
         </div>
       </div>
 

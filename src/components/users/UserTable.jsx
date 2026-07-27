@@ -28,7 +28,7 @@ const UserTable = ({
 
   return (
     <div className="table-container">
-      <table className="custom-table">
+      <table className="custom-table responsive-table">
         <thead>
           <tr>
             <th>Staff ID</th>
@@ -46,12 +46,12 @@ const UserTable = ({
             const isActive = u.status === "ACTIVE";
             return (
               <tr key={u._id}>
-                <td>
+                <td data-label="Staff ID">
                   <span className="badge" style={{ background: "#f1f5f9", color: "#475569" }}>
                     {u.employeeId || u.uhid || `EMP-${u._id.slice(-4)}`}
                   </span>
                 </td>
-                <td>
+                <td data-label="User">
                   <div className="user-cell">
                     <div
                       className="avatar-img"
@@ -72,14 +72,14 @@ const UserTable = ({
                     </div>
                   </div>
                 </td>
-                <td>{u.mobile}</td>
-                <td>
+                <td data-label="Mobile">{u.mobile}</td>
+                <td data-label="Assigned Role">
                   <span className={`badge badge-role-${u.role}`}>{u.role}</span>
                 </td>
-                <td>{u.department || "N/A"}</td>
-                <td>{u.branch || "N/A"}</td>
-                <td>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                <td data-label="Department">{u.department || "N/A"}</td>
+                <td data-label="Branch">{u.branch || "N/A"}</td>
+                <td data-label="Status">
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", justifyContent: "flex-end" }}>
                     <label className="switch">
                       <input
                         type="checkbox"
@@ -91,7 +91,7 @@ const UserTable = ({
                     <span className={`badge badge-status-${u.status}`}>{u.status}</span>
                   </div>
                 </td>
-                <td style={{ textAlign: "right" }}>
+                <td data-label="Actions" style={{ textAlign: "right" }}>
                   <div style={{ display: "inline-flex", gap: "0.4rem" }}>
                     <button
                       className="action-btn edit"
