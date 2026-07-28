@@ -2,6 +2,9 @@ import axios from "axios";
 
 // Dynamically target the host network IP address of the backend
 const getApiBaseUrl = () => {
+  if (import.meta.env && import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
   const hostname = window.location.hostname;
   return `http://${hostname}:8086/api`;
 };

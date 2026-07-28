@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
-import { 
-  fetchBillingInvoices, 
-  createBillingInvoice, 
-  payBillingInvoice, 
+import {
+  fetchBillingInvoices,
+  createBillingInvoice,
+  payBillingInvoice,
   refundBillingInvoice,
   fetchUsers,
   fetchAICashierInsights,
@@ -16,20 +16,20 @@ import {
   updateUserProfile,
   changeUserPassword
 } from "../services/api";
-import { 
-  CheckCircle, 
-  AlertCircle, 
-  Plus, 
-  Search, 
-  Printer, 
-  DollarSign, 
-  CreditCard, 
-  QrCode, 
-  AlertTriangle, 
-  ClipboardList, 
-  Activity, 
-  Pill, 
-  Clock, 
+import {
+  CheckCircle,
+  AlertCircle,
+  Plus,
+  Search,
+  Printer,
+  DollarSign,
+  CreditCard,
+  QrCode,
+  AlertTriangle,
+  ClipboardList,
+  Activity,
+  Pill,
+  Clock,
   RotateCcw,
   Sparkles,
   Download,
@@ -50,7 +50,7 @@ const CashierBilling = () => {
   const [activeTab, setActiveTab] = useState("counter"); // counter, discharge, advances, reports, analytics, profile
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
-  
+
   // Real-time socket notification states
   const [notifications, setNotifications] = useState([]);
 
@@ -62,7 +62,7 @@ const CashierBilling = () => {
   const [invoices, setInvoices] = useState([]);
   const [patients, setPatients] = useState([]);
   const [admittedPatients, setAdmittedPatients] = useState([]);
-  
+
   // Search & Pagination & Filter controls
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -147,7 +147,10 @@ const CashierBilling = () => {
 
   // Connect Socket.IO for real-time notifications
   useEffect(() => {
-    const socket = io(`http://${window.location.hostname}:8086`);
+    const backendUrl = import.meta.env && import.meta.env.VITE_API_URL 
+      ? import.meta.env.VITE_API_URL.replace(/\/api$/, "") 
+      : `http://${window.location.hostname}:8086`;
+    const socket = io(backendUrl);
 
     socket.on("connect", () => {
       console.log("🔌 Connected to Socket.IO billing events gateway");
@@ -155,8 +158,8 @@ const CashierBilling = () => {
 
     socket.on("billing:new_charge", (data) => {
       const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-700.wav");
-      audio.play().catch(() => {});
-      
+      audio.play().catch(() => { });
+
       const newNotif = {
         id: Date.now(),
         message: `🚨 New outstanding ${data.category} charge of ₹${data.amount} generated for patient (Inv: ${data.billNumber})`,
@@ -216,7 +219,7 @@ const CashierBilling = () => {
       setInvoices(invRes.data || []);
       setTotalPages(invRes.meta?.pages || 1);
       setPatients(patientRes.data || []);
-      
+
       // Filter patients currently admitted for Discharge Billing tab
       const admittedList = patientRes.data.filter(pat => pat.roomNo && pat.roomNo !== "N/A");
       setAdmittedPatients(admittedList);
@@ -409,7 +412,7 @@ const CashierBilling = () => {
   // Finalize Inpatient Discharge billing
   const handleDischargeBillingSettle = async () => {
     if (!dischargeSummary) return;
-    
+
     const advanceVal = dischargeSummary.advanceBalance;
     const grossTotal = dischargeSummary.totalAmount;
     const netDue = grossTotal - dischargeInsurance - advanceVal;
@@ -454,12 +457,12 @@ const CashierBilling = () => {
       setAdvanceLoading(true);
       await createAdvancePayment(advanceForm);
       showToast("success", `Advance credit of ₹${advanceForm.amount} registered successfully`);
-      
+
       // Reload active ledger if patient is selected
       if (selectedAdvancePatient && selectedAdvancePatient._id === advanceForm.patientId) {
         fetchAdvanceLedgerForPatient(advanceForm.patientId);
       }
-      
+
       setAdvanceForm({ patientId: "", amount: 5000, paymentMethod: "UPI", notes: "Initial IPD Bed Deposit" });
       loadData();
     } catch (err) {
@@ -524,10 +527,10 @@ const CashierBilling = () => {
   // CSV Report exporter helper
   const handleExportCSVReport = () => {
     if (cashReport.transactions.length === 0) return;
-    
+
     let csvContent = "data:text/csv;charset=utf-8,";
     csvContent += "Invoice ID,Patient Name,UHID,Category,Amount,Payment Method,Tx Date,Tx ID\n";
-    
+
     cashReport.transactions.forEach(t => {
       csvContent += `${t.billNumber},"${t.patientName}",${t.uhid},${t.category},${t.amount},${t.paymentMethod},"${new Date(t.date).toLocaleDateString()}",${t.transactionId || "N/A"}\n`;
     });
@@ -606,20 +609,20 @@ const CashierBilling = () => {
     <div style={{ paddingBottom: "3rem" }}>
       {/* Toast Alert Banner */}
       {toast && (
-        <div style={{ 
-          position: "fixed", 
-          top: "24px", 
-          right: "24px", 
-          zIndex: 2000, 
-          display: "flex", 
-          alignItems: "center", 
-          gap: "0.75rem", 
-          padding: "1rem 1.5rem", 
-          borderRadius: "16px", 
-          background: toast.type === "success" ? "linear-gradient(135deg, #10b981 0%, #059669 100%)" : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)", 
-          color: "white", 
+        <div style={{
+          position: "fixed",
+          top: "24px",
+          right: "24px",
+          zIndex: 2000,
+          display: "flex",
+          alignItems: "center",
+          gap: "0.75rem",
+          padding: "1rem 1.5rem",
+          borderRadius: "16px",
+          background: toast.type === "success" ? "linear-gradient(135deg, #10b981 0%, #059669 100%)" : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+          color: "white",
           boxShadow: "0 12px 30px rgba(0,0,0,0.15)",
-          animation: "slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)" 
+          animation: "slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
         }}>
           {toast.type === "success" ? <CheckCircle size={22} /> : <AlertCircle size={22} />}
           <span style={{ fontWeight: 600, fontSize: "0.95rem" }}>{toast.message}</span>
@@ -635,13 +638,13 @@ const CashierBilling = () => {
           </h1>
           <p>Settle OPD tickets, diagnostics, pharmacy orders, advance payments, and inpatient discharges. Track collection reports in real-time.</p>
         </div>
-        
+
         <div style={{ display: "flex", gap: "0.75rem" }}>
           <button className="btn btn-secondary" onClick={loadData} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
             <RefreshCw size={16} />
             <span>Refresh Ledger</span>
           </button>
-          
+
           <button className="btn btn-primary" onClick={() => setIsChargeModalOpen(true)} style={{ display: "flex", alignItems: "center", gap: "0.4rem", background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", border: "none" }}>
             <Plus size={16} />
             <span>New Custom Charge</span>
@@ -674,7 +677,7 @@ const CashierBilling = () => {
           <h2 style={{ margin: 0, fontSize: "1.75rem", fontWeight: 800, color: "#166534" }}>₹{totalRevenue.toLocaleString()}</h2>
           <span style={{ fontSize: "0.7rem", color: "#16a34a" }}>All channels settled portion</span>
         </div>
-        
+
         <div className="card shadow-sm" style={{ padding: "1.25rem", borderRadius: "16px", background: "#fffbeb", border: "1px solid #fef3c7" }}>
           <span style={{ fontSize: "0.8rem", color: "#b45309", fontWeight: 700, display: "block", marginBottom: "0.25rem" }}>PENDING RECEIVABLES</span>
           <h2 style={{ margin: 0, fontSize: "1.75rem", fontWeight: 800, color: "#92400e" }}>₹{totalPending.toLocaleString()}</h2>
@@ -695,10 +698,10 @@ const CashierBilling = () => {
       </div>
 
       {/* Tabs Menu Material Design 3 */}
-      <div style={{ 
-        display: "flex", 
-        gap: "0.5rem", 
-        borderBottom: "1px solid #e2e8f0", 
+      <div style={{
+        display: "flex",
+        gap: "0.5rem",
+        borderBottom: "1px solid #e2e8f0",
         marginBottom: "1.75rem",
         overflowX: "auto",
         paddingBottom: "1px"
@@ -756,7 +759,7 @@ const CashierBilling = () => {
                   <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
                     <div style={{ position: "relative", flex: 1, minWidth: "240px" }}>
                       <Search size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
-                      <input 
+                      <input
                         type="text"
                         className="form-control"
                         style={{ paddingLeft: "2.5rem" }}
@@ -765,8 +768,8 @@ const CashierBilling = () => {
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
-                    
-                    <select 
+
+                    <select
                       className="form-control"
                       style={{ width: "130px" }}
                       value={statusFilter}
@@ -779,7 +782,7 @@ const CashierBilling = () => {
                       <option value="REFUNDED">Refunded</option>
                     </select>
 
-                    <select 
+                    <select
                       className="form-control"
                       style={{ width: "140px" }}
                       value={categoryFilter}
@@ -796,23 +799,23 @@ const CashierBilling = () => {
 
                   <div style={{ display: "flex", gap: "1rem", marginTop: "1rem", flexWrap: "wrap", alignItems: "center" }}>
                     <span style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 700 }}>Date Range:</span>
-                    <input 
-                      type="date" 
-                      className="form-control" 
-                      style={{ width: "150px", fontSize: "0.85rem" }} 
+                    <input
+                      type="date"
+                      className="form-control"
+                      style={{ width: "150px", fontSize: "0.85rem" }}
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                     />
                     <span style={{ fontSize: "0.85rem", color: "#94a3b8" }}>to</span>
-                    <input 
-                      type="date" 
-                      className="form-control" 
-                      style={{ width: "150px", fontSize: "0.85rem" }} 
+                    <input
+                      type="date"
+                      className="form-control"
+                      style={{ width: "150px", fontSize: "0.85rem" }}
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
                     />
                     {(startDate || endDate || searchQuery || statusFilter || categoryFilter) && (
-                      <button 
+                      <button
                         onClick={() => {
                           setStartDate("");
                           setEndDate("");
@@ -890,15 +893,15 @@ const CashierBilling = () => {
                               <div style={{ display: "flex", gap: "0.4rem", justifyContent: "flex-end" }}>
                                 {inv.paymentStatus !== "PAID" && inv.paymentStatus !== "REFUNDED" && (
                                   <>
-                                    <button 
+                                    <button
                                       onClick={() => openPayModal(inv)}
                                       className="btn btn-primary"
                                       style={{ padding: "0.3rem 0.5rem", fontSize: "0.75rem", background: "#10b981", border: "1px solid #10b981" }}
                                     >
                                       Settle
                                     </button>
-                                    
-                                    <button 
+
+                                    <button
                                       onClick={() => openUnpaidChargesDrawer(inv.patient)}
                                       className="btn btn-secondary"
                                       title="Sync Lab & Pharmacy outstanding charges"
@@ -908,9 +911,9 @@ const CashierBilling = () => {
                                     </button>
                                   </>
                                 )}
-                                
+
                                 {inv.paymentStatus === "PAID" && (
-                                  <button 
+                                  <button
                                     onClick={() => { setSelectedInvoice(inv); setRefundReason(""); setRefundModalOpen(true); }}
                                     className="btn btn-secondary"
                                     style={{ padding: "0.3rem 0.5rem", fontSize: "0.75rem", color: "#ef4444", borderColor: "#fecaca" }}
@@ -919,7 +922,7 @@ const CashierBilling = () => {
                                   </button>
                                 )}
 
-                                <button 
+                                <button
                                   onClick={() => { setSelectedInvoice(inv); setPrintModalOpen(true); }}
                                   className="btn btn-secondary"
                                   style={{ padding: "0.3rem 0.5rem", fontSize: "0.75rem" }}
@@ -938,16 +941,16 @@ const CashierBilling = () => {
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
                   <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "1rem" }}>
-                    <button 
-                      className="btn btn-secondary" 
+                    <button
+                      className="btn btn-secondary"
                       disabled={currentPage === 1}
                       onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                     >
                       Prev
                     </button>
                     <span style={{ alignSelf: "center", color: "#64748b", fontSize: "0.9rem" }}>Page {currentPage} of {totalPages}</span>
-                    <button 
-                      className="btn btn-secondary" 
+                    <button
+                      className="btn btn-secondary"
                       disabled={currentPage === totalPages}
                       onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                     >
@@ -965,7 +968,7 @@ const CashierBilling = () => {
                     <Sparkles size={16} />
                     <span>AI Billing Assistant</span>
                   </h4>
-                  
+
                   {aiLoading ? (
                     <p style={{ color: "#64748b", fontSize: "0.85rem", margin: 0 }}>Querying collection trends...</p>
                   ) : aiCashierReport ? (
@@ -1047,15 +1050,15 @@ const CashierBilling = () => {
                       <div>
                         <span style={{ fontSize: "0.8rem", color: "#64748b", display: "block" }}>Bed Allocation:</span>
                         <strong>Room {dischargeSummary.roomNo} / Bed {dischargeSummary.bedNo} ({dischargeSummary.wardNo || "General Ward"})</strong>
-                        
+
                         <span style={{ fontSize: "0.8rem", color: "#64748b", display: "block", marginTop: "0.75rem" }}>Admission Date:</span>
                         <strong>{new Date(dischargeSummary.admissionDate).toLocaleDateString()}</strong>
                       </div>
-                      
+
                       <div>
                         <span style={{ fontSize: "0.8rem", color: "#64748b", display: "block" }}>Occupied Bed Stay:</span>
                         <strong>{dischargeSummary.occupiedDays} Days @ ₹{dischargeSummary.bedRate}/day</strong>
-                        
+
                         <span style={{ fontSize: "0.8rem", color: "#64748b", display: "block", marginTop: "0.75rem" }}>Current Date:</span>
                         <strong>{new Date().toLocaleDateString()}</strong>
                       </div>
@@ -1139,7 +1142,7 @@ const CashierBilling = () => {
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
                         <div className="form-group">
                           <label>Payment Collection Mode</label>
-                          <select 
+                          <select
                             className="form-control"
                             value={dischargePaymentMethod}
                             onChange={(e) => setDischargePaymentMethod(e.target.value)}
@@ -1151,7 +1154,7 @@ const CashierBilling = () => {
                         </div>
                         <div className="form-group">
                           <label>Bank Reference / Tx ID</label>
-                          <input 
+                          <input
                             type="text"
                             className="form-control"
                             value={dischargeTxId}
@@ -1311,9 +1314,9 @@ const CashierBilling = () => {
                   <FileSpreadsheet size={20} className="text-blue-500" />
                   <span>Daily Shift Cash Collections Ledger</span>
                 </h3>
-                
+
                 <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                  <input 
+                  <input
                     type="date"
                     className="form-control"
                     style={{ width: "150px" }}
@@ -1406,14 +1409,14 @@ const CashierBilling = () => {
                     <PieChart size={18} className="text-emerald-500" />
                     <span>Revenue Share by Category (OPD vs. IPD vs. Lab vs. Drugs)</span>
                   </h3>
-                  
+
                   <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
                     {/* SVG Pie Chart visualization */}
                     <div style={{ position: "relative", width: "160px", height: "160px" }}>
                       <svg width="100%" height="100%" viewBox="0 0 42 42" className="donut">
                         <circle className="donut-hole" cx="21" cy="21" r="15.915" fill="#fff"></circle>
                         <circle className="donut-ring" cx="21" cy="21" r="15.915" fill="transparent" stroke="#f1f5f9" strokeWidth="4"></circle>
-                        
+
                         {(() => {
                           let accumulatedPercentage = 0;
                           return categoryChartData.map((d, i) => {
@@ -1459,7 +1462,7 @@ const CashierBilling = () => {
                     <TrendingUp size={18} className="text-blue-500" />
                     <span>Shift Payments Channels Allocation Breakdown</span>
                   </h3>
-                  
+
                   <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                     {paymentModesData.map((d, i) => (
                       <div key={i} style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
@@ -1501,7 +1504,7 @@ const CashierBilling = () => {
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                     <div className="form-group">
                       <label>First Name</label>
-                      <input 
+                      <input
                         type="text"
                         className="form-control"
                         value={profileForm.firstName}
@@ -1511,7 +1514,7 @@ const CashierBilling = () => {
                     </div>
                     <div className="form-group">
                       <label>Last Name</label>
-                      <input 
+                      <input
                         type="text"
                         className="form-control"
                         value={profileForm.lastName}
@@ -1523,7 +1526,7 @@ const CashierBilling = () => {
 
                   <div className="form-group">
                     <label>Mobile Contact Number</label>
-                    <input 
+                    <input
                       type="text"
                       className="form-control"
                       value={profileForm.mobile}
@@ -1534,7 +1537,7 @@ const CashierBilling = () => {
 
                   <div className="form-group">
                     <label>Email Address</label>
-                    <input 
+                    <input
                       type="email"
                       className="form-control"
                       value={profileForm.email}
@@ -1570,7 +1573,7 @@ const CashierBilling = () => {
                 <form onSubmit={handleChangePassword} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   <div className="form-group">
                     <label>Current Secure Password *</label>
-                    <input 
+                    <input
                       type="password"
                       className="form-control"
                       value={passwordForm.currentPassword}
@@ -1582,7 +1585,7 @@ const CashierBilling = () => {
 
                   <div className="form-group">
                     <label>New Passphrase *</label>
-                    <input 
+                    <input
                       type="password"
                       className="form-control"
                       value={passwordForm.newPassword}
@@ -1594,7 +1597,7 @@ const CashierBilling = () => {
 
                   <div className="form-group">
                     <label>Confirm New Passphrase *</label>
-                    <input 
+                    <input
                       type="password"
                       className="form-control"
                       value={passwordForm.confirmPassword}
@@ -1628,7 +1631,7 @@ const CashierBilling = () => {
               <div className="modal-body" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 <div className="form-group">
                   <label>Select Patient profile *</label>
-                  <select 
+                  <select
                     className="form-control"
                     value={chargeForm.patientId}
                     onChange={(e) => setChargeForm({ ...chargeForm, patientId: e.target.value })}
@@ -1645,7 +1648,7 @@ const CashierBilling = () => {
 
                 <div className="form-group">
                   <label>Billing Category *</label>
-                  <select 
+                  <select
                     className="form-control"
                     value={chargeForm.category}
                     onChange={(e) => setChargeForm({ ...chargeForm, category: e.target.value })}
@@ -1660,7 +1663,7 @@ const CashierBilling = () => {
 
                 <div className="form-group">
                   <label>Charge Item Description *</label>
-                  <input 
+                  <input
                     type="text"
                     className="form-control"
                     value={chargeForm.itemName}
@@ -1672,7 +1675,7 @@ const CashierBilling = () => {
 
                 <div className="form-group">
                   <label>Amount in Indian Rupees (₹) *</label>
-                  <input 
+                  <input
                     type="number"
                     className="form-control"
                     value={chargeForm.amount}
@@ -1712,7 +1715,7 @@ const CashierBilling = () => {
 
               <div className="form-group">
                 <label>Amount Settle Deposit (₹) *</label>
-                <input 
+                <input
                   type="number"
                   className="form-control"
                   max={selectedInvoice.amountDue}
@@ -1726,7 +1729,7 @@ const CashierBilling = () => {
 
               <div className="form-group">
                 <label>Payment Collection Mode *</label>
-                <select 
+                <select
                   className="form-control"
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
@@ -1740,7 +1743,7 @@ const CashierBilling = () => {
 
               <div className="form-group">
                 <label>Transaction ID / Ref Code</label>
-                <input 
+                <input
                   type="text"
                   className="form-control"
                   value={transactionId}
@@ -1768,10 +1771,10 @@ const CashierBilling = () => {
             <div className="modal-body">
               <p>Reversing transaction ledger for invoice <strong>{selectedInvoice.billNumber}</strong>.</p>
               <h4 style={{ fontSize: "1.1rem", margin: "1rem 0", color: "#ef4444", fontWeight: 700 }}>Total Refund Value: ₹{selectedInvoice.amountPaid.toLocaleString()}</h4>
-              
+
               <div className="form-group">
                 <label>Reason for Refund *</label>
-                <textarea 
+                <textarea
                   className="form-control"
                   rows="3"
                   value={refundReason}
@@ -1808,7 +1811,7 @@ const CashierBilling = () => {
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   <span style={{ fontSize: "0.85rem", color: "#475569", fontWeight: 700 }}>Select items to import into Settle Counter:</span>
-                  
+
                   <div style={{ maxHeight: "280px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                     {/* Pharmacy items */}
                     {unpaidChargesData.pharmacy.map(item => (
@@ -1881,9 +1884,9 @@ const CashierBilling = () => {
             </div>
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => { setUnpaidChargesDrawerOpen(false); setUnpaidChargesPatient(null); }}>Cancel</button>
-              <button 
-                className="btn btn-primary" 
-                onClick={handleImportSelectedCharges} 
+              <button
+                className="btn btn-primary"
+                onClick={handleImportSelectedCharges}
                 disabled={selectedUnpaidCharges.length === 0}
                 style={{ background: "#2563eb", border: "none" }}
               >
@@ -1958,7 +1961,7 @@ const CashierBilling = () => {
                     </span>
                   )}
                 </div>
-                
+
                 <div style={{ textAlign: "right" }}>
                   <div style={{ fontSize: "0.8rem", color: "#64748b" }}>Gross Total: ₹{selectedInvoice.amount.toLocaleString()}.00</div>
                   <div style={{ fontSize: "0.8rem", color: "#16a34a", fontWeight: 700 }}>Amount Paid: ₹{selectedInvoice.amountPaid.toLocaleString()}.00</div>
@@ -1971,8 +1974,8 @@ const CashierBilling = () => {
               {/* Receipt Footer Mock QR Code */}
               <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", gap: "0.25rem", marginTop: "1.5rem", borderTop: "1px solid #f1f5f9", paddingTop: "1rem" }}>
                 <svg width="60" height="60" viewBox="0 0 29 29" style={{ shapeRendering: "crispEdges" }}>
-                  <path fill="#fff" d="M0 0h29v29H0z"/>
-                  <path fill="#000" d="M0 0h7v7H0zm22 0h7v7h-7zM0 22h7v7H0zm9 0h2v2H9zm2 2h2v2h-2zm-2 2h2v2H9zm2 2h2v2h-2zm3-8h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm3-8h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm-8-6h2v2H9zm2 2h2v2h-2zm-2 2h2v2H9zm2 2h2v2h-2zm3-8h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zM1 1h5v5H1zm22 0h5v5h-5zM1 23h5v5H1z"/>
+                  <path fill="#fff" d="M0 0h29v29H0z" />
+                  <path fill="#000" d="M0 0h7v7H0zm22 0h7v7h-7zM0 22h7v7H0zm9 0h2v2H9zm2 2h2v2h-2zm-2 2h2v2H9zm2 2h2v2h-2zm3-8h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm3-8h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm-8-6h2v2H9zm2 2h2v2h-2zm-2 2h2v2H9zm2 2h2v2h-2zm3-8h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zM1 1h5v5H1zm22 0h5v5h-5zM1 23h5v5H1z" />
                 </svg>
                 <span style={{ fontSize: "0.6rem", color: "#94a3b8" }}>Scan to verify hospital digital clearance status</span>
               </div>
@@ -1983,9 +1986,9 @@ const CashierBilling = () => {
               <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setPrintModalOpen(false)}>
                 Close Receipt
               </button>
-              <button 
-                className="btn btn-primary" 
-                style={{ flex: 1, background: "#10b981", border: "none" }} 
+              <button
+                className="btn btn-primary"
+                style={{ flex: 1, background: "#10b981", border: "none" }}
                 onClick={() => {
                   window.print();
                 }}
