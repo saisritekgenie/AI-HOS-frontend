@@ -95,7 +95,7 @@ const Pharmacy = () => {
 
       // Fetch all medications
       const medRes = await api.get("/clinical/all-pending-medications");
-      setPrescriptions(medRes.data || []);
+      setPrescriptions(medRes.data?.data || []);
 
       // Fetch billing invoices
       const billsRes = await fetchPharmacyBills();
@@ -163,7 +163,8 @@ const Pharmacy = () => {
       await dispensePrescription(presc._id);
       
       // 2. Lookup medicine price in inventory, default to 15 if missing
-      const cleanName = presc.medicationName.split("(")[0].trim();
+      const medName = presc.medicationName || "";
+      const cleanName = medName.split("(")[0].trim();
       const match = inventory.find(m => m.name.toLowerCase().includes(cleanName.toLowerCase()));
       const unitPrice = match ? match.price : 15;
 
@@ -201,7 +202,9 @@ const Pharmacy = () => {
 
   // Expiry date formatter
   const isExpiringSoon = (expiryStr) => {
+    if (!expiryStr) return false;
     const exp = new Date(expiryStr);
+    if (isNaN(exp.getTime())) return false;
     const today = new Date();
     const diffTime = exp - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -380,11 +383,11 @@ const Pharmacy = () => {
                     {/* Stockout risks */}
                     <div style={{ padding: "0.85rem", background: "white", border: "1px solid #e2e8f0", borderRadius: "10px" }}>
                       <span style={{ fontSize: "0.75rem", color: "#f59e0b", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>⚠️ CRITICAL STOCKOUT FORECAST</span>
-                      {aiForecast.stockoutRisks?.length === 0 ? (
+                      {(!aiForecast.stockoutRisks || aiForecast.stockoutRisks.length === 0) ? (
                         <p style={{ fontSize: "0.75rem", margin: 0, color: "#64748b" }}>All medication stocks stable.</p>
                       ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                          {aiForecast.stockoutRisks.map((risk, i) => (
+                          {(aiForecast.stockoutRisks || []).map((risk, i) => (
                             <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem" }}>
                               <strong>{risk.medicineName}</strong>
                               <span style={{ color: "#ef4444", fontWeight: 700 }}>Est. stockout: {risk.predictedDaysLeft} days ({risk.severity})</span>
@@ -397,11 +400,11 @@ const Pharmacy = () => {
                     {/* Expiry Warnings */}
                     <div style={{ padding: "0.85rem", background: "white", border: "1px solid #e2e8f0", borderRadius: "10px" }}>
                       <span style={{ fontSize: "0.75rem", color: "#ef4444", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>🚨 UPCOMING BATCH EXPIRIES</span>
-                      {aiForecast.expiryWarnings?.length === 0 ? (
+                      {(!aiForecast.expiryWarnings || aiForecast.expiryWarnings.length === 0) ? (
                         <p style={{ fontSize: "0.75rem", margin: 0, color: "#64748b" }}>No batches expiring within 6 months.</p>
                       ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                          {aiForecast.expiryWarnings.map((exp, i) => (
+                          {(aiForecast.expiryWarnings || []).map((exp, i) => (
                             <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem" }}>
                               <strong>{exp.medicineName} (Batch {exp.batchNumber})</strong>
                               <span style={{ color: "#ef4444", fontWeight: 700 }}>{exp.daysRemaining} days left</span>
@@ -414,11 +417,11 @@ const Pharmacy = () => {
                     {/* Replenishments */}
                     <div style={{ padding: "0.85rem", background: "white", border: "1px solid #e2e8f0", borderRadius: "10px" }}>
                       <span style={{ fontSize: "0.75rem", color: "#10b981", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>📦 REPLENISHMENT ADVICE</span>
-                      {aiForecast.replenishmentRecommendations?.length === 0 ? (
+                      {(!aiForecast.replenishmentRecommendations || aiForecast.replenishmentRecommendations.length === 0) ? (
                         <p style={{ fontSize: "0.75rem", margin: 0, color: "#64748b" }}>Stocks meet standard demand thresholds.</p>
                       ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                          {aiForecast.replenishmentRecommendations.slice(0, 3).map((rec, i) => (
+                          {(aiForecast.replenishmentRecommendations || []).slice(0, 3).map((rec, i) => (
                             <div key={i} style={{ fontSize: "0.72rem", color: "#334155" }}>
                               • Order <strong>{rec.suggestedQuantity} units</strong> of <strong>{rec.medicineName}</strong> ({rec.reason})
                             </div>
@@ -458,7 +461,7 @@ const Pharmacy = () => {
                           )}
                         </td>
                         <td><code>{item.batchNumber}</code></td>
-                        <td>${item.price}.00</td>
+                        <td>₹{item.price}.00</td>
                         <td>
                           <span style={{ fontWeight: 700, color: item.stock < 10 ? "#ef4444" : "#1e293b" }}>
                             {item.stock} Units
@@ -636,7 +639,7 @@ const Pharmacy = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Price Per Unit ($) *</label>
+                    <label>Price Per Unit (₹) *</label>
                     <input 
                       type="number"
                       className="form-control"
@@ -690,7 +693,7 @@ const Pharmacy = () => {
             </div>
             <div className="modal-body">
               <p>Settling invoice <strong>{selectedBill.billNumber}</strong> for patient <strong>{selectedBill.patient?.firstName} {selectedBill.patient?.lastName}</strong></p>
-              <h4 style={{ fontSize: "1.2rem", margin: "1rem 0", color: "#10b981", fontWeight: 700 }}>Total Amount: ${selectedBill.totalAmount}.00</h4>
+              <h4 style={{ fontSize: "1.2rem", margin: "1rem 0", color: "#10b981", fontWeight: 700 }}>Total Amount: ₹{selectedBill.totalAmount}.00</h4>
               
               <div className="form-group">
                 <label>Select Payment Mode</label>
@@ -755,8 +758,8 @@ const Pharmacy = () => {
                   <tr key={idx}>
                     <td>{it.medicineName}</td>
                     <td style={{ textAlign: "center" }}>{it.quantity}</td>
-                    <td style={{ textAlign: "right" }}>${it.price}.00</td>
-                    <td style={{ textAlign: "right" }}>${it.price * it.quantity}.00</td>
+                    <td style={{ textAlign: "right" }}>₹{it.price}.00</td>
+                    <td style={{ textAlign: "right" }}>₹{it.price * it.quantity}.00</td>
                   </tr>
                 ))}
               </tbody>
@@ -774,7 +777,7 @@ const Pharmacy = () => {
               </div>
               <div style={{ textAlign: "right" }}>
                 <span style={{ fontSize: "0.85rem", color: "#64748b", marginRight: "0.5rem" }}>Grand Total:</span>
-                <strong style={{ fontSize: "1.2rem", color: "#0f172a" }}>${selectedBill.totalAmount}.00</strong>
+                <strong style={{ fontSize: "1.2rem", color: "#0f172a" }}>₹{selectedBill.totalAmount}.00</strong>
               </div>
             </div>
 
