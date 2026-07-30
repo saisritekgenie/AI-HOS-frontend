@@ -103,9 +103,9 @@ const PatientPortal = () => {
         setAiSummaryLoading(true);
         // Fetch clinical summary, inpatient bills & outpatient invoices
         const [clinicalRes, billingRes, receptionRes, ipRes, aiRes] = await Promise.all([
-          fetchPatientClinicalSummary(user._id),
-          fetchBillingInvoices(),
-          fetchInvoices(),
+          fetchPatientClinicalSummary(user._id).catch(err => { console.error("Clinical summary fetch failed:", err); return { data: null }; }),
+          fetchBillingInvoices().catch(err => { console.error("Billing invoices fetch failed:", err); return { data: [] }; }),
+          fetchInvoices().catch(err => { console.error("Reception invoices fetch failed:", err); return { data: [] }; }),
           fetchSystemIp().catch(() => null),
           fetchAIPatientSummary(user._id).catch(() => null)
         ]);
@@ -222,6 +222,80 @@ const PatientPortal = () => {
     }
   };
 
+  const handlePrintAllReceipts = () => {
+    if (invoices.length === 0) return;
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Billing Receipts Statement - ${patient.firstName} ${patient.lastName}</title>
+          <style>
+            body { font-family: 'Segoe UI', sans-serif; padding: 30px; color: #1e293b; }
+            .header { border-bottom: 2px dashed #cbd5e1; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+            .title { font-size: 18px; font-weight: 800; color: #0f172a; margin: 0; }
+            .meta { font-size: 12px; color: #64748b; text-align: right; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+            th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
+            th { background-color: #f8fafc; color: #475569; }
+            .amount { font-weight: 700; text-align: right; }
+            .status { font-weight: 700; text-transform: uppercase; font-size: 10px; }
+            .total-row { border-top: 2px solid #cbd5e1; font-weight: 700; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <h1 class="title">STATEMENT OF OUTSTANDING & PAID INVOICES</h1>
+              <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Patient Name: ${patient.firstName} ${patient.lastName} | UHID: ${patient.uhid || "N/A"}</div>
+            </div>
+            <div class="meta">
+              <div style="font-weight: 800; font-size: 13px; color: #0284c7;">🏥 ${patient.hospital?.name || "AI Hospital Outlet"}</div>
+              <div>Date Generated: ${new Date().toLocaleString()}</div>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice Number</th>
+                <th>Description / Category</th>
+                <th>Issued Date</th>
+                <th>Settle Status</th>
+                <th>Payment Mode</th>
+                <th style="text-align: right;">Total Amount</th>
+                <th style="text-align: right;">Amount Paid</th>
+                <th style="text-align: right;">Remaining Due</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${invoices.map(inv => `
+                <tr>
+                  <td><strong>${inv.invoiceNumber}</strong></td>
+                  <td>${inv.type === "OUTPATIENT_CONSULTATION" ? "OPD Consultation" : inv.category || "Clinical Item"} - ${inv.itemName || "General Charge"}</td>
+                  <td>${new Date(inv.createdAt).toLocaleDateString()}</td>
+                  <td class="status" style="color: ${inv.status === "PAID" ? "#16a34a" : "#ef4444"};">${inv.status}</td>
+                  <td>${inv.paymentMethod}</td>
+                  <td class="amount">₹${inv.totalAmount}.00</td>
+                  <td class="amount" style="color: #16a34a;">₹${inv.paidAmount}.00</td>
+                  <td class="amount" style="color: #ef4444;">₹${inv.balanceAmount}.00</td>
+                </tr>
+              `).join("")}
+              <tr class="total-row">
+                <td colspan="5" style="text-align: right;">Grand Total Accumulations:</td>
+                <td style="text-align: right;">₹${invoices.reduce((acc, curr) => acc + curr.totalAmount, 0)}.00</td>
+                <td style="text-align: right; color: #16a34a;">₹${invoices.reduce((acc, curr) => acc + curr.paidAmount, 0)}.00</td>
+                <td style="text-align: right; color: #ef4444;">₹${invoices.reduce((acc, curr) => acc + curr.balanceAmount, 0)}.00</td>
+              </tr>
+            </tbody>
+          </table>
+          <script>
+            setTimeout(() => { window.print(); }, 500);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   if (loading) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fafc" }}>
@@ -301,6 +375,16 @@ const PatientPortal = () => {
 
       {/* Main Container */}
       <main className="portal-main" style={{ maxWidth: "1280px", margin: "2rem auto 0", padding: "0 2rem", display: "grid", gridTemplateColumns: "1fr 2.5fr", gap: "2rem" }}>
+        
+        {(!clinicalData?.vitals?.length && !invoices?.length && !clinicalData?.medications?.length) && (
+          <div style={{ gridColumn: "1 / -1", background: "#f0fdfa", border: "1px solid #ccfbf1", color: "#0d9488", padding: "1.25rem", borderRadius: "12px", marginBottom: "1rem", display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
+            <span style={{ fontSize: "1.25rem" }}>ℹ️</span>
+            <div>
+              <strong style={{ display: "block", fontSize: "0.9rem", color: "#0f766e", marginBottom: "0.25rem" }}>How to view your clinical files & details:</strong>
+              <span style={{ fontSize: "0.8rem" }}>Since you are a newly registered outpatient, your medical chart is currently empty. To get details, ask your primary consulting doctor or nurse at the front counter to log your vitals, file diagnostic orders, or dispense medications. Once logged by the hospital staff, your complete EMR file will immediately synchronize and display here.</span>
+            </div>
+          </div>
+        )}
         
         {/* Left Column: Personal info & Warning Tags */}
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
@@ -385,10 +469,21 @@ const PatientPortal = () => {
 
           {/* Card: Billing Receipts & Invoices */}
           <div className="table-container" style={{ padding: "1.5rem", background: "white" }}>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: "0 0 1rem 0", color: "#0f172a", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem", display: "flex", alignItems: "center", gap: "0.35rem" }}>
-              <DollarSign size={18} className="text-amber-500" />
-              <span>My Invoices</span>
-            </h3>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem", marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: 0, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <DollarSign size={18} className="text-amber-500" />
+                <span>My Invoices</span>
+              </h3>
+              {invoices.length > 0 && (
+                <button
+                  onClick={handlePrintAllReceipts}
+                  className="btn btn-secondary"
+                  style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.25rem", color: "#0ea5e9", borderColor: "#0ea5e9", background: "none", cursor: "pointer" }}
+                >
+                  🖨️ Print Statement PDF
+                </button>
+              )}
+            </div>
             {invoices.length === 0 ? (
               <p style={{ color: "#64748b", fontSize: "0.85rem", margin: 0 }}>No billing invoices generated.</p>
             ) : (
@@ -884,8 +979,8 @@ const PatientPortal = () => {
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px dashed #cbd5e1", paddingBottom: "0.5rem" }}>
                 <span>Report Status:</span>
-                <strong style={{ color: selectedLab.status === "SAMPLE_COLLECTED" ? "#059669" : "#d97706" }}>
-                  {selectedLab.status === "SAMPLE_COLLECTED" ? "COMPLETED" : "AWAITING SAMPLE"}
+                <strong style={{ color: selectedLab.status === "COMPLETED" ? "#15803d" : selectedLab.status === "SAMPLE_COLLECTED" ? "#0284c7" : "#d97706" }}>
+                  {selectedLab.status === "COMPLETED" ? "COMPLETED" : selectedLab.status === "SAMPLE_COLLECTED" ? "SAMPLE COLLECTED (PROCESSING)" : "AWAITING SAMPLE"}
                 </strong>
               </div>
             </div>
@@ -893,11 +988,27 @@ const PatientPortal = () => {
             <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1rem" }}>
               <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "#0f172a" }}>DIAGNOSTIC OBSERVATION</h5>
               <p style={{ margin: 0, fontSize: "0.8rem", color: "#475569", lineHeight: 1.4 }}>
-                {selectedLab.status === "SAMPLE_COLLECTED" 
-                  ? "Standard reference values are normal. Hemoglobin count, blood counts, and sugar indices fall within healthy physiological ranges." 
+                {selectedLab.status === "COMPLETED" 
+                  ? (selectedLab.results || "Standard reference values are normal. Hemoglobin count, blood counts, and sugar indices fall within healthy physiological ranges.") 
+                  : selectedLab.status === "SAMPLE_COLLECTED"
+                  ? "Sample has been collected and is currently being processed by pathology."
                   : "Laboratory analysis will release medical details shortly upon sample reception."}
               </p>
             </div>
+
+            {selectedLab.status === "COMPLETED" && selectedLab.reportFile && (
+              <div style={{ marginTop: "0.5rem", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.6rem", background: "#f0fdf4", borderRadius: "8px", border: "1px solid #bbf7d0" }}>
+                <span style={{ fontSize: "1.2rem" }}>📄</span>
+                <a 
+                  href={`http://localhost:8086/uploads/${selectedLab.reportFile}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ fontSize: "0.8rem", color: "#16a34a", fontWeight: 700 }}
+                >
+                  Download Complete Lab Report PDF
+                </a>
+              </div>
+            )}
             
             <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
               <button className="btn btn-secondary" onClick={() => window.print()} style={{ flex: 1 }}>Print</button>

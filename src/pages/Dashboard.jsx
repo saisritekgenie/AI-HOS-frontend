@@ -894,7 +894,7 @@ const Dashboard = ({
       },
       {
         label: "Pharmacy Total Revenue",
-        value: loading ? "..." : `$${stats.totalSales || 0}.00`,
+        value: loading ? "..." : `₹${stats.totalSales || 0}.00`,
         icon: DollarSign,
         color: "#8b5cf6",
         bg: "#f3e8ff"

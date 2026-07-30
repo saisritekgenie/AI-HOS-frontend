@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchAppointments, bookAppointment, updateAppointmentStatus, fetchUsers } from "../services/api";
+import { fetchAppointments, bookAppointment, updateAppointmentStatus, fetchUsers, fetchAISchedulingSuggestions, fetchAIQueuePrediction } from "../services/api";
 import { Plus, Search, Calendar, Clock, User, CheckCircle, AlertCircle, RefreshCw, XCircle } from "lucide-react";
 
 const Appointments = () => {
@@ -18,7 +18,15 @@ const Appointments = () => {
     appointmentDate: new Date().toISOString().split("T")[0],
     timeSlot: "10:00 AM",
     notes: "",
+    bookingMode: "WALK_IN",
   });
+
+  // AI recommendations & predictions states
+  const [aiRecommendedSlots, setAiRecommendedSlots] = useState([]);
+  const [aiRecommenderNote, setAiRecommenderNote] = useState("");
+  const [aiRecommenderLoading, setAiRecommenderLoading] = useState(false);
+  const [aiWaitPrediction, setAiWaitPrediction] = useState(null);
+  const [aiWaitPredictionLoading, setAiWaitPredictionLoading] = useState(false);
 
   // Rescheduling states
   const [rescheduleAppointment, setRescheduleAppointment] = useState(null);
@@ -147,6 +155,41 @@ const Appointments = () => {
     }
   };
 
+  const loadAIRecommendations = async (docId, date) => {
+    if (!docId || !date) {
+      setAiRecommendedSlots([]);
+      setAiRecommenderNote("");
+      setAiWaitPrediction(null);
+      return;
+    }
+    try {
+      setAiRecommenderLoading(true);
+      setAiWaitPredictionLoading(true);
+
+      const [slotsRes, waitRes] = await Promise.all([
+        fetchAISchedulingSuggestions(docId, date),
+        fetchAIQueuePrediction(docId, date)
+      ]);
+
+      if (slotsRes.success && slotsRes.data) {
+        setAiRecommendedSlots(slotsRes.data.recommendedSlots || []);
+        setAiRecommenderNote(slotsRes.data.note || "");
+      }
+      if (waitRes.success && waitRes.data) {
+        setAiWaitPrediction(waitRes.data);
+      }
+    } catch (err) {
+      console.error("Failed to load AI scheduling/queue predictions", err);
+    } finally {
+      setAiRecommenderLoading(false);
+      setAiWaitPredictionLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAIRecommendations(formData.doctorId, formData.appointmentDate);
+  }, [formData.doctorId, formData.appointmentDate]);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -163,7 +206,11 @@ const Appointments = () => {
         appointmentDate: new Date().toISOString().split("T")[0],
         timeSlot: "10:00 AM",
         notes: "",
+        bookingMode: "WALK_IN",
       });
+      setAiRecommendedSlots([]);
+      setAiRecommenderNote("");
+      setAiWaitPrediction(null);
       loadData();
     } catch (err) {
       showToast("error", err.response?.data?.message || "Failed to schedule appointment");
@@ -237,6 +284,7 @@ const Appointments = () => {
                 <th>Assigned Doctor</th>
                 <th>Appointment Date</th>
                 <th>Time Slot</th>
+                <th>Booking Type</th>
                 <th>Status</th>
                 <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
@@ -260,6 +308,17 @@ const Appointments = () => {
                   </td>
                   <td>{new Date(appt.appointmentDate).toLocaleDateString()}</td>
                   <td>{appt.timeSlot}</td>
+                  <td>
+                    <span className="badge" style={{
+                      background: appt.bookingMode === "ONLINE" ? "#eff6ff" : "#f8fafc",
+                      color: appt.bookingMode === "ONLINE" ? "#2563eb" : "#64748b",
+                      border: appt.bookingMode === "ONLINE" ? "1px solid #bfdbfe" : "1px solid #cbd5e1",
+                      fontSize: "0.7rem",
+                      fontWeight: 700
+                    }}>
+                      {appt.bookingMode === "ONLINE" ? "🌐 Online" : "🚶 Walk-In"}
+                    </span>
+                  </td>
                   <td>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
                       <span className="badge" style={{
@@ -358,6 +417,32 @@ const Appointments = () => {
                   </div>
 
                   <div className="form-group">
+                    <label>Booking Type *</label>
+                    <div style={{ display: "flex", gap: "1.5rem", marginTop: "0.25rem" }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>
+                        <input
+                          type="radio"
+                          name="bookingMode"
+                          value="WALK_IN"
+                          checked={formData.bookingMode === "WALK_IN"}
+                          onChange={(e) => setFormData({ ...formData, bookingMode: e.target.value })}
+                        />
+                        🚶 Walk-In (Reception)
+                      </label>
+                      <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500 }}>
+                        <input
+                          type="radio"
+                          name="bookingMode"
+                          value="ONLINE"
+                          checked={formData.bookingMode === "ONLINE"}
+                          onChange={(e) => setFormData({ ...formData, bookingMode: e.target.value })}
+                        />
+                        🌐 Online Appointment
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
                     <label>Select Doctor *</label>
                     <select 
                       className="form-control"
@@ -404,6 +489,76 @@ const Appointments = () => {
                       </select>
                     </div>
                   </div>
+
+                  {formData.doctorId && (
+                    <div style={{
+                      background: "#f8fafc",
+                      border: "1px dashed #cbd5e1",
+                      borderRadius: "10px",
+                      padding: "1rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.75rem"
+                    }}>
+                      <div style={{ fontSize: "0.8rem", color: "#475569", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                        <span style={{ fontSize: "1rem" }}>🤖</span>
+                        <span>AI Frontdesk Insights</span>
+                      </div>
+
+                      {/* 1. Wait Time Prediction */}
+                      {aiWaitPredictionLoading ? (
+                        <span style={{ fontSize: "0.75rem", color: "#64748b" }}>Analyzing doctor queue load...</span>
+                      ) : aiWaitPrediction ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.75rem" }}>
+                          <div>
+                            <strong>Estimated Queue Size:</strong> {aiWaitPrediction.activeQueueSize} patients scheduled.
+                          </div>
+                          <div>
+                            <strong>Predicted Wait Time:</strong> <span style={{ color: "#d97706", fontWeight: 700 }}>{aiWaitPrediction.estimatedWaitTime}</span> (Confidence: {aiWaitPrediction.confidence})
+                          </div>
+                          <div style={{ color: "#64748b", fontStyle: "italic", marginTop: "0.15rem", fontSize: "0.7rem" }}>
+                            {aiWaitPrediction.optimizationAdvice}
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {/* 2. Recommended Slots */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                        <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "#334155" }}>AI Suggested Time Slots (Click to auto-fill):</span>
+                        {aiRecommenderLoading ? (
+                          <span style={{ fontSize: "0.75rem", color: "#64748b" }}>Generating optimal slots...</span>
+                        ) : aiRecommendedSlots.length > 0 ? (
+                          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.2rem" }}>
+                            {aiRecommendedSlots.map((slot) => (
+                              <button
+                                key={slot}
+                                type="button"
+                                onClick={() => setFormData({ ...formData, timeSlot: slot })}
+                                style={{
+                                  padding: "0.25rem 0.6rem",
+                                  fontSize: "0.75rem",
+                                  borderRadius: "6px",
+                                  border: formData.timeSlot === slot ? "2px solid #0284c7" : "1px solid #cbd5e1",
+                                  background: formData.timeSlot === slot ? "#e0f2fe" : "#fff",
+                                  color: formData.timeSlot === slot ? "#0369a1" : "#475569",
+                                  fontWeight: formData.timeSlot === slot ? 700 : 500,
+                                  cursor: "pointer",
+                                  transition: "all 0.15s"
+                                }}
+                              >
+                                {slot}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: "0.75rem", color: "#64748b" }}>No custom recommendations.</span>
+                        )}
+                        {aiRecommenderNote && (
+                          <p style={{ fontSize: "0.7rem", color: "#64748b", margin: "0.25rem 0 0 0" }}>{aiRecommenderNote}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="form-group">
                     <label>Symptoms / Consultation Notes</label>

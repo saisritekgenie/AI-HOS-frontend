@@ -2,10 +2,13 @@ import axios from "axios";
 
 // Dynamically target the host network IP address of the backend
 const getApiBaseUrl = () => {
+  const hostname = window.location.hostname;
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return `http://${hostname}:8086/api`;
+  }
   if (import.meta.env && import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
-  const hostname = window.location.hostname;
   return `http://${hostname}:8086/api`;
 };
 
@@ -121,6 +124,16 @@ export const enableUser = async (id) => {
 
 export const disableUser = async (id) => {
   const response = await api.put(`/super-admin/users/${id}/disable`);
+  return response.data;
+};
+
+export const checkDuplicatePatient = async (data) => {
+  const response = await api.post("/super-admin/users/check-duplicate", data);
+  return response.data;
+};
+
+export const mergePatients = async (data) => {
+  const response = await api.post("/super-admin/users/merge", data);
   return response.data;
 };
 
@@ -515,6 +528,11 @@ export const fetchCashierAIChat = async (content) => {
 
 export const fetchPatientAIChat = async (queryType, content) => {
   const response = await api.post("/ai/patient/chat", { queryType, content });
+  return response.data;
+};
+
+export const fetchAISchedulingSuggestions = async (doctorId, date) => {
+  const response = await api.post("/ai/receptionist/scheduling-suggestions", { doctorId, date });
   return response.data;
 };
 

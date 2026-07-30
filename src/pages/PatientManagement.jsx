@@ -17,7 +17,9 @@ import {
   Building,
   Pill,
   Stethoscope,
-  FileText
+  FileText,
+  Camera,
+  Upload
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -25,6 +27,7 @@ const VitalsIcon = Activity;
 import { 
   fetchUsers, 
   createUser,
+  updateUser,
   fetchPatientClinicalSummary,
   addPatientVitals,
   addNursingNote,
@@ -44,7 +47,9 @@ import {
   fetchAIPrescriptionCheck,
   fetchAIPatientSummary,
   fetchAIMedicalReportSummary,
-  fetchAIVitalsEmergencyCheck
+  fetchAIVitalsEmergencyCheck,
+  checkDuplicatePatient,
+  mergePatients
 } from "../services/api";
 import { AIVoiceAssistant } from "../components/common/AIVoiceAssistant";
 
@@ -64,6 +69,17 @@ const PatientManagement = () => {
   const [doctors, setDoctors] = useState([]);
   const [chartLoading, setChartLoading] = useState(false);
 
+  // Duplicate Check & Merge States
+  const [duplicateWarning, setDuplicateWarning] = useState(null);
+  const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
+  const [primaryMergePatient, setPrimaryMergePatient] = useState(null);
+  const [secondaryMergePatient, setSecondaryMergePatient] = useState(null);
+  const [primarySearchText, setPrimarySearchText] = useState("");
+  const [secondarySearchText, setSecondarySearchText] = useState("");
+  const [primarySearchResults, setPrimarySearchResults] = useState([]);
+  const [secondarySearchResults, setSecondarySearchResults] = useState([]);
+  const [merging, setMerging] = useState(false);
+
   // Forms
   const [formData, setFormData] = useState({
     firstName: "",
@@ -76,7 +92,73 @@ const PatientManagement = () => {
     emergencyContact: "",
     registrationType: "WALK_IN",
     registeredBy: "Receptionist",
+    dob: "",
+    age: "",
+    address: "",
+    profilePhoto: "",
+    medicalAlerts: "",
+    insuranceProvider: "",
+    insurancePolicyNumber: "",
+    insuranceCoverageAmount: "",
+    insuranceExpiryDate: "",
   });
+
+  // Duplicate check trigger
+  const handleCheckDuplicate = async (updatedForm) => {
+    const { firstName, lastName, mobile, email, dob } = updatedForm;
+    if (!mobile && !email && !(firstName && lastName && dob)) {
+      setDuplicateWarning(null);
+      return;
+    }
+    try {
+      const res = await checkDuplicatePatient({
+        firstName,
+        lastName,
+        mobile,
+        email,
+        dob: dob || undefined
+      });
+      if (res?.data?.duplicate) {
+        setDuplicateWarning(res.data.duplicate);
+      } else {
+        setDuplicateWarning(null);
+      }
+    } catch (err) {
+      console.error("Duplicate check failed", err);
+    }
+  };
+
+  // Form field updater with automatic age calculation and duplicate check
+  const updateFormAndCheckDuplicate = (updates) => {
+    const newForm = { ...formData, ...updates };
+    
+    if (updates.dob) {
+      const birthDate = new Date(updates.dob);
+      if (!isNaN(birthDate.getTime())) {
+        const today = new Date();
+        let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          calculatedAge--;
+        }
+        newForm.age = calculatedAge >= 0 ? calculatedAge : 0;
+      }
+    }
+
+    setFormData(newForm);
+    handleCheckDuplicate(newForm);
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, profilePhoto: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const [registrationTypeFilter, setRegistrationTypeFilter] = useState(() => {
     return localStorage.getItem("patient_filter") || "ALL";
@@ -106,6 +188,35 @@ const PatientManagement = () => {
   const [chronicDiseasesInput, setChronicDiseasesInput] = useState("");
   const [vaccinationsInput, setVaccinationsInput] = useState("");
   const [documentName, setDocumentName] = useState("");
+
+  const [showPhotoSourceMenu, setShowPhotoSourceMenu] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const [cameraStream, setCameraStream] = useState(null);
+  const [isEditingDemographics, setIsEditingDemographics] = useState(false);
+  const [demographicsForm, setDemographicsForm] = useState({
+    dob: "",
+    gender: "MALE",
+    mobile: "",
+    email: "",
+    emergencyContact: "",
+    address: "",
+    insurance: {
+      provider: "",
+      policyNumber: "",
+      coverageAmount: 0,
+      expiryDate: "",
+    }
+  });
+
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "";
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   const showToast = (type, message) => {
     setToast({ type, message });
@@ -246,6 +357,315 @@ const PatientManagement = () => {
     printWindow.document.close();
   };
 
+  const handlePrintPatientReport = async (patient) => {
+    let localClinical = clinicalData;
+    if (!localClinical || localClinical.patient?._id !== patient._id) {
+      try {
+        const res = await fetchPatientClinicalSummary(patient._id);
+        localClinical = res.data;
+      } catch (err) {
+        console.error("Failed to load clinical summary for print report", err);
+      }
+    }
+
+    const printWindow = window.open("", "_blank");
+    const latestVitals = localClinical?.vitals?.[0] || {};
+    const clinicalNotes = localClinical?.notes || [];
+    const activePrescriptions = localClinical?.prescriptions || [];
+    const activeInstructions = localClinical?.instructions || [];
+    const consultations = localClinical?.consultations || [];
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Clinical Summary Report - ${patient.firstName} ${patient.lastName}</title>
+          <style>
+            body { font-family: 'Segoe UI', sans-serif; color: #1e293b; padding: 30px; margin: 0; line-height: 1.5; }
+            .header-banner { border-bottom: 3px double #cbd5e1; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+            .hospital-info { text-align: right; font-size: 11px; color: #64748b; }
+            .report-title { font-size: 20px; font-weight: 800; color: #0f172a; margin: 0; }
+            .section { margin-bottom: 25px; }
+            .section-title { font-size: 13px; font-weight: 700; color: #0284c7; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; font-size: 13px; }
+            .item { display: flex; justify-content: space-between; border-bottom: 1px dashed #f1f5f9; padding-bottom: 3px; }
+            .item label { color: #64748b; font-weight: 500; }
+            .item value { font-weight: 600; color: #334155; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+            th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; }
+            th { background-color: #f8fafc; color: #475569; font-weight: 700; }
+            .badge { display: inline-block; padding: 2px 6px; font-size: 10px; font-weight: 700; border-radius: 4px; }
+            .badge-success { background: #dcfce7; color: #15803d; }
+            .badge-warning { background: #fef3c7; color: #d97706; }
+            .badge-danger { background: #fee2e2; color: #ef4444; }
+            .notes-list { font-size: 12px; margin: 0; padding-left: 20px; }
+            .notes-list li { margin-bottom: 6px; }
+          </style>
+        </head>
+        <body>
+          <div class="header-banner">
+            <div>
+              <h1 class="report-title">PATIENT CLINICAL SUMMARY</h1>
+              <div style="font-size: 12px; color: #64748b; margin-top: 4px;">UHID: ${patient.uhid || "N/A"} | ID: ${patient.patientId || "N/A"}</div>
+            </div>
+            <div class="hospital-info">
+              <div style="font-weight: 800; font-size: 14px; color: #0284c7;">🏥 ${user?.hospital?.name || "AI Hospital Outlet"}</div>
+              <div>Diagnostic & Patient Care Record Room</div>
+              <div>Date Generated: ${new Date().toLocaleString()}</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Patient Demographics & Profiles</div>
+            <div class="grid">
+              <div class="item"><label>Full Name:</label><value>${patient.firstName} ${patient.lastName}</value></div>
+              <div class="item"><label>Age / Gender:</label><value>${patient.age || "N/A"} yrs / ${patient.gender}</value></div>
+              <div class="item"><label>Date of Birth:</label><value>${patient.dob ? new Date(patient.dob).toLocaleDateString() : "N/A"}</value></div>
+              <div class="item"><label>Blood Group:</label><value>${patient.bloodGroup || "N/A"}</value></div>
+              <div class="item"><label>Mobile Phone:</label><value>${patient.mobile || "N/A"}</value></div>
+              <div class="item"><label>Email Address:</label><value>${patient.email || "N/A"}</value></div>
+              <div class="item"><label>Emergency Contact:</label><value>${patient.emergencyContact || "N/A"}</value></div>
+              <div class="item"><label>Residential Address:</label><value>${patient.address || "N/A"}</value></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Insurance Profile</div>
+            <div class="grid">
+              <div class="item"><label>Provider / Insurer:</label><value>${patient.insuranceProvider || patient.insurance?.provider || "N/A"}</value></div>
+              <div class="item"><label>Policy Number:</label><value>${patient.insurancePolicyNumber || patient.insurance?.policyNumber || "N/A"}</value></div>
+              <div class="item"><label>Coverage Amount:</label><value>₹${patient.insuranceCoverageAmount || patient.insurance?.coverageAmount || 0}</value></div>
+              <div class="item"><label>Expiration Date:</label><value>${patient.insuranceExpiryDate || patient.insurance?.expiryDate ? new Date(patient.insuranceExpiryDate || patient.insurance?.expiryDate).toLocaleDateString() : "N/A"}</value></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Latest Clinical Vitals</div>
+            <div class="grid">
+              <div class="item"><label>Body Temperature:</label><value>${latestVitals.temperature || "N/A"} °F</value></div>
+              <div class="item"><label>Blood Pressure (BP):</label><value>${latestVitals.bp || "N/A"} mmHg</value></div>
+              <div class="item"><label>Heart / Pulse Rate:</label><value>${latestVitals.heartRate ? latestVitals.heartRate + " bpm" : "N/A"}</value></div>
+              <div class="item"><label>Oxygen Level (SPO2):</label><value>${latestVitals.spo2 ? latestVitals.spo2 + " %" : "N/A"}</value></div>
+              <div class="item"><label>Respiratory Rate:</label><value>${latestVitals.respiratoryRate ? latestVitals.respiratoryRate + " cpm" : "N/A"}</value></div>
+            <div class="item"><label>Blood Sugar Level:</label><value>${latestVitals.sugar ? latestVitals.sugar + " mg/dL" : "N/A"}</value></div>
+          </div>
+          ${!latestVitals.createdAt ? `<div style="font-size: 11px; color: #94a3b8; margin-top: 5px; font-style: italic;">* No vital measurements logged yet.</div>` : `<div style="font-size: 11px; color: #64748b; margin-top: 5px;">* Vitals recorded at: ${new Date(latestVitals.createdAt).toLocaleString()} by medical staff.</div>`}
+        </div>
+
+        <div class="section">
+          <div class="section-title">Active Outpatient Prescriptions</div>
+          ${activePrescriptions.length === 0 ? `<p style="font-size: 12px; color: #64748b; font-style: italic; margin: 0;">No active prescriptions logged.</p>` : `
+            <table>
+              <thead>
+                <tr>
+                  <th>Medication Name</th>
+                  <th>Dosage</th>
+                  <th>Routine / Frequency</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${activePrescriptions.map(pr => `
+                  <tr>
+                    <td><strong>${pr.medicationName}</strong></td>
+                    <td>${pr.dosage}</td>
+                    <td>${pr.frequency}</td>
+                    <td><span class="badge ${pr.status === "DISPENSED" || pr.status === "GIVEN" ? "badge-success" : "badge-warning"}">${pr.status}</span></td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          `}
+        </div>
+
+        <div class="section">
+          <div class="section-title">Clinical Consultations Logs</div>
+          ${consultations.length === 0 ? `<p style="font-size: 12px; color: #64748b; font-style: italic; margin: 0;">No consultation logs recorded.</p>` : `
+            <table>
+              <thead>
+                <tr>
+                  <th>Consulting Doctor</th>
+                  <th>Diagnosis Observations</th>
+                  <th>Clinical Notes</th>
+                  <th>Visit Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${consultations.map(c => `
+                  <tr>
+                    <td>Dr. ${c.doctor?.firstName || ""} ${c.doctor?.lastName || ""}</td>
+                    <td><strong>${c.diagnosis || "N/A"}</strong></td>
+                    <td>${c.clinicalNotes || "N/A"}</td>
+                    <td>${new Date(c.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          `}
+        </div>
+
+          <script>
+            setTimeout(() => { window.print(); }, 500);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const handlePrintIdCard = (patient) => {
+    const printWindow = window.open("", "_blank");
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+      JSON.stringify({
+        patientId: patient.patientId || "",
+        uhid: patient.uhid || "",
+        name: `${patient.firstName} ${patient.lastName}`,
+        bloodGroup: patient.bloodGroup || "N/A",
+        medicalAlerts: patient.medicalAlerts || []
+      })
+    )}`;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Patient ID Card - ${patient.firstName} ${patient.lastName}</title>
+          <style>
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              margin: 0;
+              background-color: #f1f5f9;
+            }
+            .card {
+              width: 380px;
+              height: 230px;
+              background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+              color: white;
+              border-radius: 16px;
+              box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+              padding: 20px;
+              box-sizing: border-box;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              position: relative;
+              overflow: hidden;
+            }
+            .card::before {
+              content: '';
+              position: absolute;
+              top: -50px;
+              right: -50px;
+              width: 150px;
+              height: 150px;
+              background: rgba(255, 255, 255, 0.05);
+              border-radius: 50%;
+            }
+            .header {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+              padding-bottom: 10px;
+            }
+            .hospital-name {
+              font-size: 14px;
+              font-weight: 800;
+              letter-spacing: 1px;
+            }
+            .card-title {
+              font-size: 10px;
+              opacity: 0.8;
+              text-transform: uppercase;
+            }
+            .body {
+              display: flex;
+              gap: 15px;
+              align-items: center;
+              margin-top: 10px;
+            }
+            .photo {
+              width: 70px;
+              height: 70px;
+              border-radius: 50%;
+              object-fit: cover;
+              border: 2px solid white;
+              background: white;
+            }
+            .info {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+            }
+            .name {
+              font-size: 16px;
+              font-weight: 700;
+              margin: 0;
+            }
+            .detail {
+              font-size: 11px;
+              opacity: 0.9;
+            }
+            .qr {
+              width: 75px;
+              height: 75px;
+              background: white;
+              padding: 4px;
+              border-radius: 8px;
+            }
+            .footer {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              font-size: 10px;
+              opacity: 0.8;
+              border-top: 1px solid rgba(255, 255, 255, 0.2);
+              padding-top: 10px;
+              margin-top: 5px;
+            }
+            .alert-pill {
+              background: #ef4444;
+              color: white;
+              padding: 2px 6px;
+              border-radius: 4px;
+              font-weight: bold;
+              font-size: 9px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="header">
+              <span class="hospital-name">🏥 AI HOSPITAL</span>
+              <span class="card-title">Patient Identity Card</span>
+            </div>
+            <div class="body">
+              <img class="photo" src="${patient.profilePhoto || 'uploads/default-avatar.png'}" onerror="this.src='uploads/default-avatar.png'" />
+              <div class="info">
+                <p class="name">${patient.firstName} ${patient.lastName}</p>
+                <div class="detail"><strong>ID:</strong> ${patient.patientId || "N/A"}</div>
+                <div class="detail"><strong>UHID:</strong> ${patient.uhid || "N/A"}</div>
+                <div class="detail"><strong>Blood Group:</strong> ${patient.bloodGroup || "N/A"}</div>
+              </div>
+              <img class="qr" src="${qrUrl}" />
+            </div>
+            <div class="footer">
+              <span>Emergency No: ${patient.emergencyContact || '102'}</span>
+              ${patient.medicalAlerts && patient.medicalAlerts.length > 0 ? `<span class="alert-pill">ALERT: ${patient.medicalAlerts[0]}</span>` : ''}
+            </div>
+          </div>
+          <script>
+            setTimeout(() => { window.print(); }, 500);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   useEffect(() => {
     localStorage.removeItem("patient_filter");
 
@@ -290,8 +710,28 @@ const PatientManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createUser({ ...formData, role: "PATIENT" });
-      showToast("success", "New patient registered successfully with auto UHID");
+      const payload = {
+        ...formData,
+        role: "PATIENT",
+        medicalAlerts: formData.medicalAlerts 
+          ? formData.medicalAlerts.split(",").map(s => s.trim()).filter(Boolean) 
+          : [],
+        insurance: {
+          provider: formData.insuranceProvider || "",
+          policyNumber: formData.insurancePolicyNumber || "",
+          coverageAmount: formData.insuranceCoverageAmount ? Number(formData.insuranceCoverageAmount) : 0,
+          expiryDate: formData.insuranceExpiryDate || undefined
+        }
+      };
+
+      // Clean up the fields we mapped to separate keys in state
+      delete payload.insuranceProvider;
+      delete payload.insurancePolicyNumber;
+      delete payload.insuranceCoverageAmount;
+      delete payload.insuranceExpiryDate;
+
+      await createUser(payload);
+      showToast("success", "New patient registered successfully with auto UHID & Patient ID");
       setIsModalOpen(false);
       setFormData({
         firstName: "",
@@ -304,7 +744,17 @@ const PatientManagement = () => {
         emergencyContact: "",
         registrationType: "WALK_IN",
         registeredBy: "Receptionist",
+        dob: "",
+        age: "",
+        address: "",
+        profilePhoto: "",
+        medicalAlerts: "",
+        insuranceProvider: "",
+        insurancePolicyNumber: "",
+        insuranceCoverageAmount: "",
+        insuranceExpiryDate: "",
       });
+      setDuplicateWarning(null);
       loadPatients();
     } catch (err) {
       showToast("error", err.response?.data?.message || "Failed to register patient");
@@ -452,6 +902,21 @@ const PatientManagement = () => {
           bedNo: res.data.patient.bedNo || "N/A",
           assignedDoctor: res.data.patient.assignedDoctor?._id || res.data.patient.assignedDoctor || "",
         });
+        setDemographicsForm({
+          dob: formatDateForInput(res.data.patient.dob),
+          gender: res.data.patient.gender || "MALE",
+          mobile: res.data.patient.mobile || "",
+          email: res.data.patient.email || "",
+          emergencyContact: res.data.patient.emergencyContact || "",
+          address: res.data.patient.address || "",
+          insurance: {
+            provider: res.data.patient.insurance?.provider || "",
+            policyNumber: res.data.patient.insurance?.policyNumber || "",
+            coverageAmount: res.data.patient.insurance?.coverageAmount || 0,
+            expiryDate: formatDateForInput(res.data.patient.insurance?.expiryDate),
+          }
+        });
+        setIsEditingDemographics(false);
       }
       loadAiPatientSummary(patient._id);
       const latestVitals = res.data?.vitalsRecord?.[0] || {};
@@ -475,6 +940,20 @@ const PatientManagement = () => {
         setAllergiesInput(res.data.patient.allergies?.join(", ") || "");
         setChronicDiseasesInput(res.data.patient.chronicDiseases?.join(", ") || "");
         setVaccinationsInput(res.data.patient.vaccinations?.join(", ") || "");
+        setDemographicsForm({
+          dob: formatDateForInput(res.data.patient.dob),
+          gender: res.data.patient.gender || "MALE",
+          mobile: res.data.patient.mobile || "",
+          email: res.data.patient.email || "",
+          emergencyContact: res.data.patient.emergencyContact || "",
+          address: res.data.patient.address || "",
+          insurance: {
+            provider: res.data.patient.insurance?.provider || "",
+            policyNumber: res.data.patient.insurance?.policyNumber || "",
+            coverageAmount: res.data.patient.insurance?.coverageAmount || 0,
+            expiryDate: formatDateForInput(res.data.patient.insurance?.expiryDate),
+          }
+        });
       }
       loadAiPatientSummary(selectedPatient._id);
       const latestVitals = res.data?.vitalsRecord?.[0] || {};
@@ -482,6 +961,277 @@ const PatientManagement = () => {
       loadAiDiagnosisSuggestions(latestVitals, complaints);
     } catch (err) {
       console.error("Failed to reload chart", err);
+    }
+  };
+
+  const handleGalleryUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      setSubmittingAction(true);
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result;
+        try {
+          await updateUser(selectedPatient._id, { profilePhoto: base64 });
+          showToast("success", "Profile picture updated successfully!");
+          reloadChartData();
+          setShowPhotoSourceMenu(false);
+        } catch (err) {
+          showToast("error", err.response?.data?.message || "Failed to update profile picture");
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      showToast("error", "Failed to read image file");
+    } finally {
+      setSubmittingAction(false);
+    }
+  };
+
+  const handleStartCamera = async () => {
+    try {
+      setShowPhotoSourceMenu(false);
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 400, height: 400, facingMode: "user" } });
+      setCameraStream(stream);
+      setShowCameraModal(true);
+      // Wait a tiny bit then bind stream to video element
+      setTimeout(() => {
+        const videoEl = document.getElementById("camera-video-feed");
+        if (videoEl) {
+          videoEl.srcObject = stream;
+        }
+      }, 300);
+    } catch (err) {
+      showToast("error", "Unable to access camera. Please check camera permissions.");
+      console.error(err);
+    }
+  };
+
+  const handleStopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setShowCameraModal(false);
+  };
+
+  const handleCaptureSnapshot = async () => {
+    const videoEl = document.getElementById("camera-video-feed");
+    if (!videoEl) return;
+    try {
+      setSubmittingAction(true);
+      const canvas = document.createElement("canvas");
+      canvas.width = videoEl.videoWidth || 400;
+      canvas.height = videoEl.videoHeight || 400;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+      const base64 = canvas.toDataURL("image/jpeg", 0.95);
+      
+      await updateUser(selectedPatient._id, { profilePhoto: base64 });
+      showToast("success", "Profile photo captured successfully!");
+      handleStopCamera();
+      reloadChartData();
+    } catch (err) {
+      showToast("error", err.response?.data?.message || "Failed to save captured photo");
+      console.error(err);
+    } finally {
+      setSubmittingAction(false);
+    }
+  };
+
+  const handleSaveDemographics = async (e) => {
+    e.preventDefault();
+    try {
+      setSubmittingAction(true);
+      // Create a clean payload mapping the fields
+      const updateData = {
+        dob: demographicsForm.dob || null,
+        gender: demographicsForm.gender,
+        mobile: demographicsForm.mobile,
+        email: demographicsForm.email,
+        emergencyContact: demographicsForm.emergencyContact,
+        address: demographicsForm.address,
+        insurance: {
+          provider: demographicsForm.insurance.provider,
+          policyNumber: demographicsForm.insurance.policyNumber,
+          coverageAmount: Number(demographicsForm.insurance.coverageAmount) || 0,
+          expiryDate: demographicsForm.insurance.expiryDate || null,
+        }
+      };
+
+      await updateUser(selectedPatient._id, updateData);
+      showToast("success", "Demographics & Insurance updated successfully");
+      setIsEditingDemographics(false);
+      reloadChartData();
+    } catch (err) {
+      showToast("error", err.response?.data?.message || "Failed to update demographics");
+      console.error(err);
+    } finally {
+      setSubmittingAction(false);
+    }
+  };
+
+  const [familySearchText, setFamilySearchText] = useState("");
+  const [familySearchResults, setFamilySearchResults] = useState([]);
+  const [selectedFamilyMember, setSelectedFamilyMember] = useState(null);
+  const [familyRelation, setFamilyRelation] = useState("Spouse");
+
+  const handleFamilySearch = async (val) => {
+    setFamilySearchText(val);
+    if (val.trim().length < 2) {
+      setFamilySearchResults([]);
+      return;
+    }
+    try {
+      const res = await fetchUsers({ role: "PATIENT", search: val, limit: 5 });
+      const results = (res.users || res.data || []).filter(p => p._id !== selectedPatient._id);
+      setFamilySearchResults(results);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddFamilyMember = async () => {
+    if (!selectedFamilyMember) {
+      showToast("error", "Please select a patient to map");
+      return;
+    }
+    try {
+      // 1. Update current patient mapping
+      const updatedMapping = [
+        ...(selectedPatient.familyMapping || []).map(f => ({
+          patient: f.patient?._id || f.patient,
+          relation: f.relation
+        })),
+        { patient: selectedFamilyMember._id, relation: familyRelation }
+      ];
+
+      await updateUser(selectedPatient._id, {
+        familyMapping: updatedMapping
+      });
+
+      // 2. Map back reciprocal mapping
+      let reciprocalRelation = "Other";
+      if (familyRelation === "Spouse") reciprocalRelation = "Spouse";
+      if (familyRelation === "Sibling") reciprocalRelation = "Sibling";
+      if (familyRelation === "Parent") reciprocalRelation = "Child";
+      if (familyRelation === "Child") reciprocalRelation = "Parent";
+
+      const targetMapping = [
+        ...(selectedFamilyMember.familyMapping || []).map(f => ({
+          patient: f.patient?._id || f.patient,
+          relation: f.relation
+        })),
+        { patient: selectedPatient._id, relation: reciprocalRelation }
+      ];
+
+      await updateUser(selectedFamilyMember._id, {
+        familyMapping: targetMapping
+      });
+
+      showToast("success", `Mapped ${selectedFamilyMember.firstName} as ${familyRelation}`);
+      setSelectedFamilyMember(null);
+      setFamilySearchText("");
+      setFamilySearchResults([]);
+      
+      reloadChartData();
+    } catch (err) {
+      showToast("error", "Failed to map family member");
+    }
+  };
+
+  const handleRemoveFamilyMember = async (mappedId) => {
+    try {
+      // 1. Remove from current patient
+      const updatedMapping = (selectedPatient.familyMapping || [])
+        .filter(f => (f.patient?._id || f.patient) !== mappedId)
+        .map(f => ({
+          patient: f.patient?._id || f.patient,
+          relation: f.relation
+        }));
+
+      await updateUser(selectedPatient._id, {
+        familyMapping: updatedMapping
+      });
+
+      // 2. Remove reciprocal from target patient
+      const targetRes = await fetchUsers({ search: mappedId });
+      const target = (targetRes.users || targetRes.data || []).find(p => p._id === mappedId);
+      if (target) {
+        const targetMapping = (target.familyMapping || [])
+          .filter(f => (f.patient?._id || f.patient) !== selectedPatient._id)
+          .map(f => ({
+            patient: f.patient?._id || f.patient,
+            relation: f.relation
+          }));
+        await updateUser(mappedId, {
+          familyMapping: targetMapping
+        });
+      }
+
+      showToast("success", "Family mapping removed");
+      reloadChartData();
+    } catch (err) {
+      showToast("error", "Failed to remove mapping");
+    }
+  };
+
+  const handlePrimarySearch = async (val) => {
+    setPrimarySearchText(val);
+    if (val.trim().length < 2) {
+      setPrimarySearchResults([]);
+      return;
+    }
+    try {
+      const res = await fetchUsers({ role: "PATIENT", search: val, limit: 5 });
+      setPrimarySearchResults(res.users || res.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSecondarySearch = async (val) => {
+    setSecondarySearchText(val);
+    if (val.trim().length < 2) {
+      setSecondarySearchResults([]);
+      return;
+    }
+    try {
+      const res = await fetchUsers({ role: "PATIENT", search: val, limit: 5 });
+      setSecondarySearchResults(res.users || res.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleMergePatients = async (e) => {
+    e.preventDefault();
+    if (!primaryMergePatient || !secondaryMergePatient) {
+      showToast("error", "Please select both primary and duplicate patients");
+      return;
+    }
+    if (primaryMergePatient._id === secondaryMergePatient._id) {
+      showToast("error", "Cannot merge a profile into itself");
+      return;
+    }
+    try {
+      setMerging(true);
+      await mergePatients({
+        primaryPatientId: primaryMergePatient._id,
+        secondaryPatientId: secondaryMergePatient._id
+      });
+      showToast("success", "Patient profiles merged successfully!");
+      setIsMergeModalOpen(false);
+      setPrimaryMergePatient(null);
+      setSecondaryMergePatient(null);
+      setPrimarySearchText("");
+      setSecondarySearchText("");
+      loadPatients();
+    } catch (err) {
+      showToast("error", err.response?.data?.message || "Failed to merge patients");
+    } finally {
+      setMerging(false);
     }
   };
 
@@ -731,10 +1481,15 @@ const PatientManagement = () => {
           <p>Click on a patient's row to open their clinical charting history, log vitals, track prescriptions, and monitor notes.</p>
         </div>
 
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-          <Plus size={18} />
-          <span>Register New Patient</span>
-        </button>
+        <div style={{ display: "flex", gap: "0.75rem" }}>
+          <button className="btn btn-secondary" onClick={() => setIsMergeModalOpen(true)} style={{ color: "#ef4444", borderColor: "#fecaca", display: "flex", alignItems: "center", gap: "0.25rem", cursor: "pointer", background: "none" }}>
+            <span>🤝 Merge Profiles</span>
+          </button>
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+            <Plus size={18} />
+            <span>Register New Patient</span>
+          </button>
+        </div>
       </div>
 
       {/* Search Bar & Export Tools */}
@@ -917,15 +1672,120 @@ const PatientManagement = () => {
                 alignItems: "center" 
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
+                <div style={{ position: "relative", cursor: "pointer" }} onClick={() => setShowPhotoSourceMenu(!showPhotoSourceMenu)}>
+                  <img
+                    src={selectedPatient.profilePhoto || "uploads/default-avatar.png"}
+                    alt={`${selectedPatient.firstName} photo`}
+                    style={{ width: "65px", height: "65px", borderRadius: "50%", objectFit: "cover", border: "3px solid #0284c7", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
+                    onError={(e) => { e.target.src = "uploads/default-avatar.png"; }}
+                  />
+                  <div style={{
+                    position: "absolute",
+                    bottom: 0,
+                    right: 0,
+                    background: "#0284c7",
+                    borderRadius: "50%",
+                    width: "20px",
+                    height: "20px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "2px solid #fff",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                  }}>
+                    <Camera size={10} color="#fff" />
+                  </div>
+
+                  {showPhotoSourceMenu && (
+                    <div style={{
+                      position: "absolute",
+                      top: "70px",
+                      left: 0,
+                      background: "#fff",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                      zIndex: 110,
+                      width: "180px",
+                      display: "flex",
+                      flexDirection: "column",
+                      padding: "0.25rem 0"
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        type="button"
+                        onClick={handleStartCamera}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          border: "none",
+                          background: "none",
+                          width: "100%",
+                          textAlign: "left",
+                          padding: "0.5rem 0.75rem",
+                          fontSize: "0.8rem",
+                          color: "#334155",
+                          cursor: "pointer",
+                          transition: "background 0.2s"
+                        }}
+                        onMouseEnter={(e) => e.target.style.background = "#f1f5f9"}
+                        onMouseLeave={(e) => e.target.style.background = "none"}
+                      >
+                        <Camera size={14} /> Take Photo (Camera)
+                      </button>
+                      <label
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          border: "none",
+                          background: "none",
+                          width: "auto",
+                          textAlign: "left",
+                          padding: "0.5rem 0.75rem",
+                          fontSize: "0.8rem",
+                          color: "#334155",
+                          cursor: "pointer",
+                          transition: "background 0.2s",
+                          margin: 0
+                        }}
+                        onMouseEnter={(e) => e.target.style.background = "#f1f5f9"}
+                        onMouseLeave={(e) => e.target.style.background = "none"}
+                      >
+                        <Upload size={14} /> Upload from Gallery
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleGalleryUpload}
+                          style={{ display: "none" }}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
                 <div>
-                  <span className="badge" style={{ background: "#e0f2fe", color: "#0284c7", fontSize: "0.75rem", fontWeight: 700 }}>
-                    {selectedPatient.uhid || "PATIENT UHID"}
-                  </span>
+                  <div style={{ display: "flex", gap: "0.35rem", alignItems: "center" }}>
+                    <span className="badge" style={{ background: "#e0f2fe", color: "#0284c7", fontSize: "0.75rem", fontWeight: 700 }}>
+                      UHID: {selectedPatient.uhid || "N/A"}
+                    </span>
+                    {selectedPatient.patientId && (
+                      <span className="badge" style={{ background: "#f1f5f9", color: "#475569", fontSize: "0.75rem", fontWeight: 700 }}>
+                        ID: {selectedPatient.patientId}
+                      </span>
+                    )}
+                  </div>
                   <h2 style={{ margin: "0.25rem 0 0", fontSize: "1.35rem", fontWeight: 800, color: "#0f172a" }}>
                     {selectedPatient.firstName} {selectedPatient.lastName}
                   </h2>
                   <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                    {selectedPatient.medicalAlerts?.length > 0 && selectedPatient.medicalAlerts.map((alert, i) => (
+                      <span key={i} className="badge" style={{ background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", fontSize: "0.65rem", fontWeight: 800, whiteSpace: "nowrap" }}>
+                        🚨 ALERT: {alert}
+                      </span>
+                    ))}
                     {selectedPatient.allergies?.length > 0 && selectedPatient.allergies.map((allergy, i) => (
                       <span key={i} className="badge" style={{ background: "#fee2e2", color: "#ef4444", fontSize: "0.65rem", fontWeight: 700, whiteSpace: "nowrap" }}>
                         ⚠️ Allergy: {allergy}
@@ -943,31 +1803,47 @@ const PatientManagement = () => {
                     ))}
                   </div>
                 </div>
-                {/* QR Code generator */}
-                <div 
-                  style={{ 
-                    display: "flex", 
-                    flexDirection: "column", 
-                    alignItems: "center", 
-                    background: "#ffffff", 
-                    padding: "0.6rem", 
-                    borderRadius: "10px", 
-                    border: "2px solid #0284c7",
-                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
-                    cursor: "pointer"
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.open(`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent("http://" + systemIp + ":5173/login?uhid=" + selectedPatient.uhid)}`, "_blank");
-                  }}
-                  title="Click to view full screen scan code"
-                >
-                  <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent("http://" + systemIp + ":5173/login?uhid=" + selectedPatient.uhid)}`} 
-                    alt="Patient UHID QR"
-                    style={{ width: "120px", height: "120px" }}
-                  />
-                  <span style={{ fontSize: "0.65rem", color: "#0284c7", fontWeight: 800, marginTop: "0.25rem" }}>CLICK TO ZOOM QR</span>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center" }}>
+                  {/* QR Code generator */}
+                  <div 
+                    style={{ 
+                      display: "flex", 
+                      flexDirection: "column", 
+                      alignItems: "center", 
+                      background: "#ffffff", 
+                      padding: "0.6rem", 
+                      borderRadius: "10px", 
+                      border: "2px solid #0284c7",
+                      boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+                      cursor: "pointer"
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent("http://" + systemIp + ":5173/login?uhid=" + selectedPatient.uhid)}`, "_blank");
+                    }}
+                    title="Click to view full screen scan code"
+                  >
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent("http://" + systemIp + ":5173/login?uhid=" + selectedPatient.uhid)}`} 
+                      alt="Patient UHID QR"
+                      style={{ width: "90px", height: "90px" }}
+                    />
+                    <span style={{ fontSize: "0.55rem", color: "#0284c7", fontWeight: 800, marginTop: "0.2rem" }}>ZOOM QR CODE</span>
+                  </div>
+                  <button
+                    onClick={() => handlePrintIdCard(selectedPatient)}
+                    className="btn btn-secondary"
+                    style={{ padding: "0.3rem 0.5rem", fontSize: "0.7rem", display: "flex", alignItems: "center", gap: "0.25rem", color: "#0284c7", borderColor: "#0284c7", background: "none", cursor: "pointer", width: "100%", justifyContent: "center" }}
+                  >
+                    🪪 Print ID Card
+                  </button>
+                  <button
+                    onClick={() => handlePrintPatientReport(selectedPatient)}
+                    className="btn btn-secondary"
+                    style={{ padding: "0.3rem 0.5rem", marginTop: "0.5rem", fontSize: "0.7rem", display: "flex", alignItems: "center", gap: "0.25rem", color: "#0ea5e9", borderColor: "#0ea5e9", background: "none", cursor: "pointer", width: "100%", justifyContent: "center" }}
+                  >
+                    📄 Print Clinical Report
+                  </button>
                 </div>
               </div>
               <button 
@@ -1008,6 +1884,7 @@ const PatientManagement = () => {
                 { id: "instructions", label: "Nurse Tasks", icon: ClipboardList },
                 { id: "labs", label: "Order Labs", icon: Activity },
                 { id: "vitals", label: "Vitals & Notes", icon: VitalsIcon },
+                { id: "family", label: "Family & Relations", icon: UserCheck },
                 { id: "documents", label: "Attachments & Docs", icon: FileText }
               ] : [
                 { id: "overview", label: "Overview", icon: User },
@@ -1016,6 +1893,7 @@ const PatientManagement = () => {
                 { id: "instructions", label: "Instructions", icon: ClipboardList },
                 { id: "notes", label: "Notes", icon: Save },
                 { id: "labs", label: "Labs", icon: Activity },
+                { id: "family", label: "Family & Relations", icon: UserCheck },
                 { id: "documents", label: "Documents", icon: FileText }
               ]).map((tab) => {
                 const TabIcon = tab.icon;
@@ -1429,21 +2307,62 @@ const PatientManagement = () => {
                           <p style={{ color: "#64748b", margin: 0 }}>No lab tests requested yet.</p>
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                            {clinicalData?.labs?.map((l) => (
-                              <div key={l._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #e2e8f0", padding: "0.85rem", borderRadius: "8px" }}>
-                                <div>
-                                  <strong style={{ fontSize: "0.9rem" }}>{l.testName}</strong>
-                                  <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Order Date: {new Date(l.createdAt).toLocaleDateString()}</div>
+                            {clinicalData?.labs?.map((l) => {
+                              let badgeBg = "#fef3c7"; // PENDING / default
+                              let badgeColor = "#d97706";
+                              if (l.status === "SAMPLE_COLLECTED") {
+                                badgeBg = "#e0f2fe";
+                                badgeColor = "#0284c7";
+                              } else if (l.status === "COMPLETED") {
+                                badgeBg = "#dcfce7";
+                                badgeColor = "#15803d";
+                              } else if (l.status === "REJECTED") {
+                                badgeBg = "#fee2e2";
+                                badgeColor = "#ef4444";
+                              } else if (l.status === "ACCEPTED") {
+                                badgeBg = "#f0fdf4";
+                                badgeColor = "#16a34a";
+                              }
+                              return (
+                                <div key={l._id} style={{ display: "flex", flexDirection: "column", gap: "0.5rem", border: "1px solid #e2e8f0", padding: "1rem", borderRadius: "10px", background: "white" }}>
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <div>
+                                      <strong style={{ fontSize: "0.95rem", color: "#0f172a" }}>{l.testName}</strong>
+                                      <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.15rem" }}>Order Date: {new Date(l.createdAt).toLocaleDateString()}</div>
+                                    </div>
+                                    <span className="badge" style={{ background: badgeBg, color: badgeColor, fontWeight: 700 }}>
+                                      {l.status}
+                                    </span>
+                                  </div>
+                                  
+                                  {l.status === "COMPLETED" && (
+                                    <div style={{ marginTop: "0.5rem", padding: "0.75rem", background: "#f8fafc", borderRadius: "8px", border: "1px solid #f1f5f9" }}>
+                                      <div style={{ fontSize: "0.8rem", color: "#475569", fontWeight: 600 }}>Results:</div>
+                                      <div style={{ fontSize: "0.85rem", color: "#1e293b", marginTop: "0.15rem" }}>{l.results || "Diagnostic parameters normal."}</div>
+                                      
+                                      {l.reportFile && (
+                                        <div style={{ marginTop: "0.5rem", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                                          <span style={{ fontSize: "1rem" }}>📄</span>
+                                          <a 
+                                            href={`http://localhost:8086/uploads/${l.reportFile}`} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            style={{ fontSize: "0.75rem", color: "#0284c7", fontWeight: 700, textDecoration: "underline" }}
+                                          >
+                                            View Diagnostics Report File ({l.reportFile})
+                                          </a>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                  {l.status === "REJECTED" && l.rejectionReason && (
+                                    <div style={{ marginTop: "0.25rem", padding: "0.5rem", background: "#fee2e2", borderRadius: "8px", border: "1px solid #fecaca", fontSize: "0.8rem", color: "#dc2626" }}>
+                                      <strong>Rejection Reason:</strong> {l.rejectionReason}
+                                    </div>
+                                  )}
                                 </div>
-                                <span className="badge" style={{
-                                  background: l.status === "SAMPLE_COLLECTED" ? "#dcfce7" : "#fee2e2",
-                                  color: l.status === "SAMPLE_COLLECTED" ? "#15803d" : "#ef4444",
-                                  fontWeight: 700
-                                }}>
-                                  {l.status}
-                                </span>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -1536,6 +2455,203 @@ const PatientManagement = () => {
                           </div>
                         ) : (
                           <p style={{ color: "#64748b", fontSize: "0.85rem", margin: 0 }}>No AI summary compiled for this profile.</p>
+                        )}
+                      </div>
+
+                      {/* Patient Demographics & Insurance Details Card */}
+                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem", marginBottom: "1rem" }}>
+                          <h4 style={{ margin: 0, fontSize: "1rem", color: "#0f172a", fontWeight: 700 }}>
+                            📋 Patient Demographics & Insurance
+                          </h4>
+                          {user?.role !== "PATIENT" && (
+                            <button
+                              type="button"
+                              onClick={() => setIsEditingDemographics(!isEditingDemographics)}
+                              className="btn btn-secondary"
+                              style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.25rem", cursor: "pointer" }}
+                            >
+                              {isEditingDemographics ? "Cancel" : "Edit Details"}
+                            </button>
+                          )}
+                        </div>
+
+                        {isEditingDemographics ? (
+                          <form onSubmit={handleSaveDemographics} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+                              <div>
+                                <h5 style={{ margin: "0 0 0.75rem 0", fontSize: "0.85rem", color: "#64748b", fontWeight: 700 }}>Contact & Demographics</h5>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                                  <div className="form-group">
+                                    <label style={{ fontSize: "0.75rem", marginBottom: "0.25rem" }}>Date of Birth</label>
+                                    <input 
+                                      type="date"
+                                      className="form-control"
+                                      value={demographicsForm.dob}
+                                      onChange={(e) => setDemographicsForm({ ...demographicsForm, dob: e.target.value })}
+                                    />
+                                  </div>
+                                  <div className="form-group">
+                                    <label style={{ fontSize: "0.75rem", marginBottom: "0.25rem" }}>Gender</label>
+                                    <select
+                                      className="form-control"
+                                      value={demographicsForm.gender}
+                                      onChange={(e) => setDemographicsForm({ ...demographicsForm, gender: e.target.value })}
+                                    >
+                                      <option value="MALE">MALE</option>
+                                      <option value="FEMALE">FEMALE</option>
+                                      <option value="OTHER">OTHER</option>
+                                    </select>
+                                  </div>
+                                  <div className="form-group">
+                                    <label style={{ fontSize: "0.75rem", marginBottom: "0.25rem" }}>Mobile *</label>
+                                    <input 
+                                      type="text"
+                                      className="form-control"
+                                      placeholder="10 digit number"
+                                      value={demographicsForm.mobile}
+                                      onChange={(e) => setDemographicsForm({ ...demographicsForm, mobile: e.target.value })}
+                                      required
+                                    />
+                                  </div>
+                                  <div className="form-group">
+                                    <label style={{ fontSize: "0.75rem", marginBottom: "0.25rem" }}>Email</label>
+                                    <input 
+                                      type="email"
+                                      className="form-control"
+                                      value={demographicsForm.email}
+                                      onChange={(e) => setDemographicsForm({ ...demographicsForm, email: e.target.value })}
+                                    />
+                                  </div>
+                                  <div className="form-group">
+                                    <label style={{ fontSize: "0.75rem", marginBottom: "0.25rem" }}>Emergency Contact</label>
+                                    <input 
+                                      type="text"
+                                      className="form-control"
+                                      value={demographicsForm.emergencyContact}
+                                      onChange={(e) => setDemographicsForm({ ...demographicsForm, emergencyContact: e.target.value })}
+                                    />
+                                  </div>
+                                  <div className="form-group">
+                                    <label style={{ fontSize: "0.75rem", marginBottom: "0.25rem" }}>Address</label>
+                                    <textarea 
+                                      className="form-control"
+                                      rows="2"
+                                      value={demographicsForm.address}
+                                      onChange={(e) => setDemographicsForm({ ...demographicsForm, address: e.target.value })}
+                                      style={{ resize: "none" }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                              <div style={{ borderLeft: "1px solid #f1f5f9", paddingLeft: "1.5rem" }}>
+                                <h5 style={{ margin: "0 0 0.75rem 0", fontSize: "0.85rem", color: "#64748b", fontWeight: 700 }}>Insurance Policy Details</h5>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                                  <div className="form-group">
+                                    <label style={{ fontSize: "0.75rem", marginBottom: "0.25rem" }}>Insurance Provider</label>
+                                    <input 
+                                      type="text"
+                                      className="form-control"
+                                      placeholder="E.g. Blue Cross"
+                                      value={demographicsForm.insurance.provider}
+                                      onChange={(e) => setDemographicsForm({
+                                        ...demographicsForm,
+                                        insurance: { ...demographicsForm.insurance, provider: e.target.value }
+                                      })}
+                                    />
+                                  </div>
+                                  <div className="form-group">
+                                    <label style={{ fontSize: "0.75rem", marginBottom: "0.25rem" }}>Policy Number</label>
+                                    <input 
+                                      type="text"
+                                      className="form-control"
+                                      placeholder="E.g. POL-12345"
+                                      value={demographicsForm.insurance.policyNumber}
+                                      onChange={(e) => setDemographicsForm({
+                                        ...demographicsForm,
+                                        insurance: { ...demographicsForm.insurance, policyNumber: e.target.value }
+                                      })}
+                                    />
+                                  </div>
+                                  <div className="form-group">
+                                    <label style={{ fontSize: "0.75rem", marginBottom: "0.25rem" }}>Coverage Limit ($)</label>
+                                    <input 
+                                      type="number"
+                                      className="form-control"
+                                      placeholder="E.g. 5000"
+                                      value={demographicsForm.insurance.coverageAmount}
+                                      onChange={(e) => setDemographicsForm({
+                                        ...demographicsForm,
+                                        insurance: { ...demographicsForm.insurance, coverageAmount: e.target.value }
+                                      })}
+                                    />
+                                  </div>
+                                  <div className="form-group">
+                                    <label style={{ fontSize: "0.75rem", marginBottom: "0.25rem" }}>Expiry Date</label>
+                                    <input 
+                                      type="date"
+                                      className="form-control"
+                                      value={demographicsForm.insurance.expiryDate}
+                                      onChange={(e) => setDemographicsForm({
+                                        ...demographicsForm,
+                                        insurance: { ...demographicsForm.insurance, expiryDate: e.target.value }
+                                      })}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", borderTop: "1px solid #e2e8f0", paddingTop: "0.75rem" }}>
+                              <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={() => setIsEditingDemographics(false)}
+                                style={{ width: "fit-content" }}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="submit"
+                                className="btn btn-primary"
+                                style={{ width: "fit-content" }}
+                                disabled={submittingAction}
+                              >
+                                <Save size={16} />
+                                <span>Save Changes</span>
+                              </button>
+                            </div>
+                          </form>
+                        ) : (
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+                            <div>
+                              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "#64748b", fontWeight: 700 }}>Contact & Demographics</h5>
+                              <div style={{ fontSize: "0.85rem", color: "#334155", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                                <div><strong>DOB:</strong> {selectedPatient.dob ? new Date(selectedPatient.dob).toLocaleDateString() : "N/A"}</div>
+                                <div><strong>Age:</strong> {selectedPatient.age ? `${selectedPatient.age} years` : (selectedPatient.dob ? "Calculated" : "N/A")}</div>
+                                <div><strong>Gender:</strong> {selectedPatient.gender}</div>
+                                <div><strong>Mobile:</strong> {selectedPatient.mobile}</div>
+                                <div><strong>Email:</strong> {selectedPatient.email}</div>
+                                <div><strong>Emergency Contact:</strong> {selectedPatient.emergencyContact || "N/A"}</div>
+                                <div style={{ marginTop: "0.25rem" }}><strong>Address:</strong><br /><span style={{ color: "#64748b" }}>{selectedPatient.address || "No address on file"}</span></div>
+                              </div>
+                            </div>
+                            <div style={{ borderLeft: "1px solid #f1f5f9", paddingLeft: "1.5rem" }}>
+                              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "#64748b", fontWeight: 700 }}>Insurance Policy Details</h5>
+                              {selectedPatient.insurance && selectedPatient.insurance.provider ? (
+                                <div style={{ fontSize: "0.85rem", color: "#334155", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                                  <div><strong>Provider:</strong> <span style={{ color: "#0284c7", fontWeight: 700 }}>{selectedPatient.insurance.provider}</span></div>
+                                  <div><strong>Policy #:</strong> {selectedPatient.insurance.policyNumber || "N/A"}</div>
+                                  <div><strong>Coverage Limit:</strong> ${selectedPatient.insurance.coverageAmount || 0}</div>
+                                  <div><strong>Expiry Date:</strong> {selectedPatient.insurance.expiryDate ? new Date(selectedPatient.insurance.expiryDate).toLocaleDateString() : "N/A"}</div>
+                                  <span className="badge" style={{ width: "fit-content", background: "#ecfdf5", color: "#059669", fontSize: "0.7rem", fontWeight: 700, marginTop: "0.5rem" }}>ACTIVE POLICY</span>
+                                </div>
+                              ) : (
+                                <div style={{ color: "#64748b", fontSize: "0.85rem" }}>
+                                  No insurance coverage logged. Patient is on self-pay status.
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         )}
                       </div>
 
@@ -2033,6 +3149,153 @@ const PatientManagement = () => {
                       )}
                     </div>
                   )}
+
+                  {/* TAB 8: FAMILY & RELATIONS */}
+                  {activeDrawerTab === "family" && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a", fontWeight: 700 }}>Map Family Member Relationship</h4>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                          <div className="form-group">
+                            <label>Search Patient by Name, UHID, or Mobile</label>
+                            <input 
+                              type="text" 
+                              className="form-control"
+                              value={familySearchText} 
+                              onChange={(e) => handleFamilySearch(e.target.value)}
+                              placeholder="Type name, mobile or UHID..."
+                            />
+                            {familySearchResults.length > 0 && (
+                              <div style={{
+                                background: "white",
+                                border: "1px solid #cbd5e1",
+                                borderRadius: "8px",
+                                marginTop: "0.25rem",
+                                boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
+                                maxHeight: "150px",
+                                overflowY: "auto",
+                                position: "absolute",
+                                width: "100%",
+                                zIndex: 10
+                              }}>
+                                {familySearchResults.map(res => (
+                                  <div 
+                                    key={res._id}
+                                    onClick={() => {
+                                      setSelectedFamilyMember(res);
+                                      setFamilySearchResults([]);
+                                    }}
+                                    style={{
+                                      padding: "0.5rem 0.75rem",
+                                      cursor: "pointer",
+                                      borderBottom: "1px solid #f1f5f9",
+                                      background: selectedFamilyMember?._id === res._id ? "#f0f9ff" : "transparent"
+                                    }}
+                                  >
+                                    <strong style={{ fontSize: "0.85rem", color: "#0f172a" }}>{res.firstName} {res.lastName}</strong>
+                                    <div style={{ fontSize: "0.75rem", color: "#64748b" }}>UHID: {res.uhid} | Mobile: {res.mobile}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {selectedFamilyMember && (
+                            <div style={{ background: "#f8fafc", padding: "0.75rem 1rem", borderRadius: "8px", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <div>
+                                <span style={{ fontSize: "0.75rem", color: "#64748b" }}>Selected Patient:</span>
+                                <h5 style={{ margin: "0.15rem 0 0 0", color: "#0f172a" }}>{selectedFamilyMember.firstName} {selectedFamilyMember.lastName}</h5>
+                              </div>
+                              <button onClick={() => setSelectedFamilyMember(null)} style={{ background: "none", border: "none", color: "#dc2626", fontSize: "0.8rem", cursor: "pointer", fontWeight: 700 }}>Clear</button>
+                            </div>
+                          )}
+
+                          <div className="form-group">
+                            <label>Relationship Type</label>
+                            <select 
+                              className="form-control"
+                              value={familyRelation}
+                              onChange={(e) => setFamilyRelation(e.target.value)}
+                            >
+                              <option value="Spouse">Spouse</option>
+                              <option value="Child">Child</option>
+                              <option value="Parent">Parent</option>
+                              <option value="Sibling">Sibling</option>
+                              <option value="Other">Other</option>
+                            </select>
+                          </div>
+
+                          <button 
+                            type="button" 
+                            onClick={handleAddFamilyMember} 
+                            className="btn btn-primary" 
+                            style={{ width: "fit-content" }}
+                            disabled={!selectedFamilyMember}
+                          >
+                            <Plus size={16} />
+                            <span>Link Family Relation</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Mapped Family Members List */}
+                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a", fontWeight: 700 }}>Mapped Family Members</h4>
+                        {!selectedPatient.familyMapping || selectedPatient.familyMapping.length === 0 ? (
+                          <p style={{ color: "#64748b", margin: 0 }}>No family members mapped to this patient profile.</p>
+                        ) : (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                            {selectedPatient.familyMapping.map((fam, idx) => {
+                              const relative = fam.patient;
+                              if (!relative) return null;
+                              return (
+                                <div 
+                                  key={idx} 
+                                  style={{
+                                    display: "flex", 
+                                    justifyContent: "space-between", 
+                                    alignItems: "center", 
+                                    border: "1px solid #e2e8f0", 
+                                    padding: "0.85rem 1rem", 
+                                    borderRadius: "8px",
+                                    background: "#f8fafc"
+                                  }}
+                                >
+                                  <div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                      <span className="badge" style={{ background: "#e0f2fe", color: "#0284c7", fontSize: "0.7rem", fontWeight: 700 }}>
+                                        {fam.relation.toUpperCase()}
+                                      </span>
+                                      <strong style={{ fontSize: "0.9rem", color: "#0f172a" }}>{relative.firstName} {relative.lastName}</strong>
+                                    </div>
+                                    <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.2rem" }}>
+                                      UHID: {relative.uhid || relative.patientId} | Mobile: {relative.mobile}
+                                    </div>
+                                  </div>
+                                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                                    <button
+                                      onClick={() => handleOpenChart(relative)}
+                                      className="btn btn-secondary"
+                                      style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem", color: "#0284c7", borderColor: "#bae6fd", background: "white", cursor: "pointer" }}
+                                    >
+                                      Open Chart
+                                    </button>
+                                    <button
+                                      onClick={() => handleRemoveFamilyMember(relative._id)}
+                                      className="btn btn-secondary"
+                                      style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem", color: "#ef4444", borderColor: "#fecaca", background: "white", cursor: "pointer" }}
+                                    >
+                                      Unlink
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -2052,7 +3315,40 @@ const PatientManagement = () => {
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="modal-body">
+              <div className="modal-body" style={{ maxHeight: "70vh", overflowY: "auto" }}>
+                {duplicateWarning && (
+                  <div style={{
+                    background: "#fffbeb",
+                    border: "1px solid #f59e0b",
+                    padding: "1rem",
+                    borderRadius: "8px",
+                    marginBottom: "1rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.5rem"
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#b45309", fontWeight: 700 }}>
+                      <span>⚠️ Possible Existing Profile Detected</span>
+                    </div>
+                    <span style={{ fontSize: "0.85rem", color: "#78350f" }}>
+                      A patient named <strong>{duplicateWarning.firstName} {duplicateWarning.lastName}</strong> is already registered.
+                      <br />
+                      <strong>UHID:</strong> {duplicateWarning.uhid} | <strong>Mobile:</strong> {duplicateWarning.mobile}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsModalOpen(false);
+                        handleOpenChart(duplicateWarning);
+                      }}
+                      className="btn btn-secondary"
+                      style={{ width: "fit-content", padding: "0.25rem 0.5rem", fontSize: "0.75rem", color: "#b45309", borderColor: "#f59e0b" }}
+                    >
+                      View Existing Patient Chart
+                    </button>
+                  </div>
+                )}
+
                 <div className="form-grid">
                   <div className="form-group">
                     <label>First Name *</label>
@@ -2060,7 +3356,7 @@ const PatientManagement = () => {
                       type="text"
                       className="form-control"
                       value={formData.firstName}
-                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      onChange={(e) => updateFormAndCheckDuplicate({ firstName: e.target.value })}
                       required
                     />
                   </div>
@@ -2071,7 +3367,7 @@ const PatientManagement = () => {
                       type="text"
                       className="form-control"
                       value={formData.lastName}
-                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      onChange={(e) => updateFormAndCheckDuplicate({ lastName: e.target.value })}
                       required
                     />
                   </div>
@@ -2082,7 +3378,7 @@ const PatientManagement = () => {
                       type="email"
                       className="form-control"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={(e) => updateFormAndCheckDuplicate({ email: e.target.value })}
                       required
                     />
                   </div>
@@ -2093,9 +3389,23 @@ const PatientManagement = () => {
                       type="text"
                       className="form-control"
                       value={formData.mobile}
-                      onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                      onChange={(e) => updateFormAndCheckDuplicate({ mobile: e.target.value })}
                       required
                     />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Gender *</label>
+                    <select
+                      className="form-control"
+                      value={formData.gender}
+                      onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                      required
+                    >
+                      <option value="MALE">MALE</option>
+                      <option value="FEMALE">FEMALE</option>
+                      <option value="OTHER">OTHER</option>
+                    </select>
                   </div>
 
                   <div className="form-group">
@@ -2117,7 +3427,28 @@ const PatientManagement = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Emergency Contact</label>
+                    <label>Date of Birth</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={formData.dob}
+                      onChange={(e) => updateFormAndCheckDuplicate({ dob: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Age</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      value={formData.age}
+                      onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                      placeholder="Calculated automatically"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Emergency Contact Mobile</label>
                     <input
                       type="text"
                       className="form-control"
@@ -2142,7 +3473,96 @@ const PatientManagement = () => {
                     </select>
                   </div>
 
+                  <div className="form-group" style={{ gridColumn: "span 2" }}>
+                    <label>Address</label>
+                    <textarea
+                      className="form-control"
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      placeholder="Full residential address"
+                      rows="2"
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ gridColumn: "span 2" }}>
+                    <label>Patient Photo</label>
+                    <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="form-control"
+                        onChange={handlePhotoChange}
+                        style={{ flex: 1 }}
+                      />
+                      {formData.profilePhoto && (
+                        <img
+                          src={formData.profilePhoto}
+                          alt="Preview"
+                          style={{ width: "50px", height: "50px", borderRadius: "8px", objectFit: "cover", border: "1px solid #cbd5e1" }}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{ gridColumn: "span 2" }}>
+                    <label>Medical Alerts & Chronic Conditions (comma-separated)</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formData.medicalAlerts}
+                      onChange={(e) => setFormData({ ...formData, medicalAlerts: e.target.value })}
+                      placeholder="E.g. Diabetes, Penicillin Allergy, Hemophilia"
+                    />
+                  </div>
+
+                  <div style={{ gridColumn: "span 2", marginTop: "0.5rem", borderTop: "1px solid #e2e8f0", paddingTop: "0.5rem" }}>
+                    <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", color: "#1e293b" }}>Insurance Information</h4>
+                  </div>
+
                   <div className="form-group">
+                    <label>Provider</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formData.insuranceProvider}
+                      onChange={(e) => setFormData({ ...formData, insuranceProvider: e.target.value })}
+                      placeholder="E.g. Blue Cross"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Policy / Member Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formData.insurancePolicyNumber}
+                      onChange={(e) => setFormData({ ...formData, insurancePolicyNumber: e.target.value })}
+                      placeholder="E.g. POL-12983712"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Coverage Limit ($)</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      value={formData.insuranceCoverageAmount}
+                      onChange={(e) => setFormData({ ...formData, insuranceCoverageAmount: e.target.value })}
+                      placeholder="E.g. 10000"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Expiry Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={formData.insuranceExpiryDate}
+                      onChange={(e) => setFormData({ ...formData, insuranceExpiryDate: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ gridColumn: "span 2" }}>
                     <label>Staff Registered By *</label>
                     <select
                       className="form-control"
@@ -2167,6 +3587,274 @@ const PatientManagement = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Patient Merge Modal */}
+      {isMergeModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-card" style={{ maxWidth: "680px" }}>
+            <div className="modal-header">
+              <h3>Merge Duplicate Patients</h3>
+              <button className="action-btn" onClick={() => {
+                setIsMergeModalOpen(false);
+                setPrimaryMergePatient(null);
+                setSecondaryMergePatient(null);
+                setPrimarySearchText("");
+                setSecondarySearchText("");
+              }}>
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleMergePatients}>
+              <div className="modal-body" style={{ maxHeight: "70vh", overflowY: "auto" }}>
+                <div style={{
+                  background: "#fee2e2",
+                  border: "1px solid #fecaca",
+                  padding: "1rem",
+                  borderRadius: "8px",
+                  marginBottom: "1.5rem",
+                  color: "#991b1b",
+                  fontSize: "0.85rem",
+                  lineHeight: 1.4
+                }}>
+                  <strong>⚠️ CRITICAL DATA WARNING:</strong>
+                  <br />
+                  This action is permanent and cannot be undone. All appointments, prescriptions, diagnostic records, vitals, billing invoices, and family mappings of the <strong>Duplicate Patient (Secondary)</strong> will be merged into the <strong>Primary Patient</strong>. The Duplicate Patient profile will be deleted from the database.
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+                  {/* Primary Selection */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    <div className="form-group" style={{ position: "relative" }}>
+                      <label style={{ fontWeight: 700, color: "#0369a1" }}>1. Primary Profile (To Keep) *</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search by UHID, name, or phone..."
+                        value={primarySearchText}
+                        onChange={(e) => handlePrimarySearch(e.target.value)}
+                      />
+                      {primarySearchResults.length > 0 && (
+                        <div style={{
+                          background: "white",
+                          border: "1px solid #cbd5e1",
+                          borderRadius: "8px",
+                          marginTop: "0.25rem",
+                          boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
+                          maxHeight: "150px",
+                          overflowY: "auto",
+                          position: "absolute",
+                          width: "100%",
+                          zIndex: 10
+                        }}>
+                          {primarySearchResults.map(res => (
+                            <div
+                              key={res._id}
+                              onClick={() => {
+                                setPrimaryMergePatient(res);
+                                setPrimarySearchResults([]);
+                              }}
+                              style={{
+                                padding: "0.5rem 0.75rem",
+                                cursor: "pointer",
+                                borderBottom: "1px solid #f1f5f9"
+                              }}
+                            >
+                              <strong style={{ fontSize: "0.85rem", color: "#0f172a" }}>{res.firstName} {res.lastName}</strong>
+                              <div style={{ fontSize: "0.75rem", color: "#64748b" }}>UHID: {res.uhid} | Mobile: {res.mobile}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {primaryMergePatient ? (
+                      <div style={{ background: "#f0f9ff", border: "1px solid #bae6fd", padding: "1rem", borderRadius: "8px" }}>
+                        <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", color: "#0369a1" }}>Primary Record Details</h4>
+                        <div style={{ fontSize: "0.8rem", color: "#334155", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                          <div><strong>Name:</strong> {primaryMergePatient.firstName} {primaryMergePatient.lastName}</div>
+                          <div><strong>UHID:</strong> {primaryMergePatient.uhid}</div>
+                          {primaryMergePatient.patientId && <div><strong>Patient ID:</strong> {primaryMergePatient.patientId}</div>}
+                          <div><strong>Mobile:</strong> {primaryMergePatient.mobile}</div>
+                          <div><strong>Email:</strong> {primaryMergePatient.email}</div>
+                          <div><strong>Joined:</strong> {new Date(primaryMergePatient.createdAt).toLocaleDateString()}</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ padding: "2rem 1rem", border: "1px dashed #cbd5e1", borderRadius: "8px", textAlign: "center", color: "#64748b", fontSize: "0.85rem" }}>
+                        Select the primary patient record to keep
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Secondary Selection */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    <div className="form-group" style={{ position: "relative" }}>
+                      <label style={{ fontWeight: 700, color: "#dc2626" }}>2. Duplicate Profile (To Delete) *</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search by UHID, name, or phone..."
+                        value={secondarySearchText}
+                        onChange={(e) => handleSecondarySearch(e.target.value)}
+                      />
+                      {secondarySearchResults.length > 0 && (
+                        <div style={{
+                          background: "white",
+                          border: "1px solid #cbd5e1",
+                          borderRadius: "8px",
+                          marginTop: "0.25rem",
+                          boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
+                          maxHeight: "150px",
+                          overflowY: "auto",
+                          position: "absolute",
+                          width: "100%",
+                          zIndex: 10
+                        }}>
+                          {secondarySearchResults.map(res => (
+                            <div
+                              key={res._id}
+                              onClick={() => {
+                                setSecondaryMergePatient(res);
+                                setSecondarySearchResults([]);
+                              }}
+                              style={{
+                                padding: "0.5rem 0.75rem",
+                                cursor: "pointer",
+                                borderBottom: "1px solid #f1f5f9"
+                              }}
+                            >
+                              <strong style={{ fontSize: "0.85rem", color: "#0f172a" }}>{res.firstName} {res.lastName}</strong>
+                              <div style={{ fontSize: "0.75rem", color: "#64748b" }}>UHID: {res.uhid} | Mobile: {res.mobile}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {secondaryMergePatient ? (
+                      <div style={{ background: "#fef2f2", border: "1px solid #fecaca", padding: "1rem", borderRadius: "8px" }}>
+                        <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", color: "#991b1b" }}>Duplicate Record Details</h4>
+                        <div style={{ fontSize: "0.8rem", color: "#334155", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                          <div><strong>Name:</strong> {secondaryMergePatient.firstName} {secondaryMergePatient.lastName}</div>
+                          <div><strong>UHID:</strong> {secondaryMergePatient.uhid}</div>
+                          {secondaryMergePatient.patientId && <div><strong>Patient ID:</strong> {secondaryMergePatient.patientId}</div>}
+                          <div><strong>Mobile:</strong> {secondaryMergePatient.mobile}</div>
+                          <div><strong>Email:</strong> {secondaryMergePatient.email}</div>
+                          <div><strong>Joined:</strong> {new Date(secondaryMergePatient.createdAt).toLocaleDateString()}</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ padding: "2rem 1rem", border: "1px dashed #cbd5e1", borderRadius: "8px", textAlign: "center", color: "#64748b", fontSize: "0.85rem" }}>
+                        Select the duplicate patient record to merge
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => {
+                  setIsMergeModalOpen(false);
+                  setPrimaryMergePatient(null);
+                  setSecondaryMergePatient(null);
+                  setPrimarySearchText("");
+                  setSecondarySearchText("");
+                }}>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ background: "#ef4444", borderColor: "#ef4444" }}
+                  disabled={!primaryMergePatient || !secondaryMergePatient || merging}
+                >
+                  {merging ? "Merging Profiles..." : "Confirm & Merge Patients"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Camera Capture Modal */}
+      {showCameraModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(15, 23, 42, 0.6)",
+          backdropFilter: "blur(6px)",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }}>
+          <div style={{
+            background: "white",
+            padding: "2rem",
+            borderRadius: "16px",
+            boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+            width: "100%",
+            maxWidth: "450px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "1.5rem"
+          }}>
+            <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Camera size={20} color="#0284c7" />
+              <span>Capture Profile Photo</span>
+            </h3>
+            
+            <div style={{
+              width: "300px",
+              height: "300px",
+              borderRadius: "50%",
+              overflow: "hidden",
+              border: "4px solid #0284c7",
+              background: "#000",
+              boxShadow: "inset 0 2px 4px rgba(0,0,0,0.6)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}>
+              <video
+                id="camera-video-feed"
+                autoPlay
+                playsInline
+                muted
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover"
+                }}
+              />
+            </div>
+            
+            <div style={{ display: "flex", gap: "1rem", width: "100%" }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleStopCamera}
+                style={{ flex: 1, justifyContent: "center" }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleCaptureSnapshot}
+                style={{ flex: 1, justifyContent: "center", background: "#0284c7", borderColor: "#0284c7" }}
+                disabled={submittingAction}
+              >
+                Capture Photo
+              </button>
+            </div>
           </div>
         </div>
       )}
