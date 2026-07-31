@@ -9,7 +9,7 @@ const getApiBaseUrl = () => {
   if (import.meta.env && import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
-  return `http://${hostname}:8086/api`;
+  return "http://localhost:8086/api";
 };
 
 const api = axios.create({
