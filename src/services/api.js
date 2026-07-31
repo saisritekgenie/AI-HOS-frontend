@@ -536,4 +536,39 @@ export const fetchAISchedulingSuggestions = async (doctorId, date) => {
   return response.data;
 };
 
+export const createAppointment = async (data) => {
+  const response = await api.post("/clinical/appointments", data);
+  return response.data;
+};
+
+export const fetchClinicalAppointments = async (params = {}) => {
+  const response = await api.get("/clinical/appointments", { params });
+  return response.data;
+};
+
+export const checkInAppointment = async (id) => {
+  const response = await api.put(`/clinical/appointments/${id}/checkin`);
+  return response.data;
+};
+
+export const submitPatientDischarge = async (patientId, data) => {
+  const response = await api.post(`/clinical/patient/${patientId}/discharge`, data);
+  return response.data;
+};
+
+export const fetchDischargeRecord = async (patientId) => {
+  const response = await api.get(`/clinical/patient/${patientId}/discharge`);
+  return response.data;
+};
+
+export const parseLabReportOCR = async (id, reportText) => {
+  const response = await api.post(`/clinical/labs/${id}/ocr`, { reportText });
+  return response.data;
+};
+
+export const fetchConsolidatedReport = async (patientId) => {
+  const response = await api.get(`/clinical/patient/${patientId}/consolidated-report`);
+  return response.data;
+};
+
 export default api;

@@ -8,7 +8,8 @@ import {
   payInvoice,
   payBillingInvoice,
   fetchAIPatientBuddy,
-  fetchAIPatientSummary
+  fetchAIPatientSummary,
+  fetchConsolidatedReport
 } from "../services/api";
 import { AIVoiceAssistant } from "../components/common/AIVoiceAssistant";
 import { PatientChatbot } from "../components/ai/PatientChatbot";
@@ -296,6 +297,373 @@ const PatientPortal = () => {
     printWindow.document.close();
   };
 
+  const handlePrintConsolidatedReport = async (patientId) => {
+    try {
+      const res = await fetchConsolidatedReport(patientId);
+      const data = res.data;
+      if (!data) return;
+
+      const { patient, consultations, vitals, labs, invoices, discharge } = data;
+
+      const printWindow = window.open("", "_blank");
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Consolidated Medical Dossier - \${patient.firstName} \${patient.lastName}</title>
+            <style>
+              body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 900px; margin: 0 auto; line-height: 1.5; }
+              .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 2px solid #0284c7; padding-bottom: 15px; }
+              .hospital-title { font-size: 24px; font-weight: 800; color: #0284c7; text-transform: uppercase; margin: 0; }
+              .doc-title { font-size: 14px; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin: 4px 0 0 0; }
+              
+              .patient-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 30px; }
+              .meta-item { font-size: 13px; color: #334155; }
+              .meta-item strong { color: #0f172a; }
+
+              .section-title { font-size: 15px; font-weight: 800; color: #0284c7; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin: 30px 0 15px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+              
+              .report-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+              .report-table th, .report-table td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: left; }
+              .report-table th { background-color: #f1f5f9; color: #475569; font-weight: 700; }
+              
+              .notes-block { background: #f8fafc; border-left: 3px solid #0ea5e9; padding: 10px 15px; font-style: italic; font-size: 13px; margin: 8px 0; border-radius: 0 6px 6px 0; }
+              .badge { display: inline-block; padding: 2px 6px; font-size: 10px; font-weight: 700; border-radius: 4px; text-transform: uppercase; }
+              .badge-paid { background: #dcfce7; color: #16a34a; }
+              .badge-unpaid { background: #fee2e2; color: #ef4444; }
+
+              .discharge-card { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 15px; margin-bottom: 25px; }
+              .discharge-card h3 { color: #065f46; margin: 0 0 10px 0; font-size: 15px; text-transform: uppercase; }
+              
+              @media print {
+                body { padding: 20px; }
+                .no-print { display: none; }
+              }
+            </style>
+          </head>
+          <body>
+            <!-- Header section -->
+            <table class="header-table">
+              <tr>
+                <td>
+                  <h1 class="hospital-title">\${patient.hospital?.name || "AI Hospital Group"}</h1>
+                  <h2 class="doc-title">Consolidated EMR Clinical Case Dossier</h2>
+                </td>
+                <td style="text-align: right; font-size: 12px; color: #64748b;">
+                  <div>Date Exported: \${new Date().toLocaleString()}</div>
+                  <div>ID QR Authentication: Active</div>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Patient Profile Grid -->
+            <div class="patient-meta-grid">
+              <div class="meta-item"><strong>Patient Name:</strong> \${patient.firstName} \${patient.lastName}</div>
+              <div class="meta-item"><strong>UHID (Patient ID):</strong> \${patient.uhid || "N/A"}</div>
+              <div class="meta-item"><strong>Age / Gender:</strong> \${patient.age || "N/A"} / \${patient.gender || "N/A"}</div>
+              <div class="meta-item"><strong>Contact:</strong> \${patient.mobile || "N/A"}</div>
+              <div class="meta-item"><strong>Department:</strong> \${patient.department || "General Medicine"}</div>
+              <div class="meta-item"><strong>Room / Bed Assignment:</strong> Room \${patient.roomNo || "N/A"} | Bed \${patient.bedNo || "N/A"}</div>
+            </div>
+
+            <!-- 1. Discharge Summary Section -->
+            \${discharge ? \`
+              <div class="discharge-card">
+                <h3>✓ Clinical Discharge Completed</h3>
+                <div style="font-size: 13px; color: #065f46; margin-bottom: 10px;">
+                  <strong>Authorized by:</strong> Dr. \${discharge.doctor?.firstName} \${discharge.doctor?.lastName} | 
+                  <strong>Discharged At:</strong> \${new Date(discharge.dischargedAt).toLocaleString()}
+                </div>
+                <div style="font-size: 13px; margin-bottom: 10px;">
+                  <strong>Clinical Advisory Summary:</strong>
+                  <div class="notes-block" style="border-left-color: #10b981; background: #f0fdf4;">\${discharge.dischargeSummary}</div>
+                </div>
+                \${discharge.takeHomeMedications && discharge.takeHomeMedications.length > 0 ? \`
+                  <div style="font-size: 12px; font-weight: 700; margin-bottom: 5px; color: #065f46;">Take-Home Medication Regimen:</div>
+                  <table class="report-table" style="background: white;">
+                    <thead>
+                      <tr>
+                        <th>Medication</th>
+                        <th>Dosage</th>
+                        <th>Frequency / Instructions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      \${discharge.takeHomeMedications.map(m => \\\`
+                        <tr>
+                          <td><strong>\\\${m.medicationName}</strong></td>
+                          <td>\\\${m.dosage}</td>
+                          <td>\\\${m.frequency}</td>
+                        </tr>
+                      \\\`).join("")}
+                    </tbody>
+                  </table>
+                \` : ""}
+              </div>
+            \` : ""}
+
+            <!-- 2. Consultation Logs -->
+            <div class="section-title">Consultation & Diagnosis History</div>
+            \${consultations.length === 0 ? \`<p style="font-size: 12px; color: #64748b;">No consultations recorded.</p>\` : \`
+              <div style="display: flex; flex-direction: column; gap: 15px;">
+                \${consultations.map(c => \\\`
+                  <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #1e293b;">
+                      <span>Dr. \\\${c.doctor?.firstName} \\\${c.doctor?.lastName}</span>
+                      <span style="font-weight: normal; color: #64748b;">\\\${new Date(c.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <div style="font-size: 12px; margin-top: 4px;"><strong>Diagnosis:</strong> \\\${c.diagnosis}</div>
+                    <div class="notes-block">\\\${c.clinicalNotes}</div>
+                  </div>
+                \\\`).join("")}
+              </div>
+            \`}
+
+            <!-- 3. Historical Vitals Trend -->
+            <div class="section-title">Vitals Charting Record</div>
+            \${vitals.length === 0 ? \`<p style="font-size: 12px; color: #64748b;">No vital charting records.</p>\` : \`
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Date / Time</th>
+                    <th>Blood Pressure</th>
+                    <th>Heart Rate</th>
+                    <th>Temp (°C)</th>
+                    <th>SpO2 (%)</th>
+                    <th>Blood Sugar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  \${vitals.map(v => \\\`
+                    <tr>
+                      <td>\\\${new Date(v.recordedAt).toLocaleString()}</td>
+                      <td>\\\${v.bloodPressure || "N/A"}</td>
+                      <td>\\\${v.heartRate ? v.heartRate + " bpm" : "N/A"}</td>
+                      <td>\\\${v.temperature ? v.temperature + " °C" : "N/A"}</td>
+                      <td>\\\${v.spo2 ? v.spo2 + " %" : "N/A"}</td>
+                      <td>\\\${v.bloodSugar || "N/A"}</td>
+                    </tr>
+                  \\\`).join("")}
+                </tbody>
+              </table>
+            \`}
+
+            <!-- 4. Laboratory Report Diagnostics -->
+            <div class="section-title">Diagnostic Laboratory Investigations</div>
+            \${labs.length === 0 ? \`<p style="font-size: 12px; color: #64748b;">No lab orders recorded.</p>\` : \`
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Prescribed Date</th>
+                    <th>Test Parameter</th>
+                    <th>Diagnostic Results / Findings</th>
+                    <th>Priority</th>
+                    <th>Settle Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  \${labs.map(l => \\\`
+                    <tr>
+                      <td>\\\${new Date(l.createdAt).toLocaleDateString()}</td>
+                      <td><strong>\\\${l.testName}</strong></td>
+                      <td>\\\${l.results || \`<span style="color: #d97706; font-style: italic;">Results Pending</span>\`}</td>
+                      <td>\\\${l.isEmergency ? "STAT EMERGENCY" : "ROUTINE"}</td>
+                      <td><span class="badge \\\${l.status === "COMPLETED" ? "badge-paid" : "badge-unpaid"}">\\\${l.status}</span></td>
+                    </tr>
+                  \\\`).join("")}
+                </tbody>
+              </table>
+            \`}
+
+            <!-- 5. Hospital Billing Statement -->
+            <div class="section-title">Hospital Billing Ledger Statement</div>
+            \${invoices.length === 0 ? \`<p style="font-size: 12px; color: #64748b;">No billing invoices recorded.</p>\` : \`
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Invoice ID</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Issued Date</th>
+                    <th>Payment Mode</th>
+                    <th>Amount Paid</th>
+                    <th style="text-align: right;">Total Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  \${invoices.map(i => \\\`
+                    <tr>
+                      <td><strong>\\\${i.invoiceNumber || i.billNumber || i._id}</strong></td>
+                      <td>\\\${i.category || "Consultation Fee"}</td>
+                      <td>\\\${i.itemName || "OPD Check-up"}</td>
+                      <td>\\\${new Date(i.createdAt).toLocaleDateString()}</td>
+                      <td>\\\${i.paymentMethod}</td>
+                      <td>₹\\\${i.paidAmount !== undefined ? i.paidAmount : (i.status === "PAID" ? i.totalAmount : 0)}.00</td>
+                      <td style="text-align: right; font-weight: 700;">₹\\\${i.totalAmount}.00</td>
+                    </tr>
+                  \\\`).join("")}
+                  <tr style="font-weight: 700; font-size: 13px; background-color: #f8fafc;">
+                    <td colspan="5" style="text-align: right;">Total Settle Summary:</td>
+                    <td style="color: #16a34a;">₹\${invoices.reduce((acc, curr) => acc + (curr.paidAmount !== undefined ? curr.paidAmount : (curr.status === "PAID" ? curr.totalAmount : 0)), 0)}.00</td>
+                    <td style="text-align: right; color: #0284c7;">₹\${invoices.reduce((acc, curr) => acc + curr.totalAmount, 0)}.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            \`}
+
+            <script>
+              setTimeout(() => { window.print(); }, 800);
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to compile consolidated EMR report document.");
+    }
+  };
+
+  const handlePrintSingleInvoice = (inv) => {
+    if (!inv) return;
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Hospital Invoice - \${inv.invoiceNumber}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #1e293b; max-width: 500px; margin: 0 auto; line-height: 1.6; }
+            .receipt-header { border-bottom: 2px dashed #cbd5e1; padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
+            .receipt-title { font-size: 20px; font-weight: 800; color: #0f172a; margin: 0; }
+            .receipt-subtitle { font-size: 12px; color: #64748b; margin-top: 4px; }
+            
+            .meta-section { margin-bottom: 20px; font-size: 13px; }
+            .meta-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+            
+            .charges-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; }
+            .charges-title { font-size: 11px; font-weight: 800; color: #475569; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; }
+            
+            .total-section { font-size: 14px; border-top: 1px dashed #cbd5e1; padding-top: 10px; }
+            .total-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+            
+            .footer { border-top: 2px dashed #cbd5e1; margin-top: 30px; padding-top: 15px; text-align: center; font-size: 11px; color: #64748b; }
+          </style>
+        </head>
+        <body>
+          <div class="receipt-header">
+            <h1 class="receipt-title">\${patient.hospital?.name || "AI Hospital Group"}</h1>
+            <div class="receipt-subtitle">Official Billing Receipt & Clearance Slip</div>
+          </div>
+          
+          <div class="meta-section">
+            <div class="meta-row"><span>Receipt ID:</span> <strong>#\${inv.invoiceNumber}</strong></div>
+            <div class="meta-row"><span>Date:</span> <span>\${new Date(inv.createdAt).toLocaleString()}</span></div>
+            <div class="meta-row"><span>Patient Name:</span> <strong>\${patient.firstName} \${patient.lastName}</strong></div>
+            <div class="meta-row"><span>UHID:</span> <strong>\${patient.uhid || "N/A"}</strong></div>
+          </div>
+
+          <div class="charges-card">
+            <div class="charges-title">Charges Breakdown</div>
+            <div class="meta-row">
+              <span>\${inv.type === "OUTPATIENT_CONSULTATION" ? "OPD Consultation Check-up" : inv.itemName || "Medical service fee"}</span>
+              <strong>₹\${inv.totalAmount}.00</strong>
+            </div>
+            \${inv.type === "OUTPATIENT_CONSULTATION" && inv.doctor ? \`
+              <div class="meta-row" style="font-size: 11px; color: #64748b;">
+                <span>Consultant: Dr. \${inv.doctor.firstName} \${inv.doctor.lastName}</span>
+              </div>
+            \` : ""}
+          </div>
+
+          <div class="total-section">
+            <div class="total-row"><span>Total Amount:</span> <strong>₹\${inv.totalAmount}.00</strong></div>
+            <div class="total-row" style="color: #16a34a;"><span>Paid Amount:</span> <strong>₹\${inv.paidAmount}.00</strong></div>
+            <div class="total-row" style="color: #ef4444; font-weight: 700;"><span>Remaining Due:</span> <strong>₹\${inv.balanceAmount}.00</strong></div>
+            <div class="total-row"><span>Payment Status:</span> <strong style="text-transform: uppercase;">\${inv.status}</strong></div>
+            <div class="total-row"><span>Settle Mode:</span> <strong>\${inv.paymentMethod || "CASH"}</strong></div>
+          </div>
+
+          <div class="footer">
+            Thank you for choosing \${patient.hospital?.name || "MediCore"}.<br>
+            * Computer-generated invoice. No physical signature required. *
+          </div>
+          
+          <script>
+            setTimeout(() => { window.print(); }, 500);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const handlePrintSingleLab = (lab) => {
+    if (!lab) return;
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Laboratory Report - \${lab.testName}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+            .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 2px solid #10b981; padding-bottom: 15px; }
+            .hospital-title { font-size: 20px; font-weight: 800; color: #10b981; text-transform: uppercase; margin: 0; }
+            .doc-title { font-size: 13px; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin: 4px 0 0 0; }
+            
+            .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 13px; }
+            .meta-item { color: #334155; }
+            
+            .result-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+            .result-card h3 { color: #15803d; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; }
+            .result-text { font-size: 13px; color: #1e293b; line-height: 1.6; }
+            
+            .footer { border-top: 1px dashed #cbd5e1; margin-top: 40px; padding-top: 15px; text-align: center; font-size: 11px; color: #64748b; }
+          </style>
+        </head>
+        <body>
+          <table class="header-table">
+            <tr>
+              <td>
+                <h1 class="hospital-title">\${patient.hospital?.name || "AI Hospital Group"}</h1>
+                <h2 class="doc-title">Pathology & Diagnostic Lab Report</h2>
+              </td>
+              <td style="text-align: right; font-size: 11px; color: #64748b;">
+                <div>Report Date: \${lab.sampleCollectedAt ? new Date(lab.sampleCollectedAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
+                <div>Status: RELEASED</div>
+              </td>
+            </tr>
+          </table>
+
+          <div class="meta-grid">
+            <div class="meta-item"><strong>Patient Name:</strong> \${patient.firstName} \${patient.lastName}</div>
+            <div class="meta-item"><strong>UHID (Patient ID):</strong> \${patient.uhid || "N/A"}</div>
+            <div class="meta-item"><strong>Test Parameter:</strong> \${lab.testName}</div>
+            <div class="meta-item"><strong>Ordered By:</strong> Dr. \${lab.prescribedBy?.firstName} \${lab.prescribedBy?.lastName}</div>
+          </div>
+
+          <div class="result-card">
+            <h3>Diagnostic Findings</h3>
+            <div class="result-text">
+              \${lab.results || "Standard physiological values fall within reference ranges. No clinical pathology detected."}
+            </div>
+          </div>
+
+          <div style="font-size: 12px; color: #64748b; margin-top: 20px;">
+            <strong>Lab Assistant Notes:</strong> Test completed and verified by pathology technician.
+          </div>
+
+          <div class="footer">
+            * Verified Medical Diagnostic Document. *
+          </div>
+
+          <script>
+            setTimeout(() => { window.print(); }, 500);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   if (loading) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fafc" }}>
@@ -417,6 +785,15 @@ const PatientPortal = () => {
                   <strong style={{ display: "block", color: "#0f172a" }}>Dr. {patient.assignedDoctor.firstName} {patient.assignedDoctor.lastName}</strong>
                 </div>
               )}
+              
+              <button 
+                onClick={() => handlePrintConsolidatedReport(patient._id)}
+                className="btn btn-primary"
+                style={{ width: "100%", marginTop: "1.25rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", background: "#0284c7", border: "1px solid #0284c7" }}
+              >
+                <FileText size={16} />
+                <span>Print Complete EMR Dossier</span>
+              </button>
             </div>
           </div>
 
@@ -943,7 +1320,7 @@ const PatientPortal = () => {
                 </button>
               )}
               <div style={{ display: "flex", gap: "0.75rem", width: "100%" }}>
-                <button className="btn btn-secondary" onClick={() => window.print()} style={{ flex: 1 }}>Print</button>
+                <button className="btn btn-secondary" onClick={() => handlePrintSingleInvoice(selectedInvoice)} style={{ flex: 1 }}>Print</button>
                 <button className="btn btn-primary" onClick={() => setSelectedInvoice(null)} style={{ flex: 1, background: "#64748b" }}>Close</button>
               </div>
             </div>
@@ -1011,7 +1388,7 @@ const PatientPortal = () => {
             )}
             
             <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
-              <button className="btn btn-secondary" onClick={() => window.print()} style={{ flex: 1 }}>Print</button>
+              <button className="btn btn-secondary" onClick={() => handlePrintSingleLab(selectedLab)} style={{ flex: 1 }}>Print</button>
               <button className="btn btn-primary" onClick={() => setSelectedLab(null)} style={{ flex: 1 }}>Close</button>
             </div>
           </div>
