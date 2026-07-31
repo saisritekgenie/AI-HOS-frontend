@@ -49,7 +49,9 @@ import {
   fetchAIMedicalReportSummary,
   fetchAIVitalsEmergencyCheck,
   checkDuplicatePatient,
-  mergePatients
+  mergePatients,
+  fetchDischargeRecord,
+  submitPatientDischarge
 } from "../services/api";
 import { AIVoiceAssistant } from "../components/common/AIVoiceAssistant";
 
@@ -68,6 +70,13 @@ const PatientManagement = () => {
   const [activeDrawerTab, setActiveDrawerTab] = useState("overview");
   const [doctors, setDoctors] = useState([]);
   const [chartLoading, setChartLoading] = useState(false);
+
+  // Patient Discharge Workflow States
+  const [dischargeRecord, setDischargeRecord] = useState(null);
+  const [dischargeSummaryInput, setDischargeSummaryInput] = useState("");
+  const [takeHomeMedsInput, setTakeHomeMedsInput] = useState([]);
+  const [newTakeHomeMed, setNewTakeHomeMed] = useState({ name: "", dosage: "", freq: "" });
+  const [discharging, setDischarging] = useState(false);
 
   // Duplicate Check & Merge States
   const [duplicateWarning, setDuplicateWarning] = useState(null);
@@ -848,6 +857,70 @@ const PatientManagement = () => {
     }
   };
 
+  // Load patient discharge status
+  const loadDischargeStatus = async (patientId) => {
+    try {
+      const res = await fetchDischargeRecord(patientId);
+      setDischargeRecord(res.data || null);
+      if (res.data) {
+        setDischargeSummaryInput(res.data.dischargeSummary || "");
+        setTakeHomeMedsInput(res.data.takeHomeMedications || []);
+      } else {
+        setDischargeSummaryInput("");
+        setTakeHomeMedsInput([]);
+      }
+    } catch (err) {
+      console.error("Failed to load discharge record", err);
+    }
+  };
+
+  // Add Take-home medication list item
+  const handleAddTakeHomeMed = () => {
+    if (!newTakeHomeMed.name.trim() || !newTakeHomeMed.dosage.trim()) {
+      showToast("error", "Medication name and dosage are required.");
+      return;
+    }
+    setTakeHomeMedsInput([...takeHomeMedsInput, newTakeHomeMed]);
+    setNewTakeHomeMed({ name: "", dosage: "", freq: "" });
+  };
+
+  // Remove Take-home medication list item
+  const handleRemoveTakeHomeMed = (idx) => {
+    setTakeHomeMedsInput(takeHomeMedsInput.filter((_, i) => i !== idx));
+  };
+
+  // Submit patient discharge record
+  const handleSaveDischarge = async (e) => {
+    e.preventDefault();
+    if (!dischargeSummaryInput.trim()) {
+      showToast("error", "Discharge summary text is required.");
+      return;
+    }
+    try {
+      setDischarging(true);
+      const res = await submitPatientDischarge(selectedPatient._id, {
+        dischargeSummary: dischargeSummaryInput,
+        takeHomeMedications: takeHomeMedsInput
+      });
+
+      if (res.data?.billingCleared) {
+        showToast("success", "Patient discharged successfully! Ward bed allocation cleared.");
+      } else {
+        showToast("warning", "Discharge summary logged, but patient has pending unpaid cashier bills.");
+      }
+      
+      // Reload discharge details
+      await loadDischargeStatus(selectedPatient._id);
+      
+      // Refresh patient listing
+      loadPatients();
+    } catch (err) {
+      showToast("error", err.response?.data?.message || "Failed to discharge patient");
+    } finally {
+      setDischarging(false);
+    }
+  };
+
   // Load Patient Clinical Summary
   const handleOpenChart = async (patient) => {
     setSelectedPatient(patient);
@@ -919,6 +992,7 @@ const PatientManagement = () => {
         setIsEditingDemographics(false);
       }
       loadAiPatientSummary(patient._id);
+      loadDischargeStatus(patient._id);
       const latestVitals = res.data?.vitalsRecord?.[0] || {};
       const complaints = res.data?.nursingNotes?.[0]?.note || "General checkup";
       loadAiDiagnosisSuggestions(latestVitals, complaints);
@@ -1885,6 +1959,7 @@ const PatientManagement = () => {
                 { id: "labs", label: "Order Labs", icon: Activity },
                 { id: "vitals", label: "Vitals & Notes", icon: VitalsIcon },
                 { id: "family", label: "Family & Relations", icon: UserCheck },
+                { id: "discharge", label: "Discharge Patient", icon: ShieldAlert },
                 { id: "documents", label: "Attachments & Docs", icon: FileText }
               ] : [
                 { id: "overview", label: "Overview", icon: User },
@@ -3294,6 +3369,146 @@ const PatientManagement = () => {
                           </div>
                         )}
                       </div>
+                    </div>
+                  )}
+
+                  {/* TAB 9: PATIENT DISCHARGE WORKFLOW */}
+                  {activeDrawerTab === "discharge" && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                      {dischargeRecord ? (
+                        <div className="modal-card" style={{ background: "#ecfdf5", padding: "1.5rem", borderRadius: "12px", border: "1px solid #a7f3d0" }}>
+                          <h4 style={{ margin: "0 0 1rem 0", fontSize: "1.05rem", color: "#065f46", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                            <CheckCircle size={20} />
+                            <span>Patient Discharge Complete</span>
+                          </h4>
+                          
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", fontSize: "0.9rem", color: "#065f46" }}>
+                            <div>
+                              <strong>Discharge Summary Note:</strong>
+                              <p style={{ margin: "0.25rem 0 0 0", fontStyle: "italic", whiteSpace: "pre-wrap" }}>{dischargeRecord.dischargeSummary}</p>
+                            </div>
+                            
+                            {dischargeRecord.takeHomeMedications?.length > 0 && (
+                              <div>
+                                <strong>Take-Home Medications:</strong>
+                                <ul style={{ margin: "0.25rem 0 0 0", paddingLeft: "1.2rem" }}>
+                                  {dischargeRecord.takeHomeMedications.map((med, idx) => (
+                                    <li key={idx}>
+                                      <strong>{med.medicationName}</strong> - {med.dosage} ({med.frequency})
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            <div style={{ borderTop: "1px solid #a7f3d0", paddingTop: "0.75rem", marginTop: "0.5rem", fontSize: "0.8rem", opacity: 0.9 }}>
+                              Discharged by Dr. {dischargeRecord.doctor?.firstName} {dischargeRecord.doctor?.lastName} on {new Date(dischargeRecord.dischargedAt).toLocaleString()}
+                              <div style={{ marginTop: "0.25rem" }}>
+                                <strong>Billing Settlement Audit:</strong> {dischargeRecord.billingCleared ? "✓ Paid & Cleared" : "⚠️ Outstanding Balance at Discharge"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                          <h4 style={{ margin: "0 0 1rem 0", fontSize: "1.05rem", color: "#0f172a" }}>Draft Patient Discharge Summary</h4>
+                          <p style={{ color: "#64748b", fontSize: "0.8rem", margin: "0 0 1rem 0" }}>
+                            Verify patient vitals are stable, outstanding laboratory reports have been reviewed, and prepare take-home medication dosage instructions.
+                          </p>
+
+                          <form onSubmit={handleSaveDischarge} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                            <div className="form-group">
+                              <label>Clinical Discharge Summary / Advice *</label>
+                              <textarea
+                                className="form-control"
+                                rows="4"
+                                value={dischargeSummaryInput}
+                                onChange={(e) => setDischargeSummaryInput(e.target.value)}
+                                placeholder="Describe final patient condition, diagnosis summary, follow-up timelines, emergency symptoms warning..."
+                                required
+                              />
+                            </div>
+
+                            {/* Take home meds list builder */}
+                            <div style={{ border: "1px solid #e2e8f0", padding: "1rem", borderRadius: "8px", background: "#f8fafc" }}>
+                              <strong style={{ fontSize: "0.85rem", color: "#475569", display: "block", marginBottom: "0.75rem" }}>Add Take-Home Medications</strong>
+                              
+                              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                                <input 
+                                  type="text" 
+                                  placeholder="Medication name" 
+                                  className="form-control" 
+                                  value={newTakeHomeMed.name} 
+                                  onChange={(e) => setNewTakeHomeMed({ ...newTakeHomeMed, name: e.target.value })}
+                                  style={{ fontSize: "0.8rem" }}
+                                />
+                                <input 
+                                  type="text" 
+                                  placeholder="Dosage (e.g. 500mg)" 
+                                  className="form-control" 
+                                  value={newTakeHomeMed.dosage} 
+                                  onChange={(e) => setNewTakeHomeMed({ ...newTakeHomeMed, dosage: e.target.value })}
+                                  style={{ fontSize: "0.8rem" }}
+                                />
+                                <div style={{ display: "flex", gap: "0.25rem" }}>
+                                  <input 
+                                    type="text" 
+                                    placeholder="Frequency (e.g. BD)" 
+                                    className="form-control" 
+                                    value={newTakeHomeMed.freq} 
+                                    onChange={(e) => setNewTakeHomeMed({ ...newTakeHomeMed, freq: e.target.value })}
+                                    style={{ fontSize: "0.8rem", flex: 1 }}
+                                  />
+                                  <button 
+                                    type="button" 
+                                    onClick={handleAddTakeHomeMed}
+                                    className="btn btn-primary"
+                                    style={{ padding: "0 0.75rem" }}
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              </div>
+
+                              {takeHomeMedsInput.length > 0 && (
+                                <table className="custom-table" style={{ fontSize: "0.8rem", background: "white" }}>
+                                  <thead>
+                                    <tr>
+                                      <th>Medication</th>
+                                      <th>Dosage</th>
+                                      <th>Frequency</th>
+                                      <th style={{ textAlign: "right" }}>Action</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {takeHomeMedsInput.map((m, idx) => (
+                                      <tr key={idx}>
+                                        <td><strong>{m.name}</strong></td>
+                                        <td>{m.dosage}</td>
+                                        <td>{m.freq}</td>
+                                        <td style={{ textAlign: "right" }}>
+                                          <button 
+                                            type="button" 
+                                            onClick={() => handleRemoveTakeHomeMed(idx)}
+                                            style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}
+                                          >
+                                            Remove
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              )}
+                            </div>
+
+                            <button type="submit" className="btn btn-primary" style={{ width: "fit-content" }} disabled={discharging}>
+                              <ShieldAlert size={16} />
+                              <span>{discharging ? "Processing..." : "Authorize Clinical Discharge"}</span>
+                            </button>
+                          </form>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>

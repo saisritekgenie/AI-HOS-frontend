@@ -45,6 +45,10 @@ import {
   createUser,
   fetchSystemIp,
   fetchAppointments,
+  createAppointment,
+  checkInAppointment,
+  fetchClinicalAppointments,
+  fetchConsolidatedReport,
   fetchLabRequests,
   fetchPharmacyStats,
   fetchInventory,
@@ -185,6 +189,28 @@ const Dashboard = ({
     registeredBy: "Receptionist",
   });
 
+  // Visual Appointments Scheduling Grid States
+  const [appointmentsList, setAppointmentsList] = useState([]);
+  const [isApptModalOpen, setIsApptModalOpen] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState("");
+  const [selectedApptPatient, setSelectedApptPatient] = useState("");
+  const [selectedApptDoctor, setSelectedApptDoctor] = useState("");
+  const [apptDate, setApptDate] = useState(new Date().toISOString().split("T")[0]);
+  const [allPatientsList, setAllPatientsList] = useState([]);
+
+  // Doctor EMR Discharge Panel States
+  const [isDischargeModalOpen, setIsDischargeModalOpen] = useState(false);
+  const [dischargeSummaryInput, setDischargeSummaryInput] = useState("");
+  const [takeHomeMedsInput, setTakeHomeMedsInput] = useState([]);
+  const [newTakeHomeMed, setNewTakeHomeMed] = useState({ name: "", dosage: "", freq: "" });
+  const [dischargeStatus, setDischargeStatus] = useState(null);
+
+  // Lab Technician OCR States
+  const [ocrReportInput, setOcrReportInput] = useState("");
+  const [ocrParsingLabId, setOcrParsingLabId] = useState("");
+  const [isOcrModalOpen, setIsOcrModalOpen] = useState(false);
+
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (user?.role === "RECEPTIONIST" && patientSearchQuery.trim()) {
@@ -301,9 +327,11 @@ const Dashboard = ({
           }
         } else if (user?.role === "RECEPTIONIST") {
           try {
-            const [cRes, docsRes] = await Promise.all([
+            const [cRes, docsRes, apptsRes, patientsRes] = await Promise.all([
               fetchReceptionStats(),
-              fetchUsers({ role: "DOCTOR", limit: 100 })
+              fetchUsers({ role: "DOCTOR", limit: 100 }),
+              fetchClinicalAppointments(),
+              fetchUsers({ role: "PATIENT", limit: 100 })
             ]);
             setStats((prev) => ({
               ...prev,
@@ -316,6 +344,9 @@ const Dashboard = ({
               todayOnline: cRes.data?.todayOnline || 0,
               checkedInPatients: cRes.data?.checkedInPatients || 0
             }));
+            setDoctors(docsRes.data || []);
+            setAppointmentsList(apptsRes.data || []);
+            setAllPatientsList(patientsRes.data || []);
           } catch (err) {
             console.error("Failed to load reception stats", err);
           }
@@ -575,6 +606,330 @@ const Dashboard = ({
       reloadChartData();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  // Create Appointment Action
+  const handleSaveAppointment = async (e) => {
+    e.preventDefault();
+    if (!selectedApptPatient || !selectedApptDoctor || !selectedSlot) {
+      showToast("error", "All fields are required to schedule an appointment");
+      return;
+    }
+    try {
+      setSubmittingAction(true);
+      await createAppointment({
+        patientId: selectedApptPatient,
+        doctorId: selectedApptDoctor,
+        appointmentDate: apptDate,
+        timeSlot: selectedSlot
+      });
+      showToast("success", "Appointment scheduled successfully!");
+      setIsApptModalOpen(false);
+      setSelectedApptPatient("");
+      setSelectedApptDoctor("");
+      setSelectedSlot("");
+      loadDashboardData();
+    } catch (err) {
+      showToast("error", err.response?.data?.message || "Failed to schedule appointment");
+    } finally {
+      setSubmittingAction(false);
+    }
+  };
+
+  // Checkin Appointment Action
+  const handleCheckIn = async (apptId) => {
+    try {
+      await checkInAppointment(apptId);
+      showToast("success", "Patient checked in successfully!");
+      loadDashboardData();
+    } catch (err) {
+      showToast("error", err.response?.data?.message || "Failed to check in patient");
+    }
+  };
+
+  const handlePrintConsolidatedReport = async (patientId) => {
+    try {
+      if (!patientId) return;
+      const res = await fetchConsolidatedReport(patientId);
+      const data = res.data;
+      if (!data) return;
+
+      const { patient, consultations, vitals, labs, invoices, discharge } = data;
+
+      const printWindow = window.open("", "_blank");
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Consolidated Medical Dossier - \${patient.firstName} \${patient.lastName}</title>
+            <style>
+              body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 900px; margin: 0 auto; line-height: 1.5; }
+              .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 2px solid #0284c7; padding-bottom: 15px; }
+              .hospital-title { font-size: 24px; font-weight: 800; color: #0284c7; text-transform: uppercase; margin: 0; }
+              .doc-title { font-size: 14px; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin: 4px 0 0 0; }
+              
+              .patient-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 30px; }
+              .meta-item { font-size: 13px; color: #334155; }
+              .meta-item strong { color: #0f172a; }
+
+              .section-title { font-size: 15px; font-weight: 800; color: #0284c7; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin: 30px 0 15px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+              
+              .report-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+              .report-table th, .report-table td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: left; }
+              .report-table th { background-color: #f1f5f9; color: #475569; font-weight: 700; }
+              
+              .notes-block { background: #f8fafc; border-left: 3px solid #0ea5e9; padding: 10px 15px; font-style: italic; font-size: 13px; margin: 8px 0; border-radius: 0 6px 6px 0; }
+              .badge { display: inline-block; padding: 2px 6px; font-size: 10px; font-weight: 700; border-radius: 4px; text-transform: uppercase; }
+              .badge-paid { background: #dcfce7; color: #16a34a; }
+              .badge-unpaid { background: #fee2e2; color: #ef4444; }
+
+              .discharge-card { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 15px; margin-bottom: 25px; }
+              .discharge-card h3 { color: #065f46; margin: 0 0 10px 0; font-size: 15px; text-transform: uppercase; }
+              
+              @media print {
+                body { padding: 20px; }
+                .no-print { display: none; }
+              }
+            </style>
+          </head>
+          <body>
+            <!-- Header section -->
+            <table class="header-table">
+              <tr>
+                <td>
+                  <h1 class="hospital-title">\${patient.hospital?.name || "AI Hospital Group"}</h1>
+                  <h2 class="doc-title">Consolidated EMR Clinical Case Dossier</h2>
+                </td>
+                <td style="text-align: right; font-size: 12px; color: #64748b;">
+                  <div>Date Exported: \${new Date().toLocaleString()}</div>
+                  <div>ID QR Authentication: Active</div>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Patient Profile Grid -->
+            <div class="patient-meta-grid">
+              <div class="meta-item"><strong>Patient Name:</strong> \${patient.firstName} \${patient.lastName}</div>
+              <div class="meta-item"><strong>UHID (Patient ID):</strong> \${patient.uhid || "N/A"}</div>
+              <div class="meta-item"><strong>Age / Gender:</strong> \${patient.age || "N/A"} / \${patient.gender || "N/A"}</div>
+              <div class="meta-item"><strong>Contact:</strong> \${patient.mobile || "N/A"}</div>
+              <div class="meta-item"><strong>Department:</strong> \${patient.department || "General Medicine"}</div>
+              <div class="meta-item"><strong>Room / Bed Assignment:</strong> Room \${patient.roomNo || "N/A"} | Bed \${patient.bedNo || "N/A"}</div>
+            </div>
+
+            <!-- 1. Discharge Summary Section -->
+            \${discharge ? \`
+              <div class="discharge-card">
+                <h3>✓ Clinical Discharge Completed</h3>
+                <div style="font-size: 13px; color: #065f46; margin-bottom: 10px;">
+                  <strong>Authorized by:</strong> Dr. \${discharge.doctor?.firstName} \${discharge.doctor?.lastName} | 
+                  <strong>Discharged At:</strong> \${new Date(discharge.dischargedAt).toLocaleString()}
+                </div>
+                <div style="font-size: 13px; margin-bottom: 10px;">
+                  <strong>Clinical Advisory Summary:</strong>
+                  <div class="notes-block" style="border-left-color: #10b981; background: #f0fdf4;">\${discharge.dischargeSummary}</div>
+                </div>
+                \${discharge.takeHomeMedications && discharge.takeHomeMedications.length > 0 ? \`
+                  <div style="font-size: 12px; font-weight: 700; margin-bottom: 5px; color: #065f46;">Take-Home Medication Regimen:</div>
+                  <table class="report-table" style="background: white;">
+                    <thead>
+                      <tr>
+                        <th>Medication</th>
+                        <th>Dosage</th>
+                        <th>Frequency / Instructions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      \${discharge.takeHomeMedications.map(m => \\\`
+                        <tr>
+                          <td><strong>\\\${m.medicationName}</strong></td>
+                          <td>\\\${m.dosage}</td>
+                          <td>\\\${m.frequency}</td>
+                        </tr>
+                      \\\`).join("")}
+                    </tbody>
+                  </table>
+                \` : ""}
+              </div>
+            \` : ""}
+
+            <!-- 2. Consultation Logs -->
+            <div class="section-title">Consultation & Diagnosis History</div>
+            \${consultations.length === 0 ? \`<p style="font-size: 12px; color: #64748b;">No consultations recorded.</p>\` : \`
+              <div style="display: flex; flex-direction: column; gap: 15px;">
+                \${consultations.map(c => \\\`
+                  <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #1e293b;">
+                      <span>Dr. \\\${c.doctor?.firstName} \\\${c.doctor?.lastName}</span>
+                      <span style="font-weight: normal; color: #64748b;">\\\${new Date(c.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <div style="font-size: 12px; margin-top: 4px;"><strong>Diagnosis:</strong> \\\${c.diagnosis}</div>
+                    <div class="notes-block">\\\${c.clinicalNotes}</div>
+                  </div>
+                \\\`).join("")}
+              </div>
+            \`}
+
+            <!-- 3. Historical Vitals Trend -->
+            <div class="section-title">Vitals Charting Record</div>
+            \${vitals.length === 0 ? \`<p style="font-size: 12px; color: #64748b;">No vital charting records.</p>\` : \`
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Date / Time</th>
+                    <th>Blood Pressure</th>
+                    <th>Heart Rate</th>
+                    <th>Temp (°C)</th>
+                    <th>SpO2 (%)</th>
+                    <th>Blood Sugar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  \${vitals.map(v => \\\`
+                    <tr>
+                      <td>\\\${new Date(v.recordedAt).toLocaleString()}</td>
+                      <td>\\\${v.bloodPressure || "N/A"}</td>
+                      <td>\\\${v.heartRate ? v.heartRate + " bpm" : "N/A"}</td>
+                      <td>\\\${v.temperature ? v.temperature + " °C" : "N/A"}</td>
+                      <td>\\\${v.spo2 ? v.spo2 + " %" : "N/A"}</td>
+                      <td>\\\${v.bloodSugar || "N/A"}</td>
+                    </tr>
+                  \\\`).join("")}
+                </tbody>
+              </table>
+            \`}
+
+            <!-- 4. Laboratory Report Diagnostics -->
+            <div class="section-title">Diagnostic Laboratory Investigations</div>
+            \${labs.length === 0 ? \`<p style="font-size: 12px; color: #64748b;">No lab orders recorded.</p>\` : \`
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Prescribed Date</th>
+                    <th>Test Parameter</th>
+                    <th>Diagnostic Results / Findings</th>
+                    <th>Priority</th>
+                    <th>Settle Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  \${labs.map(l => \\\`
+                    <tr>
+                      <td>\\\${new Date(l.createdAt).toLocaleDateString()}</td>
+                      <td><strong>\\\${l.testName}</strong></td>
+                      <td>\\\${l.results || \`<span style="color: #d97706; font-style: italic;">Results Pending</span>\`}</td>
+                      <td>\\\${l.isEmergency ? "STAT EMERGENCY" : "ROUTINE"}</td>
+                      <td><span class="badge \\\${l.status === "COMPLETED" ? "badge-paid" : "badge-unpaid"}">\\\${l.status}</span></td>
+                    </tr>
+                  \\\`).join("")}
+                </tbody>
+              </table>
+            \`}
+
+            <!-- 5. Hospital Billing Statement -->
+            <div class="section-title">Hospital Billing Ledger Statement</div>
+            \${invoices.length === 0 ? \`<p style="font-size: 12px; color: #64748b;">No billing invoices recorded.</p>\` : \`
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Invoice ID</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Issued Date</th>
+                    <th>Payment Mode</th>
+                    <th>Amount Paid</th>
+                    <th style="text-align: right;">Total Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  \${invoices.map(i => \\\`
+                    <tr>
+                      <td><strong>\\\${i.invoiceNumber || i.billNumber || i._id}</strong></td>
+                      <td>\\\${i.category || "Consultation Fee"}</td>
+                      <td>\\\${i.itemName || "OPD Check-up"}</td>
+                      <td>\\\${new Date(i.createdAt).toLocaleDateString()}</td>
+                      <td>\\\${i.paymentMethod}</td>
+                      <td>₹\\\${i.paidAmount !== undefined ? i.paidAmount : (i.status === "PAID" ? i.totalAmount : 0)}.00</td>
+                      <td style="text-align: right; font-weight: 700;">₹\\\${i.totalAmount}.00</td>
+                    </tr>
+                  \\\`).join("")}
+                  <tr style="font-weight: 700; font-size: 13px; background-color: #f8fafc;">
+                    <td colspan="5" style="text-align: right;">Total Settle Summary:</td>
+                    <td style="color: #16a34a;">₹\${invoices.reduce((acc, curr) => acc + (curr.paidAmount !== undefined ? curr.paidAmount : (curr.status === "PAID" ? curr.totalAmount : 0)), 0)}.00</td>
+                    <td style="text-align: right; color: #0284c7;">₹\${invoices.reduce((acc, curr) => acc + curr.totalAmount, 0)}.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            \`}
+
+            <script>
+              setTimeout(() => { window.print(); }, 800);
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    } catch (err) {
+      console.error(err);
+      showToast("error", "Failed to compile consolidated EMR report document.");
+    }
+  };
+
+  // Submit Discharge Record
+  const handleSaveDischarge = async (e) => {
+    e.preventDefault();
+    if (!dischargeSummaryInput.trim()) {
+      showToast("error", "Discharge clinical summary is required");
+      return;
+    }
+    try {
+      setSubmittingAction(true);
+      const res = await dischargePatient(selectedPatient._id, {
+        dischargeSummary: dischargeSummaryInput,
+        takeHomeMedications: takeHomeMedsInput.map(m => ({ medicationName: m.name, dosage: m.dosage, frequency: m.freq }))
+      });
+      
+      if (res.data?.billingCleared) {
+        showToast("success", "Patient discharged successfully! Bed allocation cleared.");
+      } else {
+        showToast("warning", "Discharge summary saved. WARNING: Patient has outstanding unpaid invoices.");
+      }
+      setIsDischargeModalOpen(false);
+      setDischargeSummaryInput("");
+      setTakeHomeMedsInput([]);
+      reloadChartData();
+    } catch (err) {
+      showToast("error", err.response?.data?.message || "Failed to discharge patient");
+    } finally {
+      setSubmittingAction(false);
+    }
+  };
+
+  // Run Lab Report OCR Parse
+  const handleRunOcr = async (e) => {
+    e.preventDefault();
+    if (!ocrReportInput.trim()) {
+      showToast("error", "Lab report text is required for OCR simulation");
+      return;
+    }
+    try {
+      setSubmittingAction(true);
+      await parseLabReportOCR(ocrParsingLabId, ocrReportInput);
+      showToast("success", "AI OCR parsed report values and auto-completed test status!");
+      setIsOcrModalOpen(false);
+      setOcrReportInput("");
+      setOcrParsingLabId("");
+      
+      // Reload stats
+      const [labsRes] = await Promise.all([
+        fetchLabRequests()
+      ]);
+      setEmergencyLabs((labsRes.data || []).filter(l => l.isEmergency && l.status !== "COMPLETED"));
+      loadDashboardData();
+    } catch (err) {
+      showToast("error", err.response?.data?.message || "Failed to parse lab report OCR");
+    } finally {
+      setSubmittingAction(false);
     }
   };
 
@@ -980,8 +1335,8 @@ const Dashboard = ({
         </div>
       </div>
 
-      {/* Emergency alerts ticker for DOCTOR role */}
-      {user?.role === "DOCTOR" && doctorAlerts.length > 0 && (
+      {/* Emergency alerts ticker for DOCTOR and NURSE roles */}
+      {(user?.role === "DOCTOR" || user?.role === "NURSE") && criticalAlerts.length > 0 && (
         <div className="emergency-ticker" style={{
           background: "linear-gradient(90deg, #ef4444 0%, #dc2626 100%)",
           color: "white",
@@ -996,9 +1351,9 @@ const Dashboard = ({
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <ShieldAlert size={24} style={{ animation: "pulse 1.5s infinite" }} />
             <div>
-              <strong style={{ fontSize: "1rem" }}>EMERGENCY VITAL ALARMS ({doctorAlerts.length})</strong>
+              <strong style={{ fontSize: "1rem" }}>EMERGENCY VITAL ALARMS ({criticalAlerts.length})</strong>
               <p style={{ margin: "0.25rem 0 0 0", fontSize: "0.85rem", opacity: 0.9 }}>
-                Patient {doctorAlerts[0].patient?.firstName} {doctorAlerts[0].patient?.lastName} in Room {doctorAlerts[0].patient?.roomNo || "N/A"} / Bed {doctorAlerts[0].patient?.bedNo || "N/A"} has critical vitals: {doctorAlerts[0].issues}
+                Patient {criticalAlerts[0].patient?.firstName} {criticalAlerts[0].patient?.lastName} in Room {criticalAlerts[0].patient?.roomNo || "N/A"} / Bed {criticalAlerts[0].patient?.bedNo || "N/A"} has critical vitals: {criticalAlerts[0].issues}
               </p>
             </div>
           </div>
@@ -1736,6 +2091,145 @@ const Dashboard = ({
               </div>
             </div>
           </div>
+
+          {/* Visual Daily Appointment Scheduling Grid */}
+          <div className="table-container" style={{ marginBottom: "2rem", padding: "1.5rem" }}>
+            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: "0 0 1rem 0", display: "flex", alignItems: "center", gap: "0.5rem", color: "#0284c7" }}>
+              <Calendar size={20} />
+              <span>Today's Daily Scheduling Board & Patient Check-ins</span>
+            </h3>
+            
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem" }}>
+              {["09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 01:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM"].map((slot) => {
+                const appt = appointmentsList.find(a => {
+                  const isSameSlot = a.timeSlot === slot;
+                  const isSameDay = new Date(a.appointmentDate).toDateString() === new Date().toDateString();
+                  return isSameSlot && isSameDay && a.status !== "CANCELLED";
+                });
+                
+                return (
+                  <div key={slot} style={{ 
+                    border: "1px solid #e2e8f0", 
+                    borderRadius: "12px", 
+                    padding: "1rem", 
+                    background: appt ? (appt.status === "CHECKED_IN" ? "#ecfdf5" : "#eff6ff") : "white",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    minHeight: "120px",
+                    boxShadow: "0 2px 5px rgba(0,0,0,0.02)"
+                  }}>
+                    <div>
+                      <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#64748b", display: "block" }}>{slot}</span>
+                      {appt ? (
+                        <div style={{ marginTop: "0.5rem" }}>
+                          <strong style={{ fontSize: "0.85rem", color: "#0f172a", display: "block" }}>{appt.patient?.firstName} {appt.patient?.lastName}</strong>
+                          <span style={{ fontSize: "0.7rem", color: "#0284c7" }}>Dr. {appt.doctor?.firstName} {appt.doctor?.lastName}</span>
+                          <button 
+                            type="button" 
+                            onClick={() => handlePrintConsolidatedReport(appt.patient?._id)} 
+                            style={{ display: "block", background: "none", border: "none", color: "#0284c7", fontSize: "0.7rem", padding: 0, marginTop: "0.25rem", cursor: "pointer", textDecoration: "underline", fontWeight: 600 }}
+                          >
+                            📄 Export Full EMR Dossier
+                          </button>
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: "0.8rem", color: "#94a3b8", display: "block", marginTop: "0.5rem" }}>🟢 Slot Available</span>
+                      )}
+                    </div>
+                    
+                    <div style={{ marginTop: "0.75rem" }}>
+                      {appt ? (
+                        (appt.status === "BOOKED" || appt.status === "SCHEDULED") ? (
+                          <button 
+                            type="button"
+                            onClick={() => handleCheckIn(appt._id)}
+                            className="btn btn-primary"
+                            style={{ width: "100%", padding: "0.3rem 0.5rem", fontSize: "0.75rem", background: "#10b981", border: "1px solid #10b981" }}
+                          >
+                            Check In Patient
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: "0.7rem", color: "#059669", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.2rem" }}>
+                            ✓ Checked In
+                          </span>
+                        )
+                      ) : (
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setSelectedSlot(slot);
+                            setIsApptModalOpen(true);
+                          }}
+                          className="btn btn-secondary"
+                          style={{ width: "100%", padding: "0.3rem 0.5rem", fontSize: "0.75rem", color: "#0284c7", borderColor: "#0284c7" }}
+                        >
+                          Book Slot
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Appointment Booking Modal */}
+          {isApptModalOpen && (
+            <div className="modal-overlay" style={{ zIndex: 999 }}>
+              <div className="modal-card" style={{ maxWidth: "450px" }}>
+                <div className="modal-header">
+                  <h3>Schedule Appointment Slot</h3>
+                  <button type="button" className="action-btn" onClick={() => setIsApptModalOpen(false)}>×</button>
+                </div>
+                <form onSubmit={handleSaveAppointment}>
+                  <div className="modal-body" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    <div className="form-group">
+                      <label>Time Slot Selected</label>
+                      <input type="text" className="form-control" value={selectedSlot} disabled />
+                    </div>
+                    <div className="form-group">
+                      <label>Appointment Date</label>
+                      <input type="date" className="form-control" value={apptDate} onChange={(e) => setApptDate(e.target.value)} required />
+                    </div>
+                    <div className="form-group">
+                      <label>Select Patient *</label>
+                      <select 
+                        className="form-control" 
+                        value={selectedApptPatient} 
+                        onChange={(e) => setSelectedApptPatient(e.target.value)} 
+                        required
+                      >
+                        <option value="">-- Choose Patient --</option>
+                        {allPatientsList.map(p => (
+                          <option key={p._id} value={p._id}>{p.firstName} {p.lastName} (UHID: {p.uhid})</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Select Doctor *</label>
+                      <select 
+                        className="form-control" 
+                        value={selectedApptDoctor} 
+                        onChange={(e) => setSelectedApptDoctor(e.target.value)} 
+                        required
+                      >
+                        <option value="">-- Choose Doctor --</option>
+                        {doctors.map(d => (
+                          <option key={d._id} value={d._id}>Dr. {d.firstName} {d.lastName} ({d.department})</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-secondary" onClick={() => setIsApptModalOpen(false)}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Schedule Patient</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
             <h3 style={{ fontSize: "1.2rem", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <UserCheck size={22} className="text-sky-600" />
@@ -1812,13 +2306,22 @@ const Dashboard = ({
                         </td>
                         <td>{new Date(p.createdAt).toLocaleDateString()}</td>
                         <td style={{ textAlign: "right" }}>
-                          <button 
-                            onClick={() => onNavigateToPatients()}
-                            className="btn btn-secondary" 
-                            style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem" }}
-                          >
-                            Open Chart File
-                          </button>
+                          <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
+                            <button 
+                              onClick={() => handlePrintConsolidatedReport(p._id)}
+                              className="btn btn-primary" 
+                              style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", background: "#0284c7", border: "1px solid #0284c7" }}
+                            >
+                              📄 Export Dossier
+                            </button>
+                            <button 
+                              onClick={() => onNavigateToPatients()}
+                              className="btn btn-secondary" 
+                              style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem" }}
+                            >
+                              Open Chart File
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -1839,6 +2342,7 @@ const Dashboard = ({
                       <th>Mobile Number</th>
                       <th>Registration Mode</th>
                       <th>Joined Date</th>
+                      <th style={{ textAlign: "right" }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1872,6 +2376,24 @@ const Dashboard = ({
                           </span>
                         </td>
                         <td>{new Date(p.createdAt).toLocaleDateString()}</td>
+                        <td style={{ textAlign: "right" }}>
+                          <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
+                            <button 
+                              onClick={() => handlePrintConsolidatedReport(p._id)}
+                              className="btn btn-primary" 
+                              style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", background: "#0284c7", border: "1px solid #0284c7" }}
+                            >
+                              📄 Export Dossier
+                            </button>
+                            <button 
+                              onClick={() => onNavigateToPatients()}
+                              className="btn btn-secondary" 
+                              style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem" }}
+                            >
+                              Open Chart File
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

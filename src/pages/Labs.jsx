@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchLabRequests, updateLabStatus, completeLabTest, fetchAILabAnalysis } from "../services/api";
+import { fetchLabRequests, updateLabStatus, completeLabTest, fetchAILabAnalysis, parseLabReportOCR } from "../services/api";
 import { CheckCircle, AlertCircle, Activity, ShieldAlert, Check, X, FileText, Download } from "lucide-react";
 
 const Labs = () => {
@@ -16,6 +16,8 @@ const Labs = () => {
   const [resultsModalOpen, setResultsModalOpen] = useState(false);
   const [resultsInput, setResultsInput] = useState("");
   const [reportFileInput, setReportFileInput] = useState("");
+  const [ocrReportText, setOcrReportText] = useState("");
+  const [ocrLoading, setOcrLoading] = useState(false);
 
   // AI Diagnostic screening
   const [aiLoading, setAiLoading] = useState(false);
@@ -102,6 +104,25 @@ const Labs = () => {
       showToast("error", "AI report analysis failed.");
     } finally {
       setAiLoading(false);
+    }
+  };
+
+  const handleRunOCR = async () => {
+    if (!ocrReportText.trim()) {
+      showToast("error", "Please write or paste the lab report sheet text first.");
+      return;
+    }
+    try {
+      setOcrLoading(true);
+      const res = await parseLabReportOCR(selectedLab._id, ocrReportText);
+      if (res.data) {
+        setResultsInput(res.data.results || "");
+        showToast("success", "AI OCR parsed raw document contents successfully!");
+      }
+    } catch (err) {
+      showToast("error", "AI OCR parsing failed");
+    } finally {
+      setOcrLoading(false);
     }
   };
 
@@ -219,7 +240,7 @@ const Labs = () => {
                       )}
                       {lab.status === "SAMPLE_COLLECTED" && (
                         <button 
-                          onClick={() => { setSelectedLab(lab); setResultsModalOpen(true); }} 
+                          onClick={() => { setSelectedLab(lab); setResultsModalOpen(true); setOcrReportText(""); }} 
                           className="btn btn-primary" 
                           style={{ padding: "0.35rem 0.75rem", fontSize: "0.75rem" }}
                         >
@@ -291,6 +312,29 @@ const Labs = () => {
               <p style={{ margin: "0 0 1rem 0" }}>Entering values for <strong>{selectedLab.testName}</strong> ordered for patient <strong>{selectedLab.patient?.firstName} {selectedLab.patient?.lastName}</strong></p>
               
               <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div style={{ border: "1px dashed #0284c7", padding: "1rem", borderRadius: "8px", background: "#f0f9ff" }}>
+                  <strong style={{ fontSize: "0.8rem", color: "#0284c7", display: "block", marginBottom: "0.4rem" }}>📄 Simulated OCR Document Parser</strong>
+                  <span style={{ fontSize: "0.7rem", color: "#64748b", display: "block", marginBottom: "0.5rem" }}>Paste raw scanned report text below. The AI will extract clinical results.</span>
+                  
+                  <textarea 
+                    className="form-control"
+                    rows="2"
+                    value={ocrReportText}
+                    onChange={(e) => setOcrReportText(e.target.value)}
+                    placeholder="E.g. CBC Panel: Hemoglobin value is low at 9.2 g/dL, WBC: 6,800..."
+                    style={{ fontSize: "0.75rem", marginBottom: "0.5rem", width: "100%", padding: "0.35rem", borderRadius: "6px", border: "1px solid #cbd5e1" }}
+                  />
+                  <button 
+                    type="button" 
+                    onClick={handleRunOCR} 
+                    disabled={ocrLoading} 
+                    className="btn btn-primary"
+                    style={{ padding: "0.35rem 0.75rem", fontSize: "0.75rem", background: "#0284c7", border: "1px solid #0284c7", width: "100%" }}
+                  >
+                    {ocrLoading ? "Running AI Document OCR..." : "Scan & Parse Report"}
+                  </button>
+                </div>
+
                 <div className="form-group">
                   <label style={{ fontSize: "0.85rem", fontWeight: 600 }}>Diagnostic Test Findings/Results *</label>
                   <textarea 
