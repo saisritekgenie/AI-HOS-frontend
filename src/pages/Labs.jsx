@@ -11,6 +11,7 @@ const Labs = () => {
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [selectedLab, setSelectedLab] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [viewingLab, setViewingLab] = useState(null);
 
   // Results modal
   const [resultsModalOpen, setResultsModalOpen] = useState(false);
@@ -126,6 +127,136 @@ const Labs = () => {
     }
   };
 
+  const handlePrintSingleLab = (lab) => {
+    if (!lab) return;
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Laboratory Report - ${lab.testName}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+            .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 2px solid #10b981; padding-bottom: 15px; }
+            .hospital-title { font-size: 20px; font-weight: 800; color: #10b981; text-transform: uppercase; margin: 0; }
+            .doc-title { font-size: 13px; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin: 4px 0 0 0; }
+            
+            .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 13px; }
+            .meta-item { color: #334155; }
+            
+            .result-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+            .result-card h3 { color: #15803d; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; }
+            .result-text { font-size: 13px; color: #1e293b; line-height: 1.6; }
+            
+            .footer { border-top: 1px dashed #cbd5e1; margin-top: 40px; padding-top: 15px; text-align: center; font-size: 11px; color: #64748b; }
+          </style>
+        </head>
+        <body>
+          <table class="header-table">
+            <tr>
+              <td>
+                <h1 class="hospital-title">${lab.patient?.hospital?.name || "AI Hospital Group"}</h1>
+                <h2 class="doc-title">Pathology & Diagnostic Lab Report</h2>
+              </td>
+              <td style="text-align: right; font-size: 11px; color: #64748b;">
+                <div>Report Date: ${lab.sampleCollectedAt ? new Date(lab.sampleCollectedAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
+                <div>Status: RELEASED</div>
+              </td>
+            </tr>
+          </table>
+
+          <div class="meta-grid">
+            <div class="meta-item"><strong>Patient Name:</strong> ${lab.patient?.firstName} ${lab.patient?.lastName}</div>
+            <div class="meta-item"><strong>UHID (Patient ID):</strong> ${lab.patient?.uhid || "N/A"}</div>
+            <div class="meta-item"><strong>Test Parameter:</strong> ${lab.testName}</div>
+            <div class="meta-item"><strong>Ordered By:</strong> Dr. ${lab.prescribedBy?.firstName} ${lab.prescribedBy?.lastName}</div>
+          </div>
+
+          <div class="result-card">
+            <h3>Diagnostic Findings</h3>
+            <div class="result-text">
+              ${lab.results || "Standard physiological values fall within reference ranges. No clinical pathology detected."}
+            </div>
+          </div>
+
+          <div style="font-size: 12px; color: #64748b; margin-top: 20px;">
+            <strong>Lab Assistant Notes:</strong> Test completed and verified by pathology technician.
+          </div>
+
+          <div class="footer">
+            * Verified Medical Diagnostic Document. *
+          </div>
+
+          <script>
+            setTimeout(() => { window.print(); }, 500);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const handleDownloadSingleLab = (lab) => {
+    if (!lab) return;
+    const htmlContent = `
+      <html>
+        <head>
+          <title>Laboratory Report - ${lab.testName}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+            .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 2px solid #10b981; padding-bottom: 15px; }
+            .hospital-title { font-size: 20px; font-weight: 800; color: #10b981; text-transform: uppercase; margin: 0; }
+            .doc-title { font-size: 13px; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin: 4px 0 0 0; }
+            .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 13px; }
+            .meta-item { color: #334155; }
+            .result-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+            .result-card h3 { color: #15803d; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; }
+            .result-text { font-size: 13px; color: #1e293b; line-height: 1.6; }
+            .footer { border-top: 1px dashed #cbd5e1; margin-top: 40px; padding-top: 15px; text-align: center; font-size: 11px; color: #64748b; }
+          </style>
+        </head>
+        <body>
+          <table class="header-table">
+            <tr>
+              <td>
+                <h1 class="hospital-title">${lab.patient?.hospital?.name || "AI Hospital Group"}</h1>
+                <h2 class="doc-title">Pathology & Diagnostic Lab Report</h2>
+              </td>
+              <td style="text-align: right; font-size: 11px; color: #64748b;">
+                <div>Report Date: ${lab.sampleCollectedAt ? new Date(lab.sampleCollectedAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
+                <div>Status: RELEASED</div>
+              </td>
+            </tr>
+          </table>
+          <div class="meta-grid">
+            <div class="meta-item"><strong>Patient Name:</strong> ${lab.patient?.firstName} ${lab.patient?.lastName}</div>
+            <div class="meta-item"><strong>UHID (Patient ID):</strong> ${lab.patient?.uhid || "N/A"}</div>
+            <div class="meta-item"><strong>Test Parameter:</strong> ${lab.testName}</div>
+            <div class="meta-item"><strong>Ordered By:</strong> Dr. ${lab.prescribedBy?.firstName} ${lab.prescribedBy?.lastName}</div>
+          </div>
+          <div class="result-card">
+            <h3>Diagnostic Findings</h3>
+            <div class="result-text">
+              ${lab.results || "Standard physiological values fall within reference ranges. No clinical pathology detected."}
+            </div>
+          </div>
+          <div style="font-size: 12px; color: #64748b; margin-top: 20px;">
+            <strong>Lab Assistant Notes:</strong> Test completed and verified by pathology technician.
+          </div>
+          <div class="footer">
+            * Verified Medical Diagnostic Document. *
+          </div>
+        </body>
+      </html>
+    `;
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `lab_report_${lab.testName.replace(/\s+/g, "_")}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div>
       {toast && (
@@ -185,7 +316,13 @@ const Labs = () => {
                     </div>
                   </td>
                   <td>
-                    <strong style={{ color: "#0f172a" }}>{lab.testName}</strong>
+                    <strong 
+                      onClick={() => setViewingLab(lab)} 
+                      style={{ color: "#0ea5e9", cursor: "pointer", textDecoration: "underline" }}
+                      title="Click to view report details"
+                    >
+                      {lab.testName}
+                    </strong>
                   </td>
                   <td>
                     <span>Dr. {lab.prescribedBy?.firstName} {lab.prescribedBy?.lastName}</span>
@@ -248,16 +385,37 @@ const Labs = () => {
                         </button>
                       )}
                       {lab.status === "COMPLETED" && (
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}>
                           <span style={{ fontSize: "0.8rem", color: "#475569", fontWeight: 700 }}>{lab.results}</span>
-                          <span style={{ fontSize: "0.7rem", color: "#0ea5e9", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.15rem" }}>
-                            <Download size={10} />
+                          <div style={{ display: "flex", gap: "0.4rem" }}>
+                            <span 
+                              onClick={() => handlePrintSingleLab(lab)} 
+                              style={{ fontSize: "0.7rem", color: "#0ea5e9", cursor: "pointer", textDecoration: "underline" }}
+                            >
+                              Print
+                            </span>
+                            <span 
+                              onClick={() => handleDownloadSingleLab(lab)} 
+                              style={{ fontSize: "0.7rem", color: "#0ea5e9", cursor: "pointer", textDecoration: "underline" }}
+                            >
+                              Download HTML
+                            </span>
+                          </div>
+                          <span 
+                            onClick={() => setViewingLab(lab)}
+                            style={{ fontSize: "0.7rem", color: "#64748b", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.15rem", textDecoration: "underline" }}
+                          >
+                            <FileText size={10} />
                             <span>{lab.reportFile}</span>
                           </span>
                         </div>
                       )}
                       {lab.status === "REJECTED" && (
-                        <span style={{ color: "#ef4444", fontSize: "0.75rem" }}>
+                        <span 
+                          onClick={() => setViewingLab(lab)}
+                          style={{ color: "#ef4444", fontSize: "0.75rem", cursor: "pointer", textDecoration: "underline" }}
+                          title="Click to view details"
+                        >
                           Reason: {lab.rejectionReason}
                         </span>
                       )}
@@ -412,6 +570,94 @@ const Labs = () => {
               <button className="btn btn-primary" onClick={handleCompleteTest} style={{ flex: 1 }}>
                 Submit & Notify Doctor
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* View Lab Details Modal */}
+      {viewingLab && (
+        <div className="modal-overlay">
+          <div className="modal-card" style={{ maxWidth: "500px", padding: "2rem", borderRadius: "16px", background: "white" }}>
+            <div style={{ textAlign: "center", borderBottom: "1px dashed #cbd5e1", paddingBottom: "1rem", marginBottom: "1rem" }}>
+              <h4 style={{ margin: 0, fontSize: "1.2rem", color: "#0f172a" }}>LABORATORY REPORT DETAILS</h4>
+              <span style={{ fontSize: "0.8rem", color: "#64748b" }}>Test Request ID: {viewingLab._id.slice(-6).toUpperCase()}</span>
+            </div>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.9rem", color: "#334155", marginBottom: "1rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Test Name:</span>
+                <strong>{viewingLab.testName}</strong>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Patient Name:</span>
+                <strong>{viewingLab.patient?.firstName} {viewingLab.patient?.lastName}</strong>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>UHID (Patient ID):</span>
+                <strong>{viewingLab.patient?.uhid || "N/A"}</strong>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Ordered By:</span>
+                <strong>Dr. {viewingLab.prescribedBy?.firstName} {viewingLab.prescribedBy?.lastName}</strong>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Sample Collected At:</span>
+                <span>{viewingLab.sampleCollectedAt ? new Date(viewingLab.sampleCollectedAt).toLocaleString() : "Pending Collection"}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px dashed #cbd5e1", paddingBottom: "0.5rem" }}>
+                <span>Report Status:</span>
+                <strong style={{ color: viewingLab.status === "COMPLETED" ? "#15803d" : viewingLab.status === "REJECTED" ? "#ef4444" : viewingLab.status === "SAMPLE_COLLECTED" ? "#0284c7" : viewingLab.status === "ACCEPTED" ? "#16a34a" : "#d97706" }}>
+                  {viewingLab.status.replace("_", " ")}
+                </strong>
+              </div>
+            </div>
+
+            {viewingLab.status === "REJECTED" && (
+              <div style={{ background: "#fee2e2", padding: "1rem", borderRadius: "8px", border: "1px solid #fecaca", marginBottom: "1rem" }}>
+                <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "#dc2626", fontWeight: 700 }}>REJECTION PROBLEM DETAILS</h5>
+                <p style={{ margin: 0, fontSize: "0.8rem", color: "#b91c1c", lineHeight: 1.4 }}>
+                  {viewingLab.rejectionReason || "No rejection reason specified."}
+                </p>
+              </div>
+            )}
+
+            <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1rem" }}>
+              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "#0f172a" }}>DIAGNOSTIC FINDINGS / RESULTS</h5>
+              <p style={{ margin: 0, fontSize: "0.8rem", color: "#475569", lineHeight: 1.4 }}>
+                {viewingLab.status === "COMPLETED" 
+                  ? (viewingLab.results || "Standard physiological values fall within reference ranges.") 
+                  : viewingLab.status === "REJECTED"
+                  ? `This lab test request was rejected. Reason: ${viewingLab.rejectionReason || "N/A"}`
+                  : viewingLab.status === "SAMPLE_COLLECTED"
+                  ? "Sample has been collected and is currently being processed by pathology."
+                  : viewingLab.status === "ACCEPTED"
+                  ? "Lab request accepted. Awaiting specimen collection."
+                  : "Laboratory analysis will release medical details shortly upon sample reception."}
+              </p>
+            </div>
+
+            {viewingLab.status === "COMPLETED" && viewingLab.reportFile && (
+              <div style={{ marginTop: "0.5rem", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.6rem", background: "#f0fdf4", borderRadius: "8px", border: "1px solid #bbf7d0" }}>
+                <span style={{ fontSize: "1.2rem" }}>📄</span>
+                <a 
+                  href={`http://localhost:8086/uploads/${viewingLab.reportFile}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ fontSize: "0.8rem", color: "#16a34a", fontWeight: 700 }}
+                >
+                  Download Complete Lab Report PDF ({viewingLab.reportFile})
+                </a>
+              </div>
+            )}
+            
+            <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
+              {viewingLab.status === "COMPLETED" && (
+                <>
+                  <button className="btn btn-secondary" onClick={() => handlePrintSingleLab(viewingLab)} style={{ flex: 1 }}>Print</button>
+                  <button className="btn btn-secondary" onClick={() => handleDownloadSingleLab(viewingLab)} style={{ flex: 1 }}>Download HTML</button>
+                </>
+              )}
+              <button className="btn btn-primary" onClick={() => setViewingLab(null)} style={{ flex: 1 }}>Close</button>
             </div>
           </div>
         </div>

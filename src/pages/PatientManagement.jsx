@@ -51,7 +51,8 @@ import {
   checkDuplicatePatient,
   mergePatients,
   fetchDischargeRecord,
-  submitPatientDischarge
+  submitPatientDischarge,
+  fetchConsolidatedReport
 } from "../services/api";
 import { AIVoiceAssistant } from "../components/common/AIVoiceAssistant";
 
@@ -345,16 +346,16 @@ const PatientManagement = () => {
               </tr>
             </thead>
             <tbody>
-              \${patients.map(p => \`
+              ${patients.map(p => `
                 <tr>
-                  <td><strong>\${p.uhid}</strong></td>
-                  <td>\${p.firstName} \${p.lastName}</td>
-                  <td>\${p.mobile}</td>
-                  <td>\${p.gender}</td>
-                  <td>\${p.registrationType || "WALK_IN"}</td>
-                  <td>\${p.registeredBy || "Receptionist"}</td>
+                  <td><strong>${p.uhid}</strong></td>
+                  <td>${p.firstName} ${p.lastName}</td>
+                  <td>${p.mobile}</td>
+                  <td>${p.gender}</td>
+                  <td>${p.registrationType || "WALK_IN"}</td>
+                  <td>${p.registeredBy || "Receptionist"}</td>
                 </tr>
-              \`).join("")}
+              `).join("")}
             </tbody>
           </table>
           <script>
@@ -367,158 +368,272 @@ const PatientManagement = () => {
   };
 
   const handlePrintPatientReport = async (patient) => {
-    let localClinical = clinicalData;
-    if (!localClinical || localClinical.patient?._id !== patient._id) {
-      try {
-        const res = await fetchPatientClinicalSummary(patient._id);
-        localClinical = res.data;
-      } catch (err) {
-        console.error("Failed to load clinical summary for print report", err);
-      }
-    }
+    try {
+      const res = await fetchConsolidatedReport(patient._id);
+      const data = res.data;
+      if (!data) return;
 
-    const printWindow = window.open("", "_blank");
-    const latestVitals = localClinical?.vitals?.[0] || {};
-    const clinicalNotes = localClinical?.notes || [];
-    const activePrescriptions = localClinical?.prescriptions || [];
-    const activeInstructions = localClinical?.instructions || [];
-    const consultations = localClinical?.consultations || [];
+      const { patient: patientInfo, consultations = [], vitals = [], labs = [], invoices = [], discharge, medications = [] } = data;
 
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Clinical Summary Report - ${patient.firstName} ${patient.lastName}</title>
-          <style>
-            body { font-family: 'Segoe UI', sans-serif; color: #1e293b; padding: 30px; margin: 0; line-height: 1.5; }
-            .header-banner { border-bottom: 3px double #cbd5e1; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-            .hospital-info { text-align: right; font-size: 11px; color: #64748b; }
-            .report-title { font-size: 20px; font-weight: 800; color: #0f172a; margin: 0; }
-            .section { margin-bottom: 25px; }
-            .section-title { font-size: 13px; font-weight: 700; color: #0284c7; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; font-size: 13px; }
-            .item { display: flex; justify-content: space-between; border-bottom: 1px dashed #f1f5f9; padding-bottom: 3px; }
-            .item label { color: #64748b; font-weight: 500; }
-            .item value { font-weight: 600; color: #334155; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-            th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; }
-            th { background-color: #f8fafc; color: #475569; font-weight: 700; }
-            .badge { display: inline-block; padding: 2px 6px; font-size: 10px; font-weight: 700; border-radius: 4px; }
-            .badge-success { background: #dcfce7; color: #15803d; }
-            .badge-warning { background: #fef3c7; color: #d97706; }
-            .badge-danger { background: #fee2e2; color: #ef4444; }
-            .notes-list { font-size: 12px; margin: 0; padding-left: 20px; }
-            .notes-list li { margin-bottom: 6px; }
-          </style>
-        </head>
-        <body>
-          <div class="header-banner">
-            <div>
-              <h1 class="report-title">PATIENT CLINICAL SUMMARY</h1>
-              <div style="font-size: 12px; color: #64748b; margin-top: 4px;">UHID: ${patient.uhid || "N/A"} | ID: ${patient.patientId || "N/A"}</div>
-            </div>
-            <div class="hospital-info">
-              <div style="font-weight: 800; font-size: 14px; color: #0284c7;">🏥 ${user?.hospital?.name || "AI Hospital Outlet"}</div>
-              <div>Diagnostic & Patient Care Record Room</div>
-              <div>Date Generated: ${new Date().toLocaleString()}</div>
-            </div>
-          </div>
+      const printWindow = window.open("", "_blank");
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Consolidated Medical Dossier - ${patientInfo.firstName} ${patientInfo.lastName}</title>
+            <style>
+              body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 900px; margin: 0 auto; line-height: 1.5; }
+              .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 2px solid #0284c7; padding-bottom: 15px; }
+              .hospital-title { font-size: 24px; font-weight: 800; color: #0284c7; text-transform: uppercase; margin: 0; }
+              .doc-title { font-size: 14px; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin: 4px 0 0 0; }
+              
+              .patient-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
+              .meta-item { font-size: 13px; color: #334155; }
+              .meta-item strong { color: #0f172a; }
 
-          <div class="section">
+              .section-title { font-size: 14px; font-weight: 800; color: #0284c7; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin: 25px 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+              
+              .report-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+              .report-table th, .report-table td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: left; }
+              .report-table th { background-color: #f1f5f9; color: #475569; font-weight: 700; }
+              
+              .notes-block { background: #f8fafc; border-left: 3px solid #0ea5e9; padding: 10px 15px; font-style: italic; font-size: 13px; margin: 8px 0; border-radius: 0 6px 6px 0; }
+              .badge { display: inline-block; padding: 2px 6px; font-size: 10px; font-weight: 700; border-radius: 4px; text-transform: uppercase; }
+              .badge-paid { background: #dcfce7; color: #16a34a; }
+              .badge-unpaid { background: #fee2e2; color: #ef4444; }
+
+              .discharge-card { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 15px; margin-bottom: 25px; }
+              .discharge-card h3 { color: #065f46; margin: 0 0 10px 0; font-size: 15px; text-transform: uppercase; }
+              
+              @media print {
+                body { padding: 20px; }
+                .no-print { display: none; }
+              }
+            </style>
+          </head>
+          <body>
+            <!-- Header section -->
+            <table class="header-table">
+              <tr>
+                <td>
+                  <h1 class="hospital-title">${patientInfo.hospital?.name || "AI Hospital Group"}</h1>
+                  <h2 class="doc-title">Consolidated EMR Clinical Case Dossier</h2>
+                </td>
+                <td style="text-align: right; font-size: 12px; color: #64748b;">
+                  <div>Date Exported: ${new Date().toLocaleString()}</div>
+                  <div>ID QR Authentication: Active</div>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Patient Profile Grid -->
             <div class="section-title">Patient Demographics & Profiles</div>
-            <div class="grid">
-              <div class="item"><label>Full Name:</label><value>${patient.firstName} ${patient.lastName}</value></div>
-              <div class="item"><label>Age / Gender:</label><value>${patient.age || "N/A"} yrs / ${patient.gender}</value></div>
-              <div class="item"><label>Date of Birth:</label><value>${patient.dob ? new Date(patient.dob).toLocaleDateString() : "N/A"}</value></div>
-              <div class="item"><label>Blood Group:</label><value>${patient.bloodGroup || "N/A"}</value></div>
-              <div class="item"><label>Mobile Phone:</label><value>${patient.mobile || "N/A"}</value></div>
-              <div class="item"><label>Email Address:</label><value>${patient.email || "N/A"}</value></div>
-              <div class="item"><label>Emergency Contact:</label><value>${patient.emergencyContact || "N/A"}</value></div>
-              <div class="item"><label>Residential Address:</label><value>${patient.address || "N/A"}</value></div>
+            <div class="patient-meta-grid">
+              <div class="meta-item"><strong>Patient Name:</strong> ${patientInfo.firstName} ${patientInfo.lastName}</div>
+              <div class="meta-item"><strong>UHID (Patient ID):</strong> ${patientInfo.uhid || "N/A"}</div>
+              <div class="meta-item"><strong>Age / Gender:</strong> ${patientInfo.age || "N/A"} yrs / ${patientInfo.gender || "N/A"}</div>
+              <div class="meta-item"><strong>Date of Birth:</strong> ${patientInfo.dob ? new Date(patientInfo.dob).toLocaleDateString() : "N/A"}</div>
+              <div class="meta-item"><strong>Blood Group:</strong> ${patientInfo.bloodGroup || "N/A"}</div>
+              <div class="meta-item"><strong>Contact:</strong> ${patientInfo.mobile || "N/A"}</div>
+              <div class="meta-item"><strong>Email:</strong> ${patientInfo.email || "N/A"}</div>
+              <div class="meta-item"><strong>Emergency Contact:</strong> ${patientInfo.emergencyContact || "N/A"}</div>
+              <div class="meta-item"><strong>Address:</strong> ${patientInfo.address || "N/A"}</div>
+              <div class="meta-item"><strong>Room / Bed Assignment:</strong> Room ${patientInfo.roomNo || "N/A"} | Bed ${patientInfo.bedNo || "N/A"}</div>
             </div>
-          </div>
 
-          <div class="section">
+            <!-- Insurance Profile -->
             <div class="section-title">Insurance Profile</div>
-            <div class="grid">
-              <div class="item"><label>Provider / Insurer:</label><value>${patient.insuranceProvider || patient.insurance?.provider || "N/A"}</value></div>
-              <div class="item"><label>Policy Number:</label><value>${patient.insurancePolicyNumber || patient.insurance?.policyNumber || "N/A"}</value></div>
-              <div class="item"><label>Coverage Amount:</label><value>₹${patient.insuranceCoverageAmount || patient.insurance?.coverageAmount || 0}</value></div>
-              <div class="item"><label>Expiration Date:</label><value>${patient.insuranceExpiryDate || patient.insurance?.expiryDate ? new Date(patient.insuranceExpiryDate || patient.insurance?.expiryDate).toLocaleDateString() : "N/A"}</value></div>
+            <div class="patient-meta-grid">
+              <div class="meta-item"><strong>Insurer:</strong> ${patientInfo.insuranceProvider || (patientInfo.insurance && patientInfo.insurance.provider) || "N/A"}</div>
+              <div class="meta-item"><strong>Policy Number:</strong> ${patientInfo.insurancePolicyNumber || (patientInfo.insurance && patientInfo.insurance.policyNumber) || "N/A"}</div>
+              <div class="meta-item"><strong>Coverage Amount:</strong> ₹${patientInfo.insuranceCoverageAmount || (patientInfo.insurance && patientInfo.insurance.coverageAmount) || 0}</div>
+              <div class="meta-item"><strong>Expiration Date:</strong> ${patientInfo.insuranceExpiryDate || (patientInfo.insurance && patientInfo.insurance.expiryDate) ? new Date(patientInfo.insuranceExpiryDate || patientInfo.insurance.expiryDate).toLocaleDateString() : "N/A"}</div>
             </div>
-          </div>
 
-          <div class="section">
-            <div class="section-title">Latest Clinical Vitals</div>
-            <div class="grid">
-              <div class="item"><label>Body Temperature:</label><value>${latestVitals.temperature || "N/A"} °F</value></div>
-              <div class="item"><label>Blood Pressure (BP):</label><value>${latestVitals.bp || "N/A"} mmHg</value></div>
-              <div class="item"><label>Heart / Pulse Rate:</label><value>${latestVitals.heartRate ? latestVitals.heartRate + " bpm" : "N/A"}</value></div>
-              <div class="item"><label>Oxygen Level (SPO2):</label><value>${latestVitals.spo2 ? latestVitals.spo2 + " %" : "N/A"}</value></div>
-              <div class="item"><label>Respiratory Rate:</label><value>${latestVitals.respiratoryRate ? latestVitals.respiratoryRate + " cpm" : "N/A"}</value></div>
-            <div class="item"><label>Blood Sugar Level:</label><value>${latestVitals.sugar ? latestVitals.sugar + " mg/dL" : "N/A"}</value></div>
-          </div>
-          ${!latestVitals.createdAt ? `<div style="font-size: 11px; color: #94a3b8; margin-top: 5px; font-style: italic;">* No vital measurements logged yet.</div>` : `<div style="font-size: 11px; color: #64748b; margin-top: 5px;">* Vitals recorded at: ${new Date(latestVitals.createdAt).toLocaleString()} by medical staff.</div>`}
-        </div>
+            <!-- 1. Discharge Summary Section -->
+            ${discharge ? `
+              <div class="discharge-card">
+                <h3>✓ Clinical Discharge Completed</h3>
+                <div style="font-size: 13px; color: #065f46; margin-bottom: 10px;">
+                  <strong>Authorized by:</strong> Dr. ${discharge.doctor?.firstName || ""} ${discharge.doctor?.lastName || ""} | 
+                  <strong>Discharged At:</strong> ${new Date(discharge.dischargedAt).toLocaleString()}
+                </div>
+                <div style="font-size: 13px; margin-bottom: 10px;">
+                  <strong>Clinical Advisory Summary:</strong>
+                  <div class="notes-block" style="border-left-color: #10b981; background: #f0fdf4;">${discharge.dischargeSummary}</div>
+                </div>
+                ${discharge.takeHomeMedications && discharge.takeHomeMedications.length > 0 ? `
+                  <div style="font-size: 12px; font-weight: 700; margin-bottom: 5px; color: #065f46;">Take-Home Medication Regimen:</div>
+                  <table class="report-table" style="background: white;">
+                    <thead>
+                      <tr>
+                        <th>Medication</th>
+                        <th>Dosage</th>
+                        <th>Frequency / Instructions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${discharge.takeHomeMedications.map(m => `
+                        <tr>
+                          <td><strong>${m.medicationName}</strong></td>
+                          <td>${m.dosage}</td>
+                          <td>${m.frequency}</td>
+                        </tr>
+                      `).join("")}
+                    </tbody>
+                  </table>
+                ` : ""}
+              </div>
+            ` : ""}
 
-        <div class="section">
-          <div class="section-title">Active Outpatient Prescriptions</div>
-          ${activePrescriptions.length === 0 ? `<p style="font-size: 12px; color: #64748b; font-style: italic; margin: 0;">No active prescriptions logged.</p>` : `
-            <table>
-              <thead>
-                <tr>
-                  <th>Medication Name</th>
-                  <th>Dosage</th>
-                  <th>Routine / Frequency</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${activePrescriptions.map(pr => `
-                  <tr>
-                    <td><strong>${pr.medicationName}</strong></td>
-                    <td>${pr.dosage}</td>
-                    <td>${pr.frequency}</td>
-                    <td><span class="badge ${pr.status === "DISPENSED" || pr.status === "GIVEN" ? "badge-success" : "badge-warning"}">${pr.status}</span></td>
-                  </tr>
-                `).join("")}
-              </tbody>
-            </table>
-          `}
-        </div>
-
-        <div class="section">
-          <div class="section-title">Clinical Consultations Logs</div>
-          ${consultations.length === 0 ? `<p style="font-size: 12px; color: #64748b; font-style: italic; margin: 0;">No consultation logs recorded.</p>` : `
-            <table>
-              <thead>
-                <tr>
-                  <th>Consulting Doctor</th>
-                  <th>Diagnosis Observations</th>
-                  <th>Clinical Notes</th>
-                  <th>Visit Date</th>
-                </tr>
-              </thead>
-              <tbody>
+            <!-- 2. Consultation Logs -->
+            <div class="section-title">Consultation & Diagnosis History</div>
+            ${consultations.length === 0 ? `<p style="font-size: 12px; color: #64748b;">No consultations recorded.</p>` : `
+              <div style="display: flex; flex-direction: column; gap: 15px;">
                 ${consultations.map(c => `
-                  <tr>
-                    <td>Dr. ${c.doctor?.firstName || ""} ${c.doctor?.lastName || ""}</td>
-                    <td><strong>${c.diagnosis || "N/A"}</strong></td>
-                    <td>${c.clinicalNotes || "N/A"}</td>
-                    <td>${new Date(c.createdAt).toLocaleDateString()}</td>
-                  </tr>
+                  <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #1e293b;">
+                      <span>Dr. ${c.doctor?.firstName || ""} ${c.doctor?.lastName || ""}</span>
+                      <span style="font-weight: normal; color: #64748b;">${new Date(c.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <div style="font-size: 12px; margin-top: 4px;"><strong>Diagnosis:</strong> ${c.diagnosis}</div>
+                    <div class="notes-block">${c.clinicalNotes}</div>
+                  </div>
                 `).join("")}
-              </tbody>
-            </table>
-          `}
-        </div>
+              </div>
+            `}
 
-          <script>
-            setTimeout(() => { window.print(); }, 500);
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+            <!-- 3. Historical Vitals Trend -->
+            <div class="section-title">Vitals Charting Record</div>
+            ${vitals.length === 0 ? `<p style="font-size: 12px; color: #64748b;">No vital charting records.</p>` : `
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Date / Time</th>
+                    <th>Blood Pressure</th>
+                    <th>Heart Rate</th>
+                    <th>Temp (°F)</th>
+                    <th>SpO2 (%)</th>
+                    <th>Blood Sugar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${vitals.map(v => `
+                    <tr>
+                      <td>${new Date(v.recordedAt || v.createdAt).toLocaleString()}</td>
+                      <td>${v.bp || "N/A"}</td>
+                      <td>${v.heartRate ? v.heartRate + " bpm" : "N/A"}</td>
+                      <td>${v.temperature ? v.temperature + " °F" : "N/A"}</td>
+                      <td>${v.spo2 ? v.spo2 + " %" : "N/A"}</td>
+                      <td>${v.sugar ? v.sugar + " mg/dL" : "N/A"}</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            `}
+
+            <!-- 4. Clinical Medications & Prescriptions -->
+            <div class="section-title">Clinical Medications & Prescriptions</div>
+            ${medications.length === 0 ? `<p style="font-size: 12px; color: #64748b;">No clinical medications logged.</p>` : `
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Medication Name</th>
+                    <th>Dosage</th>
+                    <th>Frequency</th>
+                    <th>Prescribed By</th>
+                    <th>Given By / Administered</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${medications.map(m => `
+                    <tr>
+                      <td><strong>${m.medicationName}</strong></td>
+                      <td>${m.dosage}</td>
+                      <td>${m.frequency}</td>
+                      <td>Dr. ${m.prescribedBy ? m.prescribedBy.firstName + " " + m.prescribedBy.lastName : "N/A"}</td>
+                      <td>${m.givenBy ? m.givenBy.firstName + " " + m.givenBy.lastName + " at " + new Date(m.givenAt).toLocaleString() : "Not Administered"}</td>
+                      <td><span class="badge ${m.status === "DISPENSED" || m.status === "GIVEN" ? "badge-paid" : "badge-unpaid"}">${m.status}</span></td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            `}
+
+            <!-- 5. Laboratory Report Diagnostics -->
+            <div class="section-title">Diagnostic Laboratory Investigations</div>
+            ${labs.length === 0 ? `<p style="font-size: 12px; color: #64748b;">No lab orders recorded.</p>` : `
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Prescribed Date</th>
+                    <th>Test Parameter</th>
+                    <th>Diagnostic Results / Findings</th>
+                    <th>Priority</th>
+                    <th>Settle Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${labs.map(l => `
+                    <tr>
+                      <td>${new Date(l.createdAt).toLocaleDateString()}</td>
+                      <td><strong>${l.testName}</strong></td>
+                      <td>${l.results || `<span style="color: #d97706; font-style: italic;">Results Pending</span>`}</td>
+                      <td>${l.isEmergency ? "STAT EMERGENCY" : "ROUTINE"}</td>
+                      <td><span class="badge ${l.status === "COMPLETED" ? "badge-paid" : "badge-unpaid"}">${l.status}</span></td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            `}
+
+            <!-- 6. Hospital Billing Statement -->
+            <div class="section-title">Hospital Billing Ledger Statement</div>
+            ${invoices.length === 0 ? `<p style="font-size: 12px; color: #64748b;">No billing invoices recorded.</p>` : `
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Invoice ID</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Issued Date</th>
+                    <th>Payment Mode</th>
+                    <th>Amount Paid</th>
+                    <th style="text-align: right;">Total Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${invoices.map(i => `
+                    <tr>
+                      <td><strong>${i.invoiceNumber || i.billNumber || i._id}</strong></td>
+                      <td>${i.category || "Consultation Fee"}</td>
+                      <td>${i.itemName || "OPD Check-up"}</td>
+                      <td>${new Date(i.createdAt).toLocaleDateString()}</td>
+                      <td>${i.paymentMethod}</td>
+                      <td>₹${i.paidAmount !== undefined ? i.paidAmount : (i.status === "PAID" ? i.totalAmount : 0)}.00</td>
+                      <td style="text-align: right; font-weight: 700;">₹${i.totalAmount}.00</td>
+                    </tr>
+                  `).join("")}
+                  <tr style="font-weight: 700; font-size: 13px; background-color: #f8fafc;">
+                    <td colspan="5" style="text-align: right;">Total Settle Summary:</td>
+                    <td style="color: #16a34a;">₹${invoices.reduce((acc, curr) => acc + (curr.paidAmount !== undefined ? curr.paidAmount : (curr.status === "PAID" ? curr.totalAmount : 0)), 0)}.00</td>
+                    <td style="text-align: right; color: #0284c7;">₹${invoices.reduce((acc, curr) => acc + curr.totalAmount, 0)}.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            `}
+
+            <script>
+              setTimeout(() => { window.print(); }, 800);
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to compile consolidated EMR report document.");
+    }
   };
 
   const handlePrintIdCard = (patient) => {
@@ -1401,6 +1516,136 @@ const PatientManagement = () => {
     } catch (err) {
       showToast("error", "Failed to update lab collection status");
     }
+  };
+
+  const handlePrintSingleLab = (lab) => {
+    if (!lab) return;
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Laboratory Report - ${lab.testName}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+            .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 2px solid #10b981; padding-bottom: 15px; }
+            .hospital-title { font-size: 20px; font-weight: 800; color: #10b981; text-transform: uppercase; margin: 0; }
+            .doc-title { font-size: 13px; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin: 4px 0 0 0; }
+            
+            .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 13px; }
+            .meta-item { color: #334155; }
+            
+            .result-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+            .result-card h3 { color: #15803d; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; }
+            .result-text { font-size: 13px; color: #1e293b; line-height: 1.6; }
+            
+            .footer { border-top: 1px dashed #cbd5e1; margin-top: 40px; padding-top: 15px; text-align: center; font-size: 11px; color: #64748b; }
+          </style>
+        </head>
+        <body>
+          <table class="header-table">
+            <tr>
+              <td>
+                <h1 class="hospital-title">${selectedPatient.hospital?.name || "AI Hospital Group"}</h1>
+                <h2 class="doc-title">Pathology & Diagnostic Lab Report</h2>
+              </td>
+              <td style="text-align: right; font-size: 11px; color: #64748b;">
+                <div>Report Date: ${lab.sampleCollectedAt ? new Date(lab.sampleCollectedAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
+                <div>Status: RELEASED</div>
+              </td>
+            </tr>
+          </table>
+
+          <div class="meta-grid">
+            <div class="meta-item"><strong>Patient Name:</strong> ${selectedPatient.firstName} ${selectedPatient.lastName}</div>
+            <div class="meta-item"><strong>UHID (Patient ID):</strong> ${selectedPatient.uhid || "N/A"}</div>
+            <div class="meta-item"><strong>Test Parameter:</strong> ${lab.testName}</div>
+            <div class="meta-item"><strong>Ordered By:</strong> Dr. ${lab.prescribedBy?.firstName} ${lab.prescribedBy?.lastName}</div>
+          </div>
+
+          <div class="result-card">
+            <h3>Diagnostic Findings</h3>
+            <div class="result-text">
+              ${lab.results || "Standard physiological values fall within reference ranges. No clinical pathology detected."}
+            </div>
+          </div>
+
+          <div style="font-size: 12px; color: #64748b; margin-top: 20px;">
+            <strong>Lab Assistant Notes:</strong> Test completed and verified by pathology technician.
+          </div>
+
+          <div class="footer">
+            * Verified Medical Diagnostic Document. *
+          </div>
+
+          <script>
+            setTimeout(() => { window.print(); }, 500);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const handleDownloadSingleLab = (lab) => {
+    if (!lab) return;
+    const htmlContent = `
+      <html>
+        <head>
+          <title>Laboratory Report - ${lab.testName}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+            .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 2px solid #10b981; padding-bottom: 15px; }
+            .hospital-title { font-size: 20px; font-weight: 800; color: #10b981; text-transform: uppercase; margin: 0; }
+            .doc-title { font-size: 13px; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin: 4px 0 0 0; }
+            .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 13px; }
+            .meta-item { color: #334155; }
+            .result-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+            .result-card h3 { color: #15803d; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; }
+            .result-text { font-size: 13px; color: #1e293b; line-height: 1.6; }
+            .footer { border-top: 1px dashed #cbd5e1; margin-top: 40px; padding-top: 15px; text-align: center; font-size: 11px; color: #64748b; }
+          </style>
+        </head>
+        <body>
+          <table class="header-table">
+            <tr>
+              <td>
+                <h1 class="hospital-title">${selectedPatient.hospital?.name || "AI Hospital Group"}</h1>
+                <h2 class="doc-title">Pathology & Diagnostic Lab Report</h2>
+              </td>
+              <td style="text-align: right; font-size: 11px; color: #64748b;">
+                <div>Report Date: ${lab.sampleCollectedAt ? new Date(lab.sampleCollectedAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
+                <div>Status: RELEASED</div>
+              </td>
+            </tr>
+          </table>
+          <div class="meta-grid">
+            <div class="meta-item"><strong>Patient Name:</strong> ${selectedPatient.firstName} ${selectedPatient.lastName}</div>
+            <div class="meta-item"><strong>UHID (Patient ID):</strong> ${selectedPatient.uhid || "N/A"}</div>
+            <div class="meta-item"><strong>Test Parameter:</strong> ${lab.testName}</div>
+            <div class="meta-item"><strong>Ordered By:</strong> Dr. ${lab.prescribedBy?.firstName} ${lab.prescribedBy?.lastName}</div>
+          </div>
+          <div class="result-card">
+            <h3>Diagnostic Findings</h3>
+            <div class="result-text">
+              ${lab.results || "Standard physiological values fall within reference ranges. No clinical pathology detected."}
+            </div>
+          </div>
+          <div style="font-size: 12px; color: #64748b; margin-top: 20px;">
+            <strong>Lab Assistant Notes:</strong> Test completed and verified by pathology technician.
+          </div>
+          <div class="footer">
+            * Verified Medical Diagnostic Document. *
+          </div>
+        </body>
+      </html>
+    `;
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `lab_report_${lab.testName.replace(/\s+/g, "_")}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Doctor EMR Save Handlers
@@ -2415,6 +2660,23 @@ const PatientManagement = () => {
                                       <div style={{ fontSize: "0.8rem", color: "#475569", fontWeight: 600 }}>Results:</div>
                                       <div style={{ fontSize: "0.85rem", color: "#1e293b", marginTop: "0.15rem" }}>{l.results || "Diagnostic parameters normal."}</div>
                                       
+                                      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                                        <button 
+                                          className="btn btn-secondary" 
+                                          style={{ padding: "0.2rem 0.5rem", fontSize: "0.7rem", height: "auto" }}
+                                          onClick={() => handlePrintSingleLab(l)}
+                                        >
+                                          Print
+                                        </button>
+                                        <button 
+                                          className="btn btn-secondary" 
+                                          style={{ padding: "0.2rem 0.5rem", fontSize: "0.7rem", height: "auto" }}
+                                          onClick={() => handleDownloadSingleLab(l)}
+                                        >
+                                          Download HTML
+                                        </button>
+                                      </div>
+                                      
                                       {l.reportFile && (
                                         <div style={{ marginTop: "0.5rem", display: "flex", alignItems: "center", gap: "0.25rem" }}>
                                           <span style={{ fontSize: "1rem" }}>📄</span>
@@ -3095,23 +3357,63 @@ const PatientManagement = () => {
                                   </div>
                                 </div>
                                 <div>
-                                  {lab.status === "PENDING" ? (
+                                  {lab.status === "COMPLETED" ? (
+                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}>
+                                      <span className="badge" style={{ background: "#dcfce7", color: "#15803d", fontWeight: 700 }}>
+                                        COMPLETED
+                                      </span>
+                                      <div style={{ fontSize: "0.8rem", color: "#475569", marginTop: "0.25rem", textAlign: "right" }}>
+                                        <strong>Findings:</strong> {lab.results}
+                                      </div>
+                                      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem" }}>
+                                        <button 
+                                          className="btn btn-secondary" 
+                                          style={{ padding: "0.2rem 0.5rem", fontSize: "0.7rem", height: "auto" }}
+                                          onClick={() => handlePrintSingleLab(lab)}
+                                        >
+                                          Print
+                                        </button>
+                                        <button 
+                                          className="btn btn-secondary" 
+                                          style={{ padding: "0.2rem 0.5rem", fontSize: "0.7rem", height: "auto" }}
+                                          onClick={() => handleDownloadSingleLab(lab)}
+                                        >
+                                          Download HTML
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : lab.status === "REJECTED" ? (
+                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                                      <span className="badge" style={{ background: "#fee2e2", color: "#ef4444", fontWeight: 700 }}>
+                                        REJECTED
+                                      </span>
+                                      <span style={{ fontSize: "0.75rem", color: "#ef4444", marginTop: "0.2rem" }}>
+                                        Reason: {lab.rejectionReason}
+                                      </span>
+                                    </div>
+                                  ) : lab.status === "SAMPLE_COLLECTED" ? (
+                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                                      <span className="badge" style={{ background: "#e0f2fe", color: "#0284c7", fontWeight: 700 }}>
+                                        SAMPLE COLLECTED (PROCESSING)
+                                      </span>
+                                      <span style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "0.2rem" }}>
+                                        By Nurse {lab.sampleCollectedBy ? `${lab.sampleCollectedBy.firstName} ${lab.sampleCollectedBy.lastName}` : "Staff"}
+                                      </span>
+                                    </div>
+                                  ) : lab.status === "ACCEPTED" ? (
+                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                                      <span className="badge" style={{ background: "#f0fdf4", color: "#16a34a", fontWeight: 700 }}>
+                                        ACCEPTED (PROCESSING)
+                                      </span>
+                                    </div>
+                                  ) : (
                                     <button 
                                       onClick={() => handleCollectLabSample(lab._id)} 
                                       className="btn btn-primary" 
                                       style={{ padding: "0.4rem 0.85rem", fontSize: "0.8rem", background: "#0284c7" }}
                                     >
-                                      Collect Vitals Sample
+                                      Collect Specimen
                                     </button>
-                                  ) : (
-                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-                                      <span className="badge" style={{ background: "#ecfdf5", color: "#059669", fontWeight: 700 }}>
-                                        SAMPLE COLLECTED
-                                      </span>
-                                      <span style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "0.2rem" }}>
-                                        By Nurse {lab.sampleCollectedBy ? `${lab.sampleCollectedBy.firstName} ${lab.sampleCollectedBy.lastName}` : "Staff"} on {new Date(lab.sampleCollectedAt).toLocaleTimeString()}
-                                      </span>
-                                    </div>
                                   )}
                                 </div>
                               </div>

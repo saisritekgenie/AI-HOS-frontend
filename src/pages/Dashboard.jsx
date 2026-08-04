@@ -655,13 +655,13 @@ const Dashboard = ({
       const data = res.data;
       if (!data) return;
 
-      const { patient, consultations, vitals, labs, invoices, discharge } = data;
+      const { patient, consultations, vitals, labs, invoices, discharge, medications = [] } = data;
 
       const printWindow = window.open("", "_blank");
       printWindow.document.write(`
         <html>
           <head>
-            <title>Consolidated Medical Dossier - \${patient.firstName} \${patient.lastName}</title>
+            <title>Consolidated Medical Dossier - ${patient.firstName} ${patient.lastName}</title>
             <style>
               body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 900px; margin: 0 auto; line-height: 1.5; }
               .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 2px solid #0284c7; padding-bottom: 15px; }
@@ -697,11 +697,11 @@ const Dashboard = ({
             <table class="header-table">
               <tr>
                 <td>
-                  <h1 class="hospital-title">\${patient.hospital?.name || "AI Hospital Group"}</h1>
+                  <h1 class="hospital-title">${patient.hospital?.name || "AI Hospital Group"}</h1>
                   <h2 class="doc-title">Consolidated EMR Clinical Case Dossier</h2>
                 </td>
                 <td style="text-align: right; font-size: 12px; color: #64748b;">
-                  <div>Date Exported: \${new Date().toLocaleString()}</div>
+                  <div>Date Exported: ${new Date().toLocaleString()}</div>
                   <div>ID QR Authentication: Active</div>
                 </td>
               </tr>
@@ -709,27 +709,27 @@ const Dashboard = ({
 
             <!-- Patient Profile Grid -->
             <div class="patient-meta-grid">
-              <div class="meta-item"><strong>Patient Name:</strong> \${patient.firstName} \${patient.lastName}</div>
-              <div class="meta-item"><strong>UHID (Patient ID):</strong> \${patient.uhid || "N/A"}</div>
-              <div class="meta-item"><strong>Age / Gender:</strong> \${patient.age || "N/A"} / \${patient.gender || "N/A"}</div>
-              <div class="meta-item"><strong>Contact:</strong> \${patient.mobile || "N/A"}</div>
-              <div class="meta-item"><strong>Department:</strong> \${patient.department || "General Medicine"}</div>
-              <div class="meta-item"><strong>Room / Bed Assignment:</strong> Room \${patient.roomNo || "N/A"} | Bed \${patient.bedNo || "N/A"}</div>
+              <div class="meta-item"><strong>Patient Name:</strong> ${patient.firstName} ${patient.lastName}</div>
+              <div class="meta-item"><strong>UHID (Patient ID):</strong> ${patient.uhid || "N/A"}</div>
+              <div class="meta-item"><strong>Age / Gender:</strong> ${patient.age || "N/A"} / ${patient.gender || "N/A"}</div>
+              <div class="meta-item"><strong>Contact:</strong> ${patient.mobile || "N/A"}</div>
+              <div class="meta-item"><strong>Department:</strong> ${patient.department || "General Medicine"}</div>
+              <div class="meta-item"><strong>Room / Bed Assignment:</strong> Room ${patient.roomNo || "N/A"} | Bed ${patient.bedNo || "N/A"}</div>
             </div>
 
             <!-- 1. Discharge Summary Section -->
-            \${discharge ? \`
+            ${discharge ? `
               <div class="discharge-card">
                 <h3>✓ Clinical Discharge Completed</h3>
                 <div style="font-size: 13px; color: #065f46; margin-bottom: 10px;">
-                  <strong>Authorized by:</strong> Dr. \${discharge.doctor?.firstName} \${discharge.doctor?.lastName} | 
-                  <strong>Discharged At:</strong> \${new Date(discharge.dischargedAt).toLocaleString()}
+                  <strong>Authorized by:</strong> Dr. ${discharge.doctor?.firstName || ""} ${discharge.doctor?.lastName || ""} | 
+                  <strong>Discharged At:</strong> ${new Date(discharge.dischargedAt).toLocaleString()}
                 </div>
                 <div style="font-size: 13px; margin-bottom: 10px;">
                   <strong>Clinical Advisory Summary:</strong>
-                  <div class="notes-block" style="border-left-color: #10b981; background: #f0fdf4;">\${discharge.dischargeSummary}</div>
+                  <div class="notes-block" style="border-left-color: #10b981; background: #f0fdf4;">${discharge.dischargeSummary}</div>
                 </div>
-                \${discharge.takeHomeMedications && discharge.takeHomeMedications.length > 0 ? \`
+                ${discharge.takeHomeMedications && discharge.takeHomeMedications.length > 0 ? `
                   <div style="font-size: 12px; font-weight: 700; margin-bottom: 5px; color: #065f46;">Take-Home Medication Regimen:</div>
                   <table class="report-table" style="background: white;">
                     <thead>
@@ -740,68 +740,97 @@ const Dashboard = ({
                       </tr>
                     </thead>
                     <tbody>
-                      \${discharge.takeHomeMedications.map(m => \\\`
+                      ${discharge.takeHomeMedications.map(m => `
                         <tr>
-                          <td><strong>\\\${m.medicationName}</strong></td>
-                          <td>\\\${m.dosage}</td>
-                          <td>\\\${m.frequency}</td>
+                          <td><strong>${m.medicationName}</strong></td>
+                          <td>${m.dosage}</td>
+                          <td>${m.frequency}</td>
                         </tr>
-                      \\\`).join("")}
+                      `).join("")}
                     </tbody>
                   </table>
-                \` : ""}
+                ` : ""}
               </div>
-            \` : ""}
+            ` : ""}
 
             <!-- 2. Consultation Logs -->
             <div class="section-title">Consultation & Diagnosis History</div>
-            \${consultations.length === 0 ? \`<p style="font-size: 12px; color: #64748b;">No consultations recorded.</p>\` : \`
+            ${consultations.length === 0 ? `<p style="font-size: 12px; color: #64748b;">No consultations recorded.</p>` : `
               <div style="display: flex; flex-direction: column; gap: 15px;">
-                \${consultations.map(c => \\\`
+                ${consultations.map(c => `
                   <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
                     <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #1e293b;">
-                      <span>Dr. \\\${c.doctor?.firstName} \\\${c.doctor?.lastName}</span>
-                      <span style="font-weight: normal; color: #64748b;">\\\${new Date(c.createdAt).toLocaleDateString()}</span>
+                      <span>Dr. ${c.doctor?.firstName || ""} ${c.doctor?.lastName || ""}</span>
+                      <span style="font-weight: normal; color: #64748b;">${new Date(c.createdAt).toLocaleDateString()}</span>
                     </div>
-                    <div style="font-size: 12px; margin-top: 4px;"><strong>Diagnosis:</strong> \\\${c.diagnosis}</div>
-                    <div class="notes-block">\\\${c.clinicalNotes}</div>
+                    <div style="font-size: 12px; margin-top: 4px;"><strong>Diagnosis:</strong> ${c.diagnosis}</div>
+                    <div class="notes-block">${c.clinicalNotes}</div>
                   </div>
-                \\\`).join("")}
+                `).join("")}
               </div>
-            \`}
+            `}
 
             <!-- 3. Historical Vitals Trend -->
             <div class="section-title">Vitals Charting Record</div>
-            \${vitals.length === 0 ? \`<p style="font-size: 12px; color: #64748b;">No vital charting records.</p>\` : \`
+            ${vitals.length === 0 ? `<p style="font-size: 12px; color: #64748b;">No vital charting records.</p>` : `
               <table class="report-table">
                 <thead>
                   <tr>
                     <th>Date / Time</th>
                     <th>Blood Pressure</th>
                     <th>Heart Rate</th>
-                    <th>Temp (°C)</th>
+                    <th>Temp (°F)</th>
                     <th>SpO2 (%)</th>
                     <th>Blood Sugar</th>
                   </tr>
                 </thead>
                 <tbody>
-                  \${vitals.map(v => \\\`
+                  ${vitals.map(v => `
                     <tr>
-                      <td>\\\${new Date(v.recordedAt).toLocaleString()}</td>
-                      <td>\\\${v.bloodPressure || "N/A"}</td>
-                      <td>\\\${v.heartRate ? v.heartRate + " bpm" : "N/A"}</td>
-                      <td>\\\${v.temperature ? v.temperature + " °C" : "N/A"}</td>
-                      <td>\\\${v.spo2 ? v.spo2 + " %" : "N/A"}</td>
-                      <td>\\\${v.bloodSugar || "N/A"}</td>
+                      <td>${new Date(v.recordedAt || v.createdAt).toLocaleString()}</td>
+                      <td>${v.bp || "N/A"}</td>
+                      <td>${v.heartRate ? v.heartRate + " bpm" : "N/A"}</td>
+                      <td>${v.temperature ? v.temperature + " °F" : "N/A"}</td>
+                      <td>${v.spo2 ? v.spo2 + " %" : "N/A"}</td>
+                      <td>${v.sugar ? v.sugar + " mg/dL" : "N/A"}</td>
                     </tr>
-                  \\\`).join("")}
+                  `).join("")}
                 </tbody>
               </table>
-            \`}
+            `}
 
-            <!-- 4. Laboratory Report Diagnostics -->
+            <!-- 4. Clinical Medications & Prescriptions -->
+            <div class="section-title">Clinical Medications & Prescriptions</div>
+            ${medications.length === 0 ? `<p style="font-size: 12px; color: #64748b;">No clinical medications logged.</p>` : `
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Medication Name</th>
+                    <th>Dosage</th>
+                    <th>Frequency</th>
+                    <th>Prescribed By</th>
+                    <th>Given By / Administered</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${medications.map(m => `
+                    <tr>
+                      <td><strong>${m.medicationName}</strong></td>
+                      <td>${m.dosage}</td>
+                      <td>${m.frequency}</td>
+                      <td>Dr. ${m.prescribedBy ? m.prescribedBy.firstName + " " + m.prescribedBy.lastName : "N/A"}</td>
+                      <td>${m.givenBy ? m.givenBy.firstName + " " + m.givenBy.lastName + " at " + new Date(m.givenAt).toLocaleString() : "Not Administered"}</td>
+                      <td><span class="badge ${m.status === "DISPENSED" || m.status === "GIVEN" ? "badge-paid" : "badge-unpaid"}">${m.status}</span></td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            `}
+
+            <!-- 5. Laboratory Report Diagnostics -->
             <div class="section-title">Diagnostic Laboratory Investigations</div>
-            \${labs.length === 0 ? \`<p style="font-size: 12px; color: #64748b;">No lab orders recorded.</p>\` : \`
+            ${labs.length === 0 ? `<p style="font-size: 12px; color: #64748b;">No lab orders recorded.</p>` : `
               <table class="report-table">
                 <thead>
                   <tr>
@@ -813,22 +842,22 @@ const Dashboard = ({
                   </tr>
                 </thead>
                 <tbody>
-                  \${labs.map(l => \\\`
+                  ${labs.map(l => `
                     <tr>
-                      <td>\\\${new Date(l.createdAt).toLocaleDateString()}</td>
-                      <td><strong>\\\${l.testName}</strong></td>
-                      <td>\\\${l.results || \`<span style="color: #d97706; font-style: italic;">Results Pending</span>\`}</td>
-                      <td>\\\${l.isEmergency ? "STAT EMERGENCY" : "ROUTINE"}</td>
-                      <td><span class="badge \\\${l.status === "COMPLETED" ? "badge-paid" : "badge-unpaid"}">\\\${l.status}</span></td>
+                      <td>${new Date(l.createdAt).toLocaleDateString()}</td>
+                      <td><strong>${l.testName}</strong></td>
+                      <td>${l.results || `<span style="color: #d97706; font-style: italic;">Results Pending</span>`}</td>
+                      <td>${l.isEmergency ? "STAT EMERGENCY" : "ROUTINE"}</td>
+                      <td><span class="badge ${l.status === "COMPLETED" ? "badge-paid" : "badge-unpaid"}">${l.status}</span></td>
                     </tr>
-                  \\\`).join("")}
+                  `).join("")}
                 </tbody>
               </table>
-            \`}
+            `}
 
-            <!-- 5. Hospital Billing Statement -->
+            <!-- 6. Hospital Billing Statement -->
             <div class="section-title">Hospital Billing Ledger Statement</div>
-            \${invoices.length === 0 ? \`<p style="font-size: 12px; color: #64748b;">No billing invoices recorded.</p>\` : \`
+            ${invoices.length === 0 ? `<p style="font-size: 12px; color: #64748b;">No billing invoices recorded.</p>` : `
               <table class="report-table">
                 <thead>
                   <tr>
@@ -842,25 +871,25 @@ const Dashboard = ({
                   </tr>
                 </thead>
                 <tbody>
-                  \${invoices.map(i => \\\`
+                  ${invoices.map(i => `
                     <tr>
-                      <td><strong>\\\${i.invoiceNumber || i.billNumber || i._id}</strong></td>
-                      <td>\\\${i.category || "Consultation Fee"}</td>
-                      <td>\\\${i.itemName || "OPD Check-up"}</td>
-                      <td>\\\${new Date(i.createdAt).toLocaleDateString()}</td>
-                      <td>\\\${i.paymentMethod}</td>
-                      <td>₹\\\${i.paidAmount !== undefined ? i.paidAmount : (i.status === "PAID" ? i.totalAmount : 0)}.00</td>
-                      <td style="text-align: right; font-weight: 700;">₹\\\${i.totalAmount}.00</td>
+                      <td><strong>${i.invoiceNumber || i.billNumber || i._id}</strong></td>
+                      <td>${i.category || "Consultation Fee"}</td>
+                      <td>${i.itemName || "OPD Check-up"}</td>
+                      <td>${new Date(i.createdAt).toLocaleDateString()}</td>
+                      <td>${i.paymentMethod}</td>
+                      <td>₹${i.paidAmount !== undefined ? i.paidAmount : (i.status === "PAID" ? i.totalAmount : 0)}.00</td>
+                      <td style="text-align: right; font-weight: 700;">₹${i.totalAmount}.00</td>
                     </tr>
-                  \\\`).join("")}
+                  `).join("")}
                   <tr style="font-weight: 700; font-size: 13px; background-color: #f8fafc;">
                     <td colspan="5" style="text-align: right;">Total Settle Summary:</td>
-                    <td style="color: #16a34a;">₹\${invoices.reduce((acc, curr) => acc + (curr.paidAmount !== undefined ? curr.paidAmount : (curr.status === "PAID" ? curr.totalAmount : 0)), 0)}.00</td>
-                    <td style="text-align: right; color: #0284c7;">₹\${invoices.reduce((acc, curr) => acc + curr.totalAmount, 0)}.00</td>
+                    <td style="color: #16a34a;">₹${invoices.reduce((acc, curr) => acc + (curr.paidAmount !== undefined ? curr.paidAmount : (curr.status === "PAID" ? curr.totalAmount : 0)), 0)}.00</td>
+                    <td style="text-align: right; color: #0284c7;">₹${invoices.reduce((acc, curr) => acc + curr.totalAmount, 0)}.00</td>
                   </tr>
                 </tbody>
               </table>
-            \`}
+            `}
 
             <script>
               setTimeout(() => { window.print(); }, 800);
