@@ -1648,6 +1648,96 @@ const PatientManagement = () => {
     document.body.removeChild(link);
   };
 
+  const handlePrintNursingNotes = () => {
+    if (!clinicalData?.notes || clinicalData.notes.length === 0) return;
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Nursing Observations Log - ${selectedPatient.firstName} ${selectedPatient.lastName}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #1e293b; max-width: 700px; margin: 0 auto; line-height: 1.6; }
+            .header { border-bottom: 2px solid #0284c7; padding-bottom: 15px; margin-bottom: 20px; }
+            .title { font-size: 22px; font-weight: 800; color: #0284c7; margin: 0; }
+            .meta { font-size: 13px; color: #64748b; margin-top: 5px; }
+            .note-item { border-bottom: 1px solid #e2e8f0; padding: 12px 0; }
+            .note-text { font-size: 14px; color: #0f172a; font-weight: 500; margin: 0 0 4px 0; }
+            .note-meta { font-size: 11px; color: #64748b; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1 class="title">Patient Nursing Observations History Log</h1>
+            <div class="meta">
+              Patient: <strong>${selectedPatient.firstName} ${selectedPatient.lastName}</strong> | UHID: <strong>${selectedPatient.uhid}</strong><br>
+              Generated on: ${new Date().toLocaleString()}
+            </div>
+          </div>
+          <div>
+            ${clinicalData.notes.map(n => `
+              <div class="note-item">
+                <p class="note-text">${n.note}</p>
+                <div class="note-meta">
+                  Logged by: ${n.recordedBy ? n.recordedBy.firstName + ' ' + n.recordedBy.lastName : 'Staff'} on ${new Date(n.createdAt).toLocaleString()}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+          <script>
+            setTimeout(() => { window.print(); }, 500);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const handleDownloadNursingNotes = () => {
+    if (!clinicalData?.notes || clinicalData.notes.length === 0) return;
+    const htmlContent = `
+      <html>
+        <head>
+          <title>Nursing Observations Log - ${selectedPatient.firstName} ${selectedPatient.lastName}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #1e293b; max-width: 700px; margin: 0 auto; line-height: 1.6; }
+            .header { border-bottom: 2px solid #0284c7; padding-bottom: 15px; margin-bottom: 20px; }
+            .title { font-size: 22px; font-weight: 800; color: #0284c7; margin: 0; }
+            .meta { font-size: 13px; color: #64748b; margin-top: 5px; }
+            .note-item { border-bottom: 1px solid #e2e8f0; padding: 12px 0; }
+            .note-text { font-size: 14px; color: #0f172a; font-weight: 500; margin: 0 0 4px 0; }
+            .note-meta { font-size: 11px; color: #64748b; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1 class="title">Patient Nursing Observations History Log</h1>
+            <div class="meta">
+              Patient: <strong>${selectedPatient.firstName} ${selectedPatient.lastName}</strong> | UHID: <strong>${selectedPatient.uhid}</strong><br>
+              Generated on: ${new Date().toLocaleString()}
+            </div>
+          </div>
+          <div>
+            ${clinicalData.notes.map(n => `
+              <div class="note-item">
+                <p class="note-text">${n.note}</p>
+                <div class="note-meta">
+                  Logged by: ${n.recordedBy ? n.recordedBy.firstName + ' ' + n.recordedBy.lastName : 'Staff'} on ${new Date(n.createdAt).toLocaleString()}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </body>
+      </html>
+    `;
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `nursing_notes_${selectedPatient.uhid}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Doctor EMR Save Handlers
   const handleSaveConsultation = async (e) => {
     e.preventDefault();
@@ -2196,52 +2286,72 @@ const PatientManagement = () => {
                 overflowX: "auto" 
               }}
             >
-              {(user?.role === "DOCTOR" ? [
-                { id: "consultation", label: "Consultation Room", icon: Stethoscope },
-                { id: "history", label: "Medical History", icon: Clock },
-                { id: "prescriptions", label: "Prescribe Meds", icon: Pill },
-                { id: "instructions", label: "Nurse Tasks", icon: ClipboardList },
-                { id: "labs", label: "Order Labs", icon: Activity },
-                { id: "vitals", label: "Vitals & Notes", icon: VitalsIcon },
-                { id: "family", label: "Family & Relations", icon: UserCheck },
-                { id: "discharge", label: "Discharge Patient", icon: ShieldAlert },
-                { id: "documents", label: "Attachments & Docs", icon: FileText }
-              ] : [
-                { id: "overview", label: "Overview", icon: User },
-                { id: "vitals", label: "Vitals", icon: VitalsIcon },
-                { id: "medications", label: "Medications", icon: Calendar },
-                { id: "instructions", label: "Instructions", icon: ClipboardList },
-                { id: "notes", label: "Notes", icon: Save },
-                { id: "labs", label: "Labs", icon: Activity },
-                { id: "family", label: "Family & Relations", icon: UserCheck },
-                { id: "documents", label: "Documents", icon: FileText }
-              ]).map((tab) => {
-                const TabIcon = tab.icon;
-                const isActive = activeDrawerTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveDrawerTab(tab.id)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.4rem",
-                      padding: "0.85rem 1rem",
-                      border: "none",
-                      background: "none",
-                      borderBottom: isActive ? "3px solid #0284c7" : "3px solid transparent",
-                      color: isActive ? "#0284c7" : "#64748b",
-                      fontWeight: isActive ? 700 : 500,
-                      cursor: "pointer",
-                      fontSize: "0.85rem",
-                      outline: "none"
-                    }}
-                  >
-                    <TabIcon size={16} />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
+              {(() => {
+                const tabs = [];
+                if (user?.role === "DOCTOR") {
+                  tabs.push(
+                    { id: "consultation", label: "Consultation Room", icon: Stethoscope },
+                    { id: "history", label: "Medical History", icon: Clock },
+                    { id: "prescriptions", label: "Prescribe Meds", icon: Pill },
+                    { id: "instructions", label: "Nurse Tasks", icon: ClipboardList },
+                    { id: "labs", label: "Order Labs", icon: Activity },
+                    { id: "vitals", label: "Vitals & Notes", icon: VitalsIcon },
+                    { id: "family", label: "Family & Relations", icon: UserCheck },
+                    { id: "discharge", label: "Discharge Patient", icon: ShieldAlert },
+                    { id: "documents", label: "Attachments & Docs", icon: FileText }
+                  );
+                } else if (user?.role === "NURSE") {
+                  tabs.push(
+                    { id: "overview", label: "Overview", icon: User },
+                    { id: "history", label: "Medical History", icon: Clock },
+                    { id: "vitals", label: "Vitals", icon: VitalsIcon },
+                    { id: "medications", label: "Medications", icon: Calendar },
+                    { id: "instructions", label: "Instructions", icon: ClipboardList },
+                    { id: "notes", label: "Notes", icon: Save },
+                    { id: "labs", label: "Labs", icon: Activity },
+                    { id: "family", label: "Family & Relations", icon: UserCheck },
+                    { id: "documents", label: "Documents", icon: FileText }
+                  );
+                } else {
+                  tabs.push(
+                    { id: "overview", label: "Overview", icon: User },
+                    { id: "vitals", label: "Vitals", icon: VitalsIcon },
+                    { id: "medications", label: "Medications", icon: Calendar },
+                    { id: "instructions", label: "Instructions", icon: ClipboardList },
+                    { id: "notes", label: "Notes", icon: Save },
+                    { id: "labs", label: "Labs", icon: Activity },
+                    { id: "family", label: "Family & Relations", icon: UserCheck },
+                    { id: "documents", label: "Documents", icon: FileText }
+                  );
+                }
+                return tabs.map((tab) => {
+                  const TabIcon = tab.icon;
+                  const isActive = activeDrawerTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveDrawerTab(tab.id)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.4rem",
+                        padding: "0.85rem 1rem",
+                        border: "none",
+                        background: "none",
+                        borderBottom: isActive ? "3px solid #0284c7" : "3px solid transparent",
+                        color: isActive ? "#0284c7" : "#64748b",
+                        fontWeight: isActive ? 700 : 500,
+                        cursor: "pointer",
+                        fontSize: "0.85rem",
+                        outline: "none"
+                      }}
+                    >
+                      <TabIcon size={16} />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                });
+              })()}
             </div>
 
             {/* Drawer Body content */}
@@ -3297,7 +3407,13 @@ const PatientManagement = () => {
                   {activeDrawerTab === "notes" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                       <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Log Nursing Note</h4>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                          <h4 style={{ margin: 0, fontSize: "1rem", color: "#0f172a" }}>Log Nursing Note</h4>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                            <span style={{ fontSize: "0.75rem", color: "#0284c7", fontWeight: 600 }}>🎙️ AI Voice Dictate:</span>
+                            <AIVoiceAssistant mode="stt" onTranscript={(text) => setNoteText(prev => prev ? prev + " " + text : text)} />
+                          </div>
+                        </div>
                         <form onSubmit={handleSaveNote}>
                           <div className="form-group" style={{ marginBottom: "1rem" }}>
                             <label>Observation & Care Description</label>
@@ -3308,7 +3424,7 @@ const PatientManagement = () => {
                               onChange={(e) => setNoteText(e.target.value)}
                               placeholder="Write patient status details, vital comments, feeding information..."
                               required
-                              style={{ resize: "vertical" }}
+                              style={{ resize: "vertical", width: "100%" }}
                             />
                           </div>
                           <button type="submit" className="btn btn-primary" style={{ width: "fit-content" }} disabled={submittingAction}>
@@ -3320,7 +3436,27 @@ const PatientManagement = () => {
 
                       {/* Notes log */}
                       <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Observations History Log</h4>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                          <h4 style={{ margin: 0, fontSize: "1rem", color: "#0f172a" }}>Observations History Log</h4>
+                          {clinicalData?.notes?.length > 0 && (
+                            <div style={{ display: "flex", gap: "0.5rem" }}>
+                              <button 
+                                onClick={handlePrintNursingNotes} 
+                                className="btn btn-secondary" 
+                                style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", height: "auto" }}
+                              >
+                                Print Notes
+                              </button>
+                              <button 
+                                onClick={handleDownloadNursingNotes} 
+                                className="btn btn-secondary" 
+                                style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", height: "auto" }}
+                              >
+                                Download HTML
+                              </button>
+                            </div>
+                          )}
+                        </div>
                         {!clinicalData?.notes || clinicalData.notes.length === 0 ? (
                           <p style={{ color: "#64748b", margin: 0 }}>No nursing notes logged yet.</p>
                         ) : (

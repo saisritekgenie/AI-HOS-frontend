@@ -7,6 +7,12 @@ const PendingTasks = ({ onBackToDashboard }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const isOverdue = (createdAt) => {
+    if (!createdAt) return false;
+    const elapsed = Date.now() - new Date(createdAt).getTime();
+    return elapsed > 2 * 60 * 60 * 1000; // Overdue if older than 2 hours
+  };
+
   const loadTasks = async () => {
     try {
       setLoading(true);
@@ -36,6 +42,14 @@ const PendingTasks = ({ onBackToDashboard }) => {
 
   return (
     <div>
+      <style>{`
+        @keyframes blinker {
+          50% { opacity: 0; }
+        }
+        .blink {
+          animation: blinker 1.2s linear infinite;
+        }
+      `}</style>
       <div className="page-header">
         <div className="page-title-group">
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
@@ -92,7 +106,7 @@ const PendingTasks = ({ onBackToDashboard }) => {
             </thead>
             <tbody>
               {tasks.map((task) => (
-                <tr key={task._id}>
+                <tr key={task._id} style={{ background: isOverdue(task.createdAt) ? "#fff1f2" : "inherit" }}>
                   <td>
                     <div>
                       <strong style={{ color: "var(--text-primary)" }}>
@@ -114,9 +128,15 @@ const PendingTasks = ({ onBackToDashboard }) => {
                     </div>
                   </td>
                   <td>
-                    <div style={{ fontSize: "0.9rem", color: "#0f172a", maxWidth: "300px", wordBreak: "break-word" }}>
+                    <div style={{ fontSize: "0.9rem", color: task.priority === "HIGH" ? "#ef4444" : "#0f172a", fontWeight: task.priority === "HIGH" ? 700 : 500, maxWidth: "300px", wordBreak: "break-word" }}>
                       {task.instruction}
                     </div>
+                    {isOverdue(task.createdAt) && (
+                      <div style={{ fontSize: "0.7rem", color: "#ef4444", fontWeight: 800, marginTop: "0.25rem", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                        <span className="blink" style={{ width: "6px", height: "6px", background: "#ef4444", borderRadius: "50%", display: "inline-block" }}></span>
+                        <span>OVERDUE BY {Math.round((Date.now() - new Date(task.createdAt).getTime()) / (60 * 60 * 1000))}h+</span>
+                      </div>
+                    )}
                   </td>
                   <td>
                     <span className="badge" style={{ 

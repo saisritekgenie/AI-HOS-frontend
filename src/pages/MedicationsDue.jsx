@@ -7,6 +7,12 @@ const MedicationsDue = ({ onBackToDashboard }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const isOverdue = (createdAt) => {
+    if (!createdAt) return false;
+    const elapsed = Date.now() - new Date(createdAt).getTime();
+    return elapsed > 2 * 60 * 60 * 1000; // Overdue if older than 2 hours
+  };
+
   const loadMeds = async () => {
     try {
       setLoading(true);
@@ -36,6 +42,14 @@ const MedicationsDue = ({ onBackToDashboard }) => {
 
   return (
     <div>
+      <style>{`
+        @keyframes blinker {
+          50% { opacity: 0; }
+        }
+        .blink {
+          animation: blinker 1.2s linear infinite;
+        }
+      `}</style>
       <div className="page-header">
         <div className="page-title-group">
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
@@ -93,7 +107,7 @@ const MedicationsDue = ({ onBackToDashboard }) => {
             </thead>
             <tbody>
               {meds.map((med) => (
-                <tr key={med._id}>
+                <tr key={med._id} style={{ background: isOverdue(med.createdAt) ? "#fff1f2" : "inherit" }}>
                   <td>
                     <div>
                       <strong style={{ color: "var(--text-primary)" }}>
@@ -116,9 +130,15 @@ const MedicationsDue = ({ onBackToDashboard }) => {
                   </td>
                   <td>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontWeight: 700, color: "#0f172a" }}>
-                      <Pill size={16} style={{ color: "#f59e0b" }} />
+                      <Pill size={16} style={{ color: isOverdue(med.createdAt) ? "#ef4444" : "#f59e0b" }} />
                       <span>{med.medicationName}</span>
                     </div>
+                    {isOverdue(med.createdAt) && (
+                      <div style={{ fontSize: "0.7rem", color: "#ef4444", fontWeight: 800, marginTop: "0.25rem", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                        <span className="blink" style={{ width: "6px", height: "6px", background: "#ef4444", borderRadius: "50%", display: "inline-block" }}></span>
+                        <span>OVERDUE BY {Math.round((Date.now() - new Date(med.createdAt).getTime()) / (60 * 60 * 1000))}h+</span>
+                      </div>
+                    )}
                   </td>
                   <td>
                     <span style={{ fontWeight: 600 }}>{med.dosage}</span>
