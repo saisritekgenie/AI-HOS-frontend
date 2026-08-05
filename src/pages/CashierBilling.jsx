@@ -43,7 +43,9 @@ import {
   Bell,
   RefreshCw,
   X,
-  FileText
+  FileText,
+  Eye,
+  EyeOff
 } from "lucide-react";
 
 const CashierBilling = () => {
@@ -131,6 +133,9 @@ const CashierBilling = () => {
     newPassword: "",
     confirmPassword: ""
   });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Refund Modal States
   const [refundModalOpen, setRefundModalOpen] = useState(false);
@@ -519,6 +524,9 @@ const CashierBilling = () => {
       });
       showToast("success", "Password updated successfully");
       setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
     } catch (err) {
       showToast("error", err.response?.data?.message || "Failed to update password");
     }
@@ -1573,38 +1581,101 @@ const CashierBilling = () => {
                 <form onSubmit={handleChangePassword} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   <div className="form-group">
                     <label>Current Secure Password *</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      value={passwordForm.currentPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                      placeholder="••••••••"
-                      required
-                    />
+                    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                      <input
+                        type={showCurrentPassword ? "text" : "password"}
+                        className="form-control"
+                        value={passwordForm.currentPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                        placeholder="••••••••"
+                        style={{ width: "100%", paddingRight: "2.5rem" }}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        style={{
+                          position: "absolute",
+                          right: "0.75rem",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "#64748b",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: 0
+                        }}
+                      >
+                        {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="form-group">
                     <label>New Passphrase *</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      value={passwordForm.newPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                      placeholder="Minimum 6 characters"
-                      required
-                    />
+                    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                      <input
+                        type={showNewPassword ? "text" : "password"}
+                        className="form-control"
+                        value={passwordForm.newPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                        placeholder="Minimum 6 characters"
+                        style={{ width: "100%", paddingRight: "2.5rem" }}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        style={{
+                          position: "absolute",
+                          right: "0.75rem",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "#64748b",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: 0
+                        }}
+                      >
+                        {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="form-group">
                     <label>Confirm New Passphrase *</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      value={passwordForm.confirmPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                      placeholder="••••••••"
-                      required
-                    />
+                    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        className="form-control"
+                        value={passwordForm.confirmPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                        placeholder="••••••••"
+                        style={{ width: "100%", paddingRight: "2.5rem" }}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        style={{
+                          position: "absolute",
+                          right: "0.75rem",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "#64748b",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: 0
+                        }}
+                      >
+                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </div>
 
                   <button type="submit" className="btn btn-primary" style={{ background: "#dc2626", border: "none" }}>

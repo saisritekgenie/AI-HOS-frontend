@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Save } from "lucide-react";
+import { X, Save, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 const UserModal = ({ isOpen, onClose, onSave, editingUser }) => {
@@ -21,6 +21,7 @@ const UserModal = ({ isOpen, onClose, onSave, editingUser }) => {
 
   const [errorMsg, setErrorMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (editingUser) {
@@ -51,6 +52,7 @@ const UserModal = ({ isOpen, onClose, onSave, editingUser }) => {
       });
     }
     setErrorMsg("");
+    setShowPassword(false);
   }, [editingUser, isOpen]);
 
   if (!isOpen) return null;
@@ -197,14 +199,35 @@ const UserModal = ({ isOpen, onClose, onSave, editingUser }) => {
               {!editingUser && (
                 <div className="form-group full-width">
                   <label>Initial Login Password *</label>
-                  <input
-                    type="password"
-                    name="password"
-                    className="form-control"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                  />
+                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      className="form-control"
+                      value={formData.password}
+                      onChange={handleChange}
+                      style={{ width: "100%", paddingRight: "2.5rem" }}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: "absolute",
+                        right: "0.75rem",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "#64748b",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: 0
+                      }}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
               )}
 

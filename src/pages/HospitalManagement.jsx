@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Hospital as HospitalIcon, Plus, CheckCircle, XCircle, Bell, Search, MapPin, Building, ShieldCheck } from "lucide-react";
+import { Hospital as HospitalIcon, Plus, CheckCircle, XCircle, Bell, Search, MapPin, Building, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { fetchHospitals, registerHospital, approveHospital, rejectHospital } from "../services/api";
 
 const HospitalManagement = () => {
@@ -11,6 +11,14 @@ const HospitalManagement = () => {
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  
+  useEffect(() => {
+    if (!isModalOpen) {
+      setShowPassword(false);
+    }
+  }, [isModalOpen]);
+
   const [formData, setFormData] = useState({
     hospitalName: "",
     hospitalCode: "",
@@ -387,13 +395,34 @@ const HospitalManagement = () => {
 
                   <div className="form-group full-width">
                     <label>Initial Admin Password *</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      value={formData.adminPassword}
-                      onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
-                      required
-                    />
+                    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        className="form-control"
+                        value={formData.adminPassword}
+                        onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                        style={{ width: "100%", paddingRight: "2.5rem" }}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{
+                          position: "absolute",
+                          right: "0.75rem",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "#64748b",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: 0
+                        }}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
