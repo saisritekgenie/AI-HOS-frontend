@@ -161,7 +161,7 @@ const HospitalManagement = () => {
           <button
             className="btn btn-secondary"
             onClick={() => setFilterStatus("PENDING_APPROVAL")}
-            style={{ background: "#ffffff", borderColor: "#fde68a", color: "#b45309" }}
+            style={{ background: "var(--bg-secondary)", borderColor: "#fde68a", color: "#b45309" }}
           >
             Filter Pending Requests
           </button>
@@ -413,7 +413,7 @@ const HospitalManagement = () => {
                           background: "none",
                           border: "none",
                           cursor: "pointer",
-                          color: "#64748b",
+                          color: "var(--text-secondary)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",

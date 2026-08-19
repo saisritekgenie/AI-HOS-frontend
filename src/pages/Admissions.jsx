@@ -175,14 +175,21 @@ const Admissions = () => {
               {filteredAdmissions.map((adm) => (
                 <tr key={adm._id}>
                   <td>
-                    <span className="badge" style={{ background: "#e0f2fe", color: "#0284c7", fontWeight: 700 }}>
+                    <span className="badge" style={{ background: "rgba(8, 127, 140, 0.08)", color: "var(--accent-primary)", fontWeight: 700 }}>
                       {adm.patient?.uhid || "N/A"}
                     </span>
                   </td>
                   <td>
                     <strong>{adm.patient?.firstName} {adm.patient?.lastName}</strong>
                   </td>
-                  <td>{adm.department}</td>
+                  <td>
+                    <div>{adm.department}</div>
+                    {adm.patient?.assignedDoctor && (
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontStyle: "italic" }}>
+                        Dr. {adm.patient.assignedDoctor.firstName} {adm.patient.assignedDoctor.lastName}
+                      </div>
+                    )}
+                  </td>
                   <td>
                     <strong>{adm.wardNo}</strong>
                   </td>
@@ -192,25 +199,35 @@ const Admissions = () => {
                   <td>{new Date(adm.admissionDate).toLocaleDateString()}</td>
                   <td>
                     <span className="badge" style={{
-                      background: adm.status === "ADMITTED" ? "#fee2e2" : "#f1f5f9",
-                      color: adm.status === "ADMITTED" ? "#ef4444" : "#64748b",
+                      background: 
+                        adm.status === "CRITICAL" ? "rgba(239, 68, 68, 0.1)" :
+                        adm.status === "READY_FOR_DISCHARGE" ? "rgba(59, 130, 246, 0.1)" :
+                        adm.status === "UNDER_TREATMENT" ? "rgba(16, 185, 129, 0.1)" :
+                        adm.status === "ADMITTED" ? "rgba(245, 158, 11, 0.1)" :
+                        "rgba(100, 116, 139, 0.1)",
+                      color: 
+                        adm.status === "CRITICAL" ? "#ef4444" :
+                        adm.status === "READY_FOR_DISCHARGE" ? "#3b82f6" :
+                        adm.status === "UNDER_TREATMENT" ? "#10b981" :
+                        adm.status === "ADMITTED" ? "#f59e0b" :
+                        "#64748b",
                       fontWeight: 700
                     }}>
-                      {adm.status}
+                      {adm.status.replace("_", " ")}
                     </span>
                   </td>
                   <td style={{ textAlign: "right" }}>
-                    {adm.status === "ADMITTED" ? (
+                    {adm.status !== "DISCHARGED" ? (
                       <button 
                         onClick={() => handleDischarge(adm._id)} 
                         className="btn btn-secondary" 
-                        style={{ padding: "0.35rem 0.75rem", fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.25rem", borderColor: "#ef4444", color: "#ef4444", background: "#fdf2f2" }}
+                        style={{ padding: "0.35rem 0.75rem", fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.25rem", borderColor: "var(--status-inactive-text)", color: "var(--status-inactive-text)", background: "var(--status-inactive-bg)" }}
                       >
                         <LogOut size={12} />
                         <span>Discharge</span>
                       </button>
                     ) : (
-                      <span style={{ fontSize: "0.8rem", color: "#64748b" }}>
+                      <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
                         Released {new Date(adm.dischargeDate).toLocaleDateString()}
                       </span>
                     )}

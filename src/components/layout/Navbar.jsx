@@ -1,10 +1,16 @@
-import React from "react";
-import { Activity, Bell, ShieldCheck, LogOut, Building, Menu } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Activity, Bell, ShieldCheck, LogOut, Building, Menu, Sun, Moon } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 const Navbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
   const hospitalName = user?.hospital?.name || "SaaS Master HQ";
+
+  useEffect(() => {
+    document.body.classList.add("light-theme");
+    document.body.classList.remove("dark-theme");
+    localStorage.setItem("theme", "light");
+  }, []);
 
   return (
     <header className="navbar">
@@ -30,10 +36,10 @@ const Navbar = ({ onMenuClick }) => {
         </button>
 
         <div className="navbar-brand">
-          <Activity className="w-6 h-6 text-sky-600" />
+          <Activity size={24} style={{ color: "var(--accent-primary)" }} />
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span className="brand-title-main">AI Hospital System</span>
-            <span className="brand-title-sub" style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 600, display: "flex", alignItems: "center", gap: "0.25rem" }}>
+            <span className="brand-title-sub" style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 600, display: "flex", alignItems: "center", gap: "0.25rem" }}>
               <Building size={12} />
               {hospitalName}
             </span>
@@ -42,6 +48,9 @@ const Navbar = ({ onMenuClick }) => {
       </div>
 
       <div className="navbar-user">
+
+
+
         <button className="action-btn" title="Notifications">
           <Bell size={20} />
         </button>

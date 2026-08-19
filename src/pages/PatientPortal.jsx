@@ -826,7 +826,7 @@ const PatientPortal = () => {
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fafc" }}>
         <div style={{ textAlign: "center" }}>
           <div className="spinner" style={{ border: "4px solid #f3f3f3", borderTop: "4px solid #0284c7", borderRadius: "50%", width: "40px", height: "40px", animation: "spin 1s linear infinite", margin: "0 auto 1rem" }}></div>
-          <p style={{ color: "#64748b", fontWeight: 600 }}>Loading your secure medical portal...</p>
+          <p style={{ color: "var(--text-secondary)", fontWeight: 600 }}>Loading your secure medical portal...</p>
         </div>
       </div>
     );
@@ -870,22 +870,22 @@ const PatientPortal = () => {
         }
       `}</style>
       {/* Top Navbar */}
-      <header style={{ background: "white", borderBottom: "1px solid #e2e8f0", padding: "1rem 2rem", position: "sticky", top: 0, zIndex: 10 }}>
+      <header style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border-glass)", padding: "1rem 2rem", position: "sticky", top: 0, zIndex: 10 }}>
         <div className="portal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "1280px", margin: "0 auto" }}>
           <div className="portal-header-left" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <div style={{ width: "40px", height: "40px", borderRadius: "12px", background: "linear-gradient(135deg, #0284c7 0%, #4f46e5 100%)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
               <Activity size={24} />
             </div>
             <div style={{ textAlign: "left" }}>
-              <h1 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: "-0.5px" }}>MediCore Patient Portal</h1>
-              <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 500 }}>Secure Clinical Access</span>
+              <h1 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.5px" }}>MediCore Patient Portal</h1>
+              <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 500 }}>Secure Clinical Access</span>
             </div>
           </div>
 
           <div className="portal-header-right" style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "#0f172a" }}>{patient.firstName} {patient.lastName}</div>
-              <div style={{ fontSize: "0.75rem", color: "#0284c7", fontWeight: 700 }}>{patient.uhid}</div>
+              <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-primary)" }}>{patient.firstName} {patient.lastName}</div>
+              <div style={{ fontSize: "0.75rem", color: "var(--accent-primary)", fontWeight: 700 }}>{patient.uhid}</div>
             </div>
             <button 
               onClick={logout}
@@ -915,31 +915,31 @@ const PatientPortal = () => {
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           
           {/* Card: My File Profile */}
-          <div className="table-container" style={{ padding: "1.5rem", background: "white" }}>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: "0 0 1rem 0", color: "#0f172a", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+          <div className="table-container" style={{ padding: "1.5rem", background: "var(--bg-secondary)" }}>
+            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: "0 0 1rem 0", color: "var(--text-primary)", borderBottom: "1px solid var(--border-glass)", paddingBottom: "0.5rem" }}>
               My Patient File
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", fontSize: "0.9rem" }}>
               <div>
-                <span style={{ color: "#64748b" }}>Assigned Hospital:</span>
-                <strong style={{ display: "block", color: "#0f172a" }}>{patient.hospital?.name || "MediCore General Hospital"}</strong>
+                <span style={{ color: "var(--text-secondary)" }}>Assigned Hospital:</span>
+                <strong style={{ display: "block", color: "var(--text-primary)" }}>{patient.hospital?.name || "MediCore General Hospital"}</strong>
               </div>
               <div>
-                <span style={{ color: "#64748b" }}>Contact Number:</span>
-                <strong style={{ display: "block", color: "#0f172a" }}>{patient.mobile || "N/A"}</strong>
+                <span style={{ color: "var(--text-secondary)" }}>Contact Number:</span>
+                <strong style={{ display: "block", color: "var(--text-primary)" }}>{patient.mobile || "N/A"}</strong>
               </div>
               <div>
-                <span style={{ color: "#64748b" }}>Blood Group:</span>
-                <strong style={{ display: "block", color: "#0f172a" }}>{patient.bloodGroup || "O+"}</strong>
+                <span style={{ color: "var(--text-secondary)" }}>Blood Group:</span>
+                <strong style={{ display: "block", color: "var(--text-primary)" }}>{patient.bloodGroup || "O+"}</strong>
               </div>
               <div>
-                <span style={{ color: "#64748b" }}>Registered Type:</span>
-                <strong style={{ display: "block", color: "#0f172a" }}>{patient.registrationType || "WALK_IN"}</strong>
+                <span style={{ color: "var(--text-secondary)" }}>Registered Type:</span>
+                <strong style={{ display: "block", color: "var(--text-primary)" }}>{patient.registrationType || "WALK_IN"}</strong>
               </div>
               {patient.assignedDoctor && (
                 <div>
-                  <span style={{ color: "#64748b" }}>Primary Physician:</span>
-                  <strong style={{ display: "block", color: "#0f172a" }}>Dr. {patient.assignedDoctor.firstName} {patient.assignedDoctor.lastName}</strong>
+                  <span style={{ color: "var(--text-secondary)" }}>Primary Physician:</span>
+                  <strong style={{ display: "block", color: "var(--text-primary)" }}>Dr. {patient.assignedDoctor.firstName} {patient.assignedDoctor.lastName}</strong>
                 </div>
               )}
               
@@ -955,13 +955,13 @@ const PatientPortal = () => {
           </div>
 
           {/* Card: Active Clinical Alerts */}
-          <div className="table-container" style={{ padding: "1.5rem", background: "white" }}>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: "0 0 1rem 0", color: "#0f172a", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+          <div className="table-container" style={{ padding: "1.5rem", background: "var(--bg-secondary)" }}>
+            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: "0 0 1rem 0", color: "var(--text-primary)", borderBottom: "1px solid var(--border-glass)", paddingBottom: "0.5rem" }}>
               Clinical Warnings & Allergies
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
               {(!patient.allergies?.length && !patient.chronicDiseases?.length && !patient.vaccinations?.length) ? (
-                <p style={{ color: "#64748b", fontSize: "0.85rem", margin: 0 }}>No clinical alerts or allergies recorded.</p>
+                <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", margin: 0 }}>No clinical alerts or allergies recorded.</p>
               ) : (
                 <>
                   {patient.allergies?.length > 0 && (
@@ -1002,9 +1002,9 @@ const PatientPortal = () => {
           </div>
 
           {/* Card: Billing Receipts & Invoices */}
-          <div className="table-container" style={{ padding: "1.5rem", background: "white" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem", marginBottom: "1rem" }}>
-              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: 0, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.35rem" }}>
+          <div className="table-container" style={{ padding: "1.5rem", background: "var(--bg-secondary)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-glass)", paddingBottom: "0.5rem", marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: 0, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "0.35rem" }}>
                 <DollarSign size={18} className="text-amber-500" />
                 <span>My Invoices</span>
               </h3>
@@ -1019,7 +1019,7 @@ const PatientPortal = () => {
               )}
             </div>
             {invoices.length === 0 ? (
-              <p style={{ color: "#64748b", fontSize: "0.85rem", margin: 0 }}>No billing invoices generated.</p>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", margin: 0 }}>No billing invoices generated.</p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 {invoices.map((inv) => (
@@ -1030,10 +1030,10 @@ const PatientPortal = () => {
                       display: "flex", 
                       justifyContent: "space-between", 
                       alignItems: "center", 
-                      border: "1px solid #e2e8f0", 
+                      border: "1px solid var(--border-glass)", 
                       padding: "0.85rem 1rem", 
                       borderRadius: "10px", 
-                      background: "#ffffff", 
+                      background: "var(--bg-secondary)", 
                       cursor: "pointer",
                       boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
                       transition: "transform 0.15s ease"
@@ -1043,13 +1043,13 @@ const PatientPortal = () => {
                     onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
                   >
                     <div>
-                      <strong style={{ fontSize: "0.85rem", color: "#0f172a", display: "block" }}>
+                      <strong style={{ fontSize: "0.85rem", color: "var(--text-primary)", display: "block" }}>
                         Inv: {inv.invoiceNumber}
                         <span style={{ fontSize: "0.7rem", color: "#6366f1", fontWeight: 700, marginLeft: "0.35rem" }}>
                           ({inv.type === "OUTPATIENT_CONSULTATION" ? "Consultation" : inv.category || "Clinical"})
                         </span>
                       </strong>
-                      <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                      <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
                         Balance: <strong>₹{inv.balanceAmount}</strong> / Total: ₹{inv.totalAmount}
                       </span>
                     </div>
@@ -1062,7 +1062,7 @@ const PatientPortal = () => {
                       }}>
                         {inv.status}
                       </span>
-                      <span style={{ fontSize: "0.75rem", color: "#0284c7", fontWeight: 700 }}>Receipt →</span>
+                      <span style={{ fontSize: "0.75rem", color: "var(--accent-primary)", fontWeight: 700 }}>Receipt →</span>
                     </div>
                   </div>
                 ))}
@@ -1117,7 +1117,7 @@ const PatientPortal = () => {
                 )}
               </div>
             ) : (
-              <p style={{ color: "#64748b", fontSize: "0.85rem", margin: 0 }}>Loading clinical summaries...</p>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", margin: 0 }}>Loading clinical summaries...</p>
             )}
           </div>
 
@@ -1129,7 +1129,7 @@ const PatientPortal = () => {
             </h3>
             <div style={{ padding: "1.5rem" }}>
               {!clinicalData?.medications || clinicalData.medications.length === 0 ? (
-                <p style={{ color: "#64748b", margin: 0 }}>No active prescriptions logged.</p>
+                <p style={{ color: "var(--text-secondary)", margin: 0 }}>No active prescriptions logged.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   {clinicalData.medications.map((m) => (
@@ -1139,7 +1139,7 @@ const PatientPortal = () => {
                         display: "flex", 
                         justifyContent: "space-between", 
                         alignItems: "center", 
-                        border: "1px solid #e2e8f0", 
+                        border: "1px solid var(--border-glass)", 
                         padding: "1rem 1.25rem", 
                         borderRadius: "12px", 
                         background: m.status === "GIVEN" ? "#f0fdf4" : "#ffffff",
@@ -1147,11 +1147,11 @@ const PatientPortal = () => {
                       }}
                     >
                       <div>
-                        <strong style={{ fontSize: "0.95rem", color: "#0f172a", display: "block" }}>{m.medicationName}</strong>
-                        <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.25rem" }}>
+                        <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>{m.medicationName}</strong>
+                        <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: "0.25rem" }}>
                           Dosage: <strong>{m.dosage}</strong> | Frequency: <strong>{m.frequency}</strong>
                         </div>
-                        <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.2rem" }}>
+                        <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "0.2rem" }}>
                           Prescribed by Dr. {m.prescribedBy ? `${m.prescribedBy.firstName} ${m.prescribedBy.lastName}` : "Doctor"}
                         </div>
                       </div>
@@ -1184,13 +1184,13 @@ const PatientPortal = () => {
             </h3>
             <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
               {!clinicalData?.instructions || clinicalData.instructions.length === 0 ? (
-                <p style={{ color: "#64748b", margin: 0 }}>No nursing or care instructions listed.</p>
+                <p style={{ color: "var(--text-secondary)", margin: 0 }}>No nursing or care instructions listed.</p>
               ) : (
                 clinicalData.instructions.map((inst) => (
-                  <div key={inst._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #e2e8f0", padding: "1rem", borderRadius: "10px", background: inst.status === "COMPLETED" ? "#f8fafc" : "white" }}>
+                  <div key={inst._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid var(--border-glass)", padding: "1rem", borderRadius: "10px", background: inst.status === "COMPLETED" ? "#f8fafc" : "white" }}>
                     <div>
-                      <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.9rem", color: "#0f172a" }}>{inst.instruction}</p>
-                      <span style={{ fontSize: "0.75rem", color: "#64748b" }}>Ordered by Dr. {inst.prescribedBy?.firstName} {inst.prescribedBy?.lastName}</span>
+                      <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.9rem", color: "var(--text-primary)" }}>{inst.instruction}</p>
+                      <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Ordered by Dr. {inst.prescribedBy?.firstName} {inst.prescribedBy?.lastName}</span>
                     </div>
                     <span className="badge" style={{ 
                       background: inst.priority === "HIGH" ? "#fee2e2" : inst.priority === "MEDIUM" ? "#fef3c7" : "#f1f5f9", 
@@ -1214,7 +1214,7 @@ const PatientPortal = () => {
             </h3>
             <div style={{ padding: "1.5rem" }}>
               {!clinicalData?.labs || clinicalData.labs.length === 0 ? (
-                <p style={{ color: "#64748b", margin: 0 }}>No lab test records found.</p>
+                <p style={{ color: "var(--text-secondary)", margin: 0 }}>No lab test records found.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   {clinicalData.labs.map((lab) => (
@@ -1225,10 +1225,10 @@ const PatientPortal = () => {
                         display: "flex", 
                         justifyContent: "space-between", 
                         alignItems: "center", 
-                        border: "1px solid #e2e8f0", 
+                        border: "1px solid var(--border-glass)", 
                         padding: "1.25rem", 
                         borderRadius: "12px", 
-                        background: "#ffffff",
+                        background: "var(--bg-secondary)",
                         cursor: "pointer",
                         boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
                         transition: "transform 0.15s ease, box-shadow 0.15s ease"
@@ -1244,8 +1244,8 @@ const PatientPortal = () => {
                       }}
                     >
                       <div>
-                        <strong style={{ fontSize: "0.95rem", color: "#0f172a", display: "block" }}>{lab.testName}</strong>
-                        <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.25rem" }}>
+                        <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>{lab.testName}</strong>
+                        <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "0.25rem" }}>
                           Ordered by Dr. {lab.prescribedBy?.firstName} {lab.prescribedBy?.lastName}
                         </div>
                       </div>
@@ -1258,7 +1258,7 @@ const PatientPortal = () => {
                         }}>
                           {lab.status === "COMPLETED" ? "REPORT RELEASED" : lab.status === "REJECTED" ? "REJECTED" : lab.status === "SAMPLE_COLLECTED" ? "SAMPLE COLLECTED (PROCESSING)" : lab.status === "ACCEPTED" ? "ACCEPTED (PROCESSING)" : "AWAITING SAMPLE"}
                         </span>
-                        <span style={{ fontSize: "0.8rem", color: "#0284c7", fontWeight: 700 }}>View Details →</span>
+                        <span style={{ fontSize: "0.8rem", color: "var(--accent-primary)", fontWeight: 700 }}>View Details →</span>
                       </div>
                     </div>
                   ))}
@@ -1275,41 +1275,41 @@ const PatientPortal = () => {
             </h3>
             <div style={{ padding: "1.5rem" }}>
               {!clinicalData?.vitals || clinicalData.vitals.length === 0 ? (
-                <p style={{ color: "#64748b", margin: 0 }}>No vitals recorded by nursing staff yet.</p>
+                <p style={{ color: "var(--text-secondary)", margin: 0 }}>No vitals recorded by nursing staff yet.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   {clinicalData.vitals.map((v) => (
                     <div 
                       key={v._id} 
                       style={{ 
-                        border: "1px solid #e2e8f0", 
+                        border: "1px solid var(--border-glass)", 
                         padding: "1.25rem", 
                         borderRadius: "12px", 
-                        background: "#ffffff",
+                        background: "var(--bg-secondary)",
                         boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
                       }}
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #f1f5f9", paddingBottom: "0.5rem", marginBottom: "0.75rem" }}>
-                        <span style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 600 }}>Record Date: {new Date(v.createdAt).toLocaleDateString()}</span>
-                        <span style={{ fontSize: "0.75rem", color: "#64748b" }}>By: {v.recordedBy ? `${v.recordedBy.firstName} ${v.recordedBy.lastName}` : "Nurse"}</span>
+                      <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--border-glass)", paddingBottom: "0.5rem", marginBottom: "0.75rem" }}>
+                        <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", fontWeight: 600 }}>Record Date: {new Date(v.createdAt).toLocaleDateString()}</span>
+                        <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>By: {v.recordedBy ? `${v.recordedBy.firstName} ${v.recordedBy.lastName}` : "Nurse"}</span>
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: "0.75rem" }}>
                         {v.temperature && (
-                          <div style={{ background: "#f8fafc", padding: "0.5rem", borderRadius: "8px", border: "1px solid #f1f5f9" }}>
-                            <div style={{ fontSize: "0.7rem", color: "#64748b" }}>Temp</div>
-                            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "#0f172a" }}>{v.temperature}°F</div>
+                          <div style={{ background: "#f8fafc", padding: "0.5rem", borderRadius: "8px", border: "1px solid var(--border-glass)" }}>
+                            <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>Temp</div>
+                            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-primary)" }}>{v.temperature}°F</div>
                           </div>
                         )}
                         {v.bp && (
-                          <div style={{ background: "#f8fafc", padding: "0.5rem", borderRadius: "8px", border: "1px solid #f1f5f9" }}>
-                            <div style={{ fontSize: "0.7rem", color: "#64748b" }}>BP</div>
-                            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "#0f172a" }}>{v.bp}</div>
+                          <div style={{ background: "#f8fafc", padding: "0.5rem", borderRadius: "8px", border: "1px solid var(--border-glass)" }}>
+                            <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>BP</div>
+                            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-primary)" }}>{v.bp}</div>
                           </div>
                         )}
                         {v.heartRate && (
-                          <div style={{ background: "#f8fafc", padding: "0.5rem", borderRadius: "8px", border: "1px solid #f1f5f9" }}>
-                            <div style={{ fontSize: "0.7rem", color: "#64748b" }}>Pulse</div>
-                            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "#0f172a" }}>{v.heartRate} bpm</div>
+                          <div style={{ background: "#f8fafc", padding: "0.5rem", borderRadius: "8px", border: "1px solid var(--border-glass)" }}>
+                            <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>Pulse</div>
+                            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-primary)" }}>{v.heartRate} bpm</div>
                           </div>
                         )}
                         {v.spo2 && (
@@ -1322,9 +1322,9 @@ const PatientPortal = () => {
                           </div>
                         )}
                         {v.sugar && (
-                          <div style={{ background: "#f8fafc", padding: "0.5rem", borderRadius: "8px", border: "1px solid #f1f5f9" }}>
-                            <div style={{ fontSize: "0.7rem", color: "#64748b" }}>Blood Sugar</div>
-                            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "#0f172a" }}>{v.sugar} mg/dL</div>
+                          <div style={{ background: "#f8fafc", padding: "0.5rem", borderRadius: "8px", border: "1px solid var(--border-glass)" }}>
+                            <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>Blood Sugar</div>
+                            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-primary)" }}>{v.sugar} mg/dL</div>
                           </div>
                         )}
                       </div>
@@ -1343,16 +1343,16 @@ const PatientPortal = () => {
             </h3>
             <div style={{ padding: "1.5rem" }}>
               {!patient.documents || patient.documents.length === 0 ? (
-                <p style={{ color: "#64748b", margin: 0 }}>No file attachments uploaded to your record.</p>
+                <p style={{ color: "var(--text-secondary)", margin: 0 }}>No file attachments uploaded to your record.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                   {patient.documents.map((doc, idx) => (
-                    <div key={idx} className="doc-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #e2e8f0", padding: "0.85rem 1.25rem", borderRadius: "10px", background: "#f8fafc" }}>
+                    <div key={idx} className="doc-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid var(--border-glass)", padding: "0.85rem 1.25rem", borderRadius: "10px", background: "#f8fafc" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                        <FileText size={20} style={{ color: "#64748b" }} />
+                        <FileText size={20} style={{ color: "var(--text-secondary)" }} />
                         <div>
-                          <strong style={{ fontSize: "0.9rem", color: "#0f172a" }}>{doc.name}</strong>
-                          <div style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "0.15rem" }}>
+                          <strong style={{ fontSize: "0.9rem", color: "var(--text-primary)" }}>{doc.name}</strong>
+                          <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)", marginTop: "0.15rem" }}>
                             Uploaded on {new Date(doc.uploadedAt).toLocaleString()}
                           </div>
                         </div>
@@ -1361,7 +1361,7 @@ const PatientPortal = () => {
                         href={doc.url.startsWith("http") ? doc.url : `http://localhost:8086${doc.url}`}
                         target="_blank" 
                         rel="noopener noreferrer"
-                        style={{ fontSize: "0.8rem", color: "#0284c7", fontWeight: 700, textDecoration: "none" }}
+                        style={{ fontSize: "0.8rem", color: "var(--accent-primary)", fontWeight: 700, textDecoration: "none" }}
                       >
                         View Attachment
                       </a>
@@ -1379,10 +1379,10 @@ const PatientPortal = () => {
       {/* Invoice Receipt Modal */}
       {selectedInvoice && (
         <div className="modal-overlay">
-          <div className="modal-card" style={{ maxWidth: "450px", padding: "2rem", borderRadius: "16px", background: "white" }}>
+          <div className="modal-card" style={{ maxWidth: "450px", padding: "2rem", borderRadius: "16px", background: "var(--bg-secondary)" }}>
             <div style={{ textAlign: "center", borderBottom: "1px dashed #cbd5e1", paddingBottom: "1rem", marginBottom: "1rem" }}>
-              <h4 style={{ margin: 0, fontSize: "1.2rem", color: "#0f172a" }}>MEDICORE HOSPITAL RECEIPT</h4>
-              <span style={{ fontSize: "0.8rem", color: "#64748b" }}>Invoice #{selectedInvoice.invoiceNumber}</span>
+              <h4 style={{ margin: 0, fontSize: "1.2rem", color: "var(--text-primary)" }}>MEDICORE HOSPITAL RECEIPT</h4>
+              <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Invoice #{selectedInvoice.invoiceNumber}</span>
             </div>
             
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.9rem", color: "#334155" }}>
@@ -1400,7 +1400,7 @@ const PatientPortal = () => {
               </div>
 
               {/* Detailed Breakdown section */}
-              <div style={{ background: "#f8fafc", padding: "0.85rem", borderRadius: "10px", border: "1px solid #e2e8f0", margin: "0.25rem 0" }}>
+              <div style={{ background: "#f8fafc", padding: "0.85rem", borderRadius: "10px", border: "1px solid var(--border-glass)", margin: "0.25rem 0" }}>
                 <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#475569", borderBottom: "1px solid #cbd5e1", paddingBottom: "0.25rem", marginBottom: "0.4rem", textTransform: "uppercase" }}>
                   Charges breakdown
                 </div>
@@ -1409,36 +1409,36 @@ const PatientPortal = () => {
                     <>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span>Doctor Consultation Fee:</span>
-                        <strong style={{ color: "#0f172a" }}>₹{selectedInvoice.totalAmount}</strong>
+                        <strong style={{ color: "var(--text-primary)" }}>₹{selectedInvoice.totalAmount}</strong>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span>Consulting Doctor:</span>
-                        <strong style={{ color: "#0f172a" }}>
+                        <strong style={{ color: "var(--text-primary)" }}>
                           {selectedInvoice.doctor ? `Dr. ${selectedInvoice.doctor.firstName} ${selectedInvoice.doctor.lastName}` : "Assigned Physician"}
                         </strong>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span>Service Location:</span>
-                        <strong style={{ color: "#0f172a" }}>Outpatient Desk</strong>
+                        <strong style={{ color: "var(--text-primary)" }}>Outpatient Desk</strong>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span>Billing Processor:</span>
-                        <strong style={{ color: "#0f172a" }}>Receptionist Staff</strong>
+                        <strong style={{ color: "var(--text-primary)" }}>Receptionist Staff</strong>
                       </div>
                     </>
                   ) : (
                     <>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span>Service Description:</span>
-                        <strong style={{ color: "#0f172a" }}>{selectedInvoice.itemName || "Medical service fee"}</strong>
+                        <strong style={{ color: "var(--text-primary)" }}>{selectedInvoice.itemName || "Medical service fee"}</strong>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span>Billing Category:</span>
-                        <strong style={{ color: "#0284c7" }}>{selectedInvoice.category || "Clinical"}</strong>
+                        <strong style={{ color: "var(--accent-primary)" }}>{selectedInvoice.category || "Clinical"}</strong>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span>Billing Processor:</span>
-                        <strong style={{ color: "#0f172a" }}>
+                        <strong style={{ color: "var(--text-primary)" }}>
                           {selectedInvoice.processedBy ? `${selectedInvoice.processedBy.firstName} ${selectedInvoice.processedBy.lastName} (Cashier)` : "Billing Desk (Unprocessed)"}
                         </strong>
                       </div>
@@ -1451,7 +1451,7 @@ const PatientPortal = () => {
                 <span>Payment Method:</span>
                 <strong>{selectedInvoice.paymentMethod || "CASH"}</strong>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.05rem", color: "#0f172a" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.05rem", color: "var(--text-primary)" }}>
                 <span>Total Amount:</span>
                 <strong>₹{selectedInvoice.totalAmount}</strong>
               </div>
@@ -1489,10 +1489,10 @@ const PatientPortal = () => {
       {/* Lab Report Modal */}
       {selectedLab && (
         <div className="modal-overlay">
-          <div className="modal-card" style={{ maxWidth: "500px", padding: "2rem", borderRadius: "16px", background: "white" }}>
+          <div className="modal-card" style={{ maxWidth: "500px", padding: "2rem", borderRadius: "16px", background: "var(--bg-secondary)" }}>
             <div style={{ textAlign: "center", borderBottom: "1px dashed #cbd5e1", paddingBottom: "1rem", marginBottom: "1rem" }}>
-              <h4 style={{ margin: 0, fontSize: "1.2rem", color: "#0f172a" }}>LABORATORY REPORT</h4>
-              <span style={{ fontSize: "0.8rem", color: "#64748b" }}>Test Request ID: {selectedLab._id.slice(-6).toUpperCase()}</span>
+              <h4 style={{ margin: 0, fontSize: "1.2rem", color: "var(--text-primary)" }}>LABORATORY REPORT</h4>
+              <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Test Request ID: {selectedLab._id.slice(-6).toUpperCase()}</span>
             </div>
             
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.9rem", color: "#334155", marginBottom: "1rem" }}>
@@ -1529,8 +1529,8 @@ const PatientPortal = () => {
               </div>
             )}
 
-            <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1rem" }}>
-              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "#0f172a" }}>DIAGNOSTIC OBSERVATION</h5>
+            <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "8px", border: "1px solid var(--border-glass)", marginBottom: "1rem" }}>
+              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "var(--text-primary)" }}>DIAGNOSTIC OBSERVATION</h5>
               <p style={{ margin: 0, fontSize: "0.8rem", color: "#475569", lineHeight: 1.4 }}>
                 {selectedLab.status === "COMPLETED" 
                   ? (selectedLab.results || "Standard reference values are normal. Hemoglobin count, blood counts, and sugar indices fall within healthy physiological ranges.") 
@@ -1570,29 +1570,29 @@ const PatientPortal = () => {
       {/* Mock Payment Gateway Modal */}
       {payingInvoice && (
         <div className="modal-overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <div className="modal-card" style={{ maxWidth: "450px", width: "90%", padding: "2rem", borderRadius: "20px", background: "white", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)" }}>
+          <div className="modal-card" style={{ maxWidth: "450px", width: "90%", padding: "2rem", borderRadius: "20px", background: "var(--bg-secondary)", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)" }}>
             <div style={{ textAlign: "center", borderBottom: "1px dashed #cbd5e1", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
               <div style={{ display: "inline-flex", padding: "0.5rem", borderRadius: "12px", background: "#f0fdf4", color: "#16a34a", marginBottom: "0.5rem" }}>
                 <DollarSign size={24} />
               </div>
-              <h4 style={{ margin: 0, fontSize: "1.2rem", color: "#0f172a", fontWeight: 800 }}>MediCore Secure Checkout</h4>
-              <span style={{ fontSize: "0.8rem", color: "#64748b" }}>Simulated Payment Gateway</span>
+              <h4 style={{ margin: 0, fontSize: "1.2rem", color: "var(--text-primary)", fontWeight: 800 }}>MediCore Secure Checkout</h4>
+              <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Simulated Payment Gateway</span>
             </div>
 
-            <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
+            <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "12px", border: "1px solid var(--border-glass)", marginBottom: "1.5rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                <span style={{ fontSize: "0.8rem", color: "#64748b" }}>Invoice Reference:</span>
-                <strong style={{ fontSize: "0.85rem", color: "#0f172a" }}>#{payingInvoice.invoiceNumber}</strong>
+                <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Invoice Reference:</span>
+                <strong style={{ fontSize: "0.85rem", color: "var(--text-primary)" }}>#{payingInvoice.invoiceNumber}</strong>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "0.8rem", color: "#64748b" }}>Total Due Amount:</span>
+                <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Total Due Amount:</span>
                 <strong style={{ fontSize: "1rem", color: "#4f46e5" }}>₹{payingInvoice.totalAmount}</strong>
               </div>
             </div>
 
             {/* Payment Method Selector */}
             <div style={{ marginBottom: "1.5rem" }}>
-              <label style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 600, display: "block", marginBottom: "0.5rem" }}>SELECT PAYMENT METHOD</label>
+              <label style={{ fontSize: "0.8rem", color: "var(--text-secondary)", fontWeight: 600, display: "block", marginBottom: "0.5rem" }}>SELECT PAYMENT METHOD</label>
               <div style={{ display: "flex", gap: "0.75rem" }}>
                 <button 
                   onClick={() => setPaymentMethod("UPI")}
@@ -1629,17 +1629,17 @@ const PatientPortal = () => {
 
             {/* Method Content */}
             {paymentMethod === "UPI" ? (
-              <div style={{ textAlign: "center", padding: "1.5rem 1rem", background: "#f8fafc", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
-                <div style={{ display: "inline-block", padding: "0.75rem", background: "white", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "0.75rem" }}>
+              <div style={{ textAlign: "center", padding: "1.5rem 1rem", background: "#f8fafc", borderRadius: "12px", border: "1px solid var(--border-glass)", marginBottom: "1.5rem" }}>
+                <div style={{ display: "inline-block", padding: "0.75rem", background: "var(--bg-secondary)", borderRadius: "8px", border: "1px solid var(--border-glass)", marginBottom: "0.75rem" }}>
                   {/* Mock QR Code representation */}
                   <div style={{ width: "120px", height: "120px", background: "repeating-conic-gradient(from 45deg, #0f172a 0% 25%, transparent 0% 50%) 50% / 15px 15px", opacity: 0.85, margin: "0 auto" }}></div>
                 </div>
-                <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>Scan mock QR code with GPay/PhonePe to simulate direct payment authorization.</p>
+                <p style={{ margin: 0, fontSize: "0.75rem", color: "var(--text-secondary)" }}>Scan mock QR code with GPay/PhonePe to simulate direct payment authorization.</p>
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1.5rem" }}>
                 <div>
-                  <label style={{ fontSize: "0.7rem", color: "#64748b", display: "block", marginBottom: "0.25rem" }}>Cardholder Name</label>
+                  <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.25rem" }}>Cardholder Name</label>
                   <input 
                     type="text" 
                     placeholder="John Doe" 
@@ -1649,7 +1649,7 @@ const PatientPortal = () => {
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: "0.7rem", color: "#64748b", display: "block", marginBottom: "0.25rem" }}>Card Number</label>
+                  <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.25rem" }}>Card Number</label>
                   <input 
                     type="text" 
                     placeholder="xxxx xxxx xxxx xxxx" 
@@ -1660,7 +1660,7 @@ const PatientPortal = () => {
                 </div>
                 <div style={{ display: "flex", gap: "0.75rem" }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: "0.7rem", color: "#64748b", display: "block", marginBottom: "0.25rem" }}>Expiry Date</label>
+                    <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.25rem" }}>Expiry Date</label>
                     <input 
                       type="text" 
                       placeholder="MM/YY" 
@@ -1669,7 +1669,7 @@ const PatientPortal = () => {
                     />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: "0.7rem", color: "#64748b", display: "block", marginBottom: "0.25rem" }}>CVV</label>
+                    <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.25rem" }}>CVV</label>
                     <input 
                       type="password" 
                       placeholder="***" 
@@ -1714,7 +1714,7 @@ const PatientPortal = () => {
               <button 
                 onClick={() => setPayingInvoice(null)}
                 disabled={paymentProcessing}
-                style={{ width: "100%", padding: "0.75rem", background: "white", border: "1px solid #cbd5e1", color: "#64748b", borderRadius: "10px", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer" }}
+                style={{ width: "100%", padding: "0.75rem", background: "var(--bg-secondary)", border: "1px solid #cbd5e1", color: "var(--text-secondary)", borderRadius: "10px", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer" }}
               >
                 Cancel Transaction
               </button>

@@ -152,13 +152,15 @@ const AuditLogs = () => {
         }
         .log-inspector-drawer {
           display: ${isInspectorOpen ? "block" : "none"};
-          background: white;
+          background: var(--bg-glass);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
           border-radius: 16px;
-          border: 1px solid #cbd5e1;
-          box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+          border: 1px solid var(--card-border);
+          box-shadow: var(--card-shadow);
           padding: 1.5rem;
           position: sticky;
-          top: 1rem;
+          top: calc(72px + 1.25rem);
           animation: slideIn 0.2s ease-out;
         }
         @keyframes slideIn {
@@ -191,11 +193,11 @@ const AuditLogs = () => {
       {/* Header section */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
-          <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--text-primary)", margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <ShieldAlert size={28} style={{ color: "#2563eb" }} />
             <span>EMR Activity Audit Logs</span>
           </h2>
-          <p style={{ margin: "0.25rem 0 0 0", color: "#64748b", fontSize: "0.85rem" }}>
+          <p style={{ margin: "0.25rem 0 0 0", color: "var(--text-secondary)", fontSize: "0.85rem" }}>
             Real-time tracking of all security events, modifications, and clinical charting activities.
           </p>
         </div>
@@ -267,11 +269,11 @@ const AuditLogs = () => {
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: 0 }}>
               
               {/* Search & Filter Drawer */}
-              <div className="card shadow-sm" style={{ padding: "1.25rem", borderRadius: "16px", background: "white", border: "1px solid #e2e8f0" }}>
+              <div className="card shadow-sm" style={{ padding: "1.25rem", borderRadius: "16px", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)" }}>
                 <form onSubmit={handleSearchSubmit}>
                   <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginBottom: "1rem" }}>
                     <div style={{ position: "relative", flex: 1, minWidth: "240px" }}>
-                      <Search size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
+                      <Search size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-secondary)" }} />
                       <input 
                         type="text"
                         className="form-control"
@@ -290,7 +292,7 @@ const AuditLogs = () => {
                 {/* Filter Rows */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem" }}>
                   <div>
-                    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#64748b", display: "block", marginBottom: "0.25rem" }}>Module:</label>
+                    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--text-secondary)", display: "block", marginBottom: "0.25rem" }}>Module:</label>
                     <select className="form-control" value={moduleFilter} onChange={(e) => { setModuleFilter(e.target.value); setPage(1); }}>
                       <option value="">All Modules</option>
                       <option value="AUTH">Authentication</option>
@@ -304,7 +306,7 @@ const AuditLogs = () => {
                   </div>
 
                   <div>
-                    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#64748b", display: "block", marginBottom: "0.25rem" }}>Status:</label>
+                    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--text-secondary)", display: "block", marginBottom: "0.25rem" }}>Status:</label>
                     <select className="form-control" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}>
                       <option value="">All Statuses</option>
                       <option value="SUCCESS">Success</option>
@@ -313,7 +315,7 @@ const AuditLogs = () => {
                   </div>
 
                   <div>
-                    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#64748b", display: "block", marginBottom: "0.25rem" }}>Start Date:</label>
+                    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--text-secondary)", display: "block", marginBottom: "0.25rem" }}>Start Date:</label>
                     <input 
                       type="date" 
                       className="form-control" 
@@ -323,7 +325,7 @@ const AuditLogs = () => {
                   </div>
 
                   <div>
-                    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#64748b", display: "block", marginBottom: "0.25rem" }}>End Date:</label>
+                    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--text-secondary)", display: "block", marginBottom: "0.25rem" }}>End Date:</label>
                     <input 
                       type="date" 
                       className="form-control" 
@@ -348,11 +350,11 @@ const AuditLogs = () => {
               {/* Logs Table Container */}
               <div className="table-container">
                 {loading ? (
-                  <div style={{ padding: "4rem", textAlign: "center", color: "#64748b" }}>
+                  <div style={{ padding: "4rem", textAlign: "center", color: "var(--text-secondary)" }}>
                     <p>Refreshing audit log entries...</p>
                   </div>
                 ) : logs.length === 0 ? (
-                  <div style={{ padding: "4rem", textAlign: "center", color: "#64748b" }}>
+                  <div style={{ padding: "4rem", textAlign: "center", color: "var(--text-secondary)" }}>
                     <Database size={36} style={{ margin: "0 auto 1rem", display: "block", color: "#cbd5e1" }} />
                     <span>No audit log records found matching the active query.</span>
                   </div>
@@ -376,7 +378,7 @@ const AuditLogs = () => {
                           <td style={{ fontSize: "0.8rem", color: "#334155" }}>
                             {new Date(log.createdAt).toLocaleString()}
                           </td>
-                          <td style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0f172a" }}>
+                          <td style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-primary)" }}>
                             {log.performedBy ? `${log.performedBy.firstName} ${log.performedBy.lastName}` : "System"}
                           </td>
                           <td style={{ fontSize: "0.8rem" }}>
@@ -400,7 +402,7 @@ const AuditLogs = () => {
                               <span>{log.status}</span>
                             </span>
                           </td>
-                          <td style={{ fontSize: "0.8rem", color: "#64748b" }}>
+                          <td style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
                             {log.ipAddress}
                           </td>
                           <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
@@ -421,7 +423,7 @@ const AuditLogs = () => {
               {/* Pagination Controls */}
               {pages > 1 && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1rem" }}>
-                  <span style={{ fontSize: "0.85rem", color: "#64748b" }}>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
                     Showing {(page - 1) * limit + 1} - {Math.min(page * limit, total)} of {total} logs
                   </span>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -459,11 +461,11 @@ const AuditLogs = () => {
             {/* Right Column: Sliding Detail Inspector Drawer */}
             {isInspectorOpen && selectedLog && (
               <div className="log-inspector-drawer">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.75rem", marginBottom: "1rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-glass)", paddingBottom: "0.75rem", marginBottom: "1rem" }}>
                   <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: 800 }}>Audit Log Inspector</h4>
                   <button 
                     onClick={() => setIsInspectorOpen(false)}
-                    style={{ border: "none", background: "none", color: "#94a3b8", cursor: "pointer" }}
+                    style={{ border: "none", background: "none", color: "var(--text-secondary)", cursor: "pointer" }}
                   >
                     <X size={20} />
                   </button>
@@ -471,12 +473,12 @@ const AuditLogs = () => {
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem", fontSize: "0.85rem" }}>
                   <div>
-                    <span style={{ fontWeight: 700, color: "#64748b", display: "block" }}>Timestamp:</span>
+                    <span style={{ fontWeight: 700, color: "var(--text-secondary)", display: "block" }}>Timestamp:</span>
                     <span>{new Date(selectedLog.createdAt).toLocaleString()}</span>
                   </div>
 
                   <div>
-                    <span style={{ fontWeight: 700, color: "#64748b", display: "block" }}>User & Role:</span>
+                    <span style={{ fontWeight: 700, color: "var(--text-secondary)", display: "block" }}>User & Role:</span>
                     <span>
                       {selectedLog.performedBy ? `${selectedLog.performedBy.firstName} ${selectedLog.performedBy.lastName}` : "System"}
                       <span style={{ marginLeft: "0.5rem", fontSize: "0.7rem", padding: "0.1rem 0.3rem", background: "#eff6ff", color: "#1e40af", borderRadius: "4px", fontWeight: 700 }}>
@@ -486,14 +488,14 @@ const AuditLogs = () => {
                   </div>
 
                   <div>
-                    <span style={{ fontWeight: 700, color: "#64748b", display: "block" }}>Module & Action:</span>
+                    <span style={{ fontWeight: 700, color: "var(--text-secondary)", display: "block" }}>Module & Action:</span>
                     <span>
                       {selectedLog.module} - <code>{selectedLog.action}</code>
                     </span>
                   </div>
 
                   <div>
-                    <span style={{ fontWeight: 700, color: "#64748b", display: "block" }}>Log Status:</span>
+                    <span style={{ fontWeight: 700, color: "var(--text-secondary)", display: "block" }}>Log Status:</span>
                     <span className={`status-badge ${selectedLog.status.toLowerCase()}`} style={{ marginTop: "0.25rem" }}>
                       {selectedLog.status === "SUCCESS" ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
                       <span>{selectedLog.status}</span>
@@ -501,30 +503,30 @@ const AuditLogs = () => {
                   </div>
 
                   <div>
-                    <span style={{ fontWeight: 700, color: "#64748b", display: "block" }}>IP Address & Client Device:</span>
+                    <span style={{ fontWeight: 700, color: "var(--text-secondary)", display: "block" }}>IP Address & Client Device:</span>
                     <span style={{ display: "block", color: "#334155" }}>IP: {selectedLog.ipAddress}</span>
-                    <span style={{ display: "block", color: "#64748b", fontSize: "0.75rem", marginTop: "0.2rem" }}>
+                    <span style={{ display: "block", color: "var(--text-secondary)", fontSize: "0.75rem", marginTop: "0.2rem" }}>
                       Device: {selectedLog.device}
                     </span>
                   </div>
 
                   {selectedLog.targetId && (
                     <div>
-                      <span style={{ fontWeight: 700, color: "#64748b", display: "block" }}>Target ID / Key:</span>
+                      <span style={{ fontWeight: 700, color: "var(--text-secondary)", display: "block" }}>Target ID / Key:</span>
                       <code>{selectedLog.targetId}</code>
                     </div>
                   )}
 
                   {selectedLog.targetName && (
                     <div>
-                      <span style={{ fontWeight: 700, color: "#64748b", display: "block" }}>Target Entity Name:</span>
+                      <span style={{ fontWeight: 700, color: "var(--text-secondary)", display: "block" }}>Target Entity Name:</span>
                       <span style={{ fontWeight: 600 }}>{selectedLog.targetName}</span>
                     </div>
                   )}
 
                   <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "0.75rem", marginTop: "0.5rem" }}>
-                    <span style={{ fontWeight: 700, color: "#64748b", display: "block", marginBottom: "0.25rem" }}>Log Description Details:</span>
-                    <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "0.75rem", borderRadius: "8px", color: "#334155", lineHeight: 1.4, fontFamily: "monospace", fontSize: "0.8rem", wordBreak: "break-all" }}>
+                    <span style={{ fontWeight: 700, color: "var(--text-secondary)", display: "block", marginBottom: "0.25rem" }}>Log Description Details:</span>
+                    <div style={{ background: "#f8fafc", border: "1px solid var(--border-glass)", padding: "0.75rem", borderRadius: "8px", color: "#334155", lineHeight: 1.4, fontFamily: "monospace", fontSize: "0.8rem", wordBreak: "break-all" }}>
                       {selectedLog.details}
                     </div>
                   </div>

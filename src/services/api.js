@@ -61,6 +61,11 @@ export const fetchMe = async () => {
   return response.data;
 };
 
+export const updateProfile = async (data) => {
+  const response = await api.put("/auth/profile", data);
+  return response.data;
+};
+
 export const fetchSystemIp = async () => {
   const response = await api.get("/auth/system-ip");
   return response.data;
@@ -491,43 +496,53 @@ export const fetchAIVitalsEmergencyCheck = async (vitals) => {
 };
 
 // Role-Based AI Chat APIs
-export const fetchAdminAIChat = async (content) => {
-  const response = await api.post("/ai/admin/chat", { content });
+export const fetchAdminAIChat = async (content, activeTab) => {
+  const response = await api.post("/ai/admin/chat", { content, activeTab });
   return response.data;
 };
 
-export const fetchReceptionistAIChat = async (content) => {
-  const response = await api.post("/ai/receptionist/chat", { content });
+export const fetchReceptionistAIChat = async (content, activeTab) => {
+  const response = await api.post("/ai/receptionist/chat", { content, activeTab });
   return response.data;
 };
 
-export const fetchDoctorAIChat = async (content) => {
-  const response = await api.post("/ai/doctor/chat", { content });
+export const fetchDoctorAIChat = async (content, activeTab) => {
+  const response = await api.post("/ai/doctor/chat", { content, activeTab });
   return response.data;
 };
 
-export const fetchNurseAIChat = async (content) => {
-  const response = await api.post("/ai/nurse/chat", { content });
+export const fetchNurseAIChat = async (content, activeTab) => {
+  const response = await api.post("/ai/nurse/chat", { content, activeTab });
   return response.data;
 };
 
-export const fetchLabTechnicianAIChat = async (content) => {
-  const response = await api.post("/ai/lab-technician/chat", { content });
+export const fetchLabTechnicianAIChat = async (content, activeTab) => {
+  const response = await api.post("/ai/lab-technician/chat", { content, activeTab });
   return response.data;
 };
 
-export const fetchPharmacistAIChat = async (content) => {
-  const response = await api.post("/ai/pharmacist/chat", { content });
+export const fetchPharmacistAIChat = async (content, activeTab) => {
+  const response = await api.post("/ai/pharmacist/chat", { content, activeTab });
   return response.data;
 };
 
-export const fetchCashierAIChat = async (content) => {
-  const response = await api.post("/ai/cashier/chat", { content });
+export const fetchCashierAIChat = async (content, activeTab) => {
+  const response = await api.post("/ai/cashier/chat", { content, activeTab });
   return response.data;
 };
 
 export const fetchPatientAIChat = async (queryType, content) => {
   const response = await api.post("/ai/patient/chat", { queryType, content });
+  return response.data;
+};
+
+export const translateText = async (text, targetLanguage, takeaways, recommendations) => {
+  const response = await api.post("/ai/translate", { text, targetLanguage, takeaways, recommendations });
+  return response.data;
+};
+
+export const fetchIcd10Suggestions = async (diagnosisText) => {
+  const response = await api.post("/ai/icd10-suggestions", { diagnosisText });
   return response.data;
 };
 

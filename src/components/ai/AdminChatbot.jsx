@@ -3,7 +3,7 @@ import { MessageSquare, X, Send, Bot, User as UserIcon, Sparkles } from "lucide-
 import { fetchAdminAIChat } from "../../services/api";
 import { AIVoiceAssistant } from "../common/AIVoiceAssistant";
 
-export const AdminChatbot = () => {
+export const AdminChatbot = ({ activeTab }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { 
@@ -34,7 +34,7 @@ export const AdminChatbot = () => {
     setLoading(true);
 
     try {
-      const res = await fetchAdminAIChat(textToSend);
+      const res = await fetchAdminAIChat(textToSend, activeTab);
       
       const botMsg = {
         sender: "bot",
@@ -58,6 +58,54 @@ export const AdminChatbot = () => {
 
   const handleVoiceInput = (transcript) => {
     setInputVal(prev => prev + " " + transcript);
+  };
+
+  const toggleTranslation = async (idx) => {
+    const msg = messages[idx];
+    if (!msg || msg.sender !== "bot") return;
+
+    if (msg.isTelugu) {
+      setMessages(prev => prev.map((m, i) => i === idx ? {
+        ...m,
+        text: m.enText || m.text,
+        takeaways: m.enTakeaways || m.takeaways,
+        recommendations: m.enRecommendations || m.recommendations,
+        isTelugu: false
+      } : m));
+    } else {
+      if (msg.teText) {
+        setMessages(prev => prev.map((m, i) => i === idx ? {
+          ...m,
+          text: m.teText,
+          takeaways: m.teTakeaways || m.takeaways,
+          recommendations: m.teRecommendations || m.recommendations,
+          isTelugu: true
+        } : m));
+      } else {
+        try {
+          const { translateText } = await import("../../services/api");
+          const res = await translateText(msg.text, "te", msg.takeaways, msg.recommendations);
+          const teTranslation = res.data?.translated || msg.text;
+          const teTakeaways = res.data?.takeaways || msg.takeaways;
+          const teRecommendations = res.data?.recommendations || msg.recommendations;
+          setMessages(prev => prev.map((m, i) => i === idx ? {
+            ...m,
+            enText: m.text,
+            enTakeaways: m.takeaways,
+            enRecommendations: m.recommendations,
+            teText: teTranslation,
+            teTakeaways: teTakeaways,
+            teRecommendations: teRecommendations,
+            text: teTranslation,
+            takeaways: teTakeaways,
+            recommendations: teRecommendations,
+            isTelugu: true
+          } : m));
+        } catch (err) {
+          console.error("Failed to translate text:", err);
+        }
+      }
+    }
   };
 
   return (
@@ -156,7 +204,28 @@ export const AdminChatbot = () => {
                     boxShadow: "0 2px 5px rgba(0,0,0,0.03)"
                   }}
                 >
-                  {m.text}
+                  {m.isTelugu && m.teText ? m.teText : m.text}
+                  
+                  {m.sender === "bot" && (
+                    <button
+                      onClick={() => toggleTranslation(idx)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#0284c7",
+                        fontSize: "0.7rem",
+                        cursor: "pointer",
+                        padding: "0.2rem 0",
+                        textAlign: "left",
+                        display: "block",
+                        textDecoration: "underline",
+                        fontWeight: 600,
+                        marginTop: "0.3rem"
+                      }}
+                    >
+                      {m.isTelugu ? "Show English" : "Translate to Telugu (తెలుగు)"}
+                    </button>
+                  )}
                   
                   {m.sender === "bot" && (m.takeaways?.length > 0 || m.recommendations?.length > 0) && (
                     <div style={{ marginTop: "0.6rem", borderTop: "1px solid #cbd5e1", paddingTop: "0.5rem", fontSize: "0.75rem" }}>

@@ -112,7 +112,7 @@ const MainAppContent = () => {
 
         {activeTab === "hospitals" && <HospitalManagement />}
 
-        {activeTab === "users" && <UserManagement />}
+        {activeTab === "users" && user?.role === "ADMIN" && <UserManagement />}
 
         {activeTab === "doctors" && <DoctorManagement />}
 

@@ -265,11 +265,11 @@ const Pharmacy = () => {
           {activeTab === "prescriptions" && (
             <div className="table-container" style={{ border: "none", boxShadow: "none" }}>
               {/* AI Drug-Drug Interaction screening */}
-              <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "1.25rem", borderRadius: "12px", marginBottom: "1.5rem" }}>
+              <div style={{ background: "#f8fafc", border: "1px solid var(--border-glass)", padding: "1.25rem", borderRadius: "12px", marginBottom: "1.5rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
                   <div>
-                    <strong style={{ fontSize: "0.9rem", color: "#0f172a", display: "block" }}>🛡️ AI Pharmacist Companion - Drug Safety Screening</strong>
-                    <span style={{ fontSize: "0.75rem", color: "#64748b" }}>Screen active queue prescriptions for cross-drug clinical interactions.</span>
+                    <strong style={{ fontSize: "0.9rem", color: "var(--text-primary)", display: "block" }}>🛡️ AI Pharmacist Companion - Drug Safety Screening</strong>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Screen active queue prescriptions for cross-drug clinical interactions.</span>
                   </div>
                   <button 
                     onClick={handleCheckSafety} 
@@ -283,7 +283,7 @@ const Pharmacy = () => {
 
                 {aiInteractionReport && (
                   <div style={{ marginTop: "1rem", display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "1rem" }}>
-                    <div style={{ background: "white", padding: "0.85rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ background: "var(--bg-secondary)", padding: "0.85rem", borderRadius: "8px", border: "1px solid var(--border-glass)" }}>
                       <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#e11d48", display: "block", marginBottom: "0.4rem" }}>⚠️ DETECTED CROSS-DRUG INTERACTIONS:</span>
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                         {aiInteractionReport.interactionWarnings?.map((warn, i) => (
@@ -297,12 +297,12 @@ const Pharmacy = () => {
                       </div>
                     </div>
 
-                    <div style={{ background: "white", padding: "0.85rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ background: "var(--bg-secondary)", padding: "0.85rem", borderRadius: "8px", border: "1px solid var(--border-glass)" }}>
                       <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#16a34a", display: "block", marginBottom: "0.4rem" }}>🌱 SUGGESTED GENERIC ALTERNATIVES:</span>
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontSize: "0.75rem", color: "#334155" }}>
                         {Object.entries(aiInteractionReport.genericAlternatives || {}).map(([med, gen]) => (
                           <div key={med} style={{ display: "flex", justifyContent: "space-between" }}>
-                            <span style={{ color: "#64748b" }}>{med.split("(")[0].trim()}:</span>
+                            <span style={{ color: "var(--text-secondary)" }}>{med.split("(")[0].trim()}:</span>
                             <strong style={{ color: "#15803d", marginLeft: "0.5rem" }}>{gen}</strong>
                           </div>
                         ))}
@@ -311,14 +311,14 @@ const Pharmacy = () => {
                   </div>
                 )}
                 
-                <div style={{ marginTop: "0.75rem", textAlign: "right", fontSize: "0.65rem", color: "#94a3b8", fontWeight: 600 }}>
+                <div style={{ marginTop: "0.75rem", textAlign: "right", fontSize: "0.65rem", color: "var(--text-secondary)", fontWeight: 600 }}>
                   * AI safety warning suggestions are advisory only. Final medication validation rests with the dispensing pharmacist.
                 </div>
               </div>
 
               {prescriptions.filter(p => p.status === "PENDING").length === 0 ? (
                 <div style={{ padding: "3rem", textAlign: "center" }}>
-                  <ClipboardList size={40} style={{ color: "#94a3b8", marginBottom: "0.5rem" }} />
+                  <ClipboardList size={40} style={{ color: "var(--text-secondary)", marginBottom: "0.5rem" }} />
                   <p style={{ color: "var(--text-secondary)" }}>No pending prescriptions to dispense.</p>
                 </div>
               ) : (
@@ -338,10 +338,10 @@ const Pharmacy = () => {
                       <tr key={p._id}>
                         <td>
                           <strong>{p.patient?.firstName} {p.patient?.lastName}</strong>
-                          <div style={{ fontSize: "0.75rem", color: "#64748b" }}>UHID: {p.patient?.uhid}</div>
+                          <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>UHID: {p.patient?.uhid}</div>
                         </td>
                         <td>
-                          <span style={{ fontWeight: 700, color: "#0f172a", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>
+                          <span style={{ fontWeight: 700, color: "var(--text-primary)", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>
                             <Pill size={14} style={{ color: "#0ea5e9" }} />
                             <span>{p.medicationName}</span>
                           </span>
@@ -371,20 +371,20 @@ const Pharmacy = () => {
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               {/* AI Pharmacy Forecast Analytics */}
               <div className="table-container" style={{ padding: "1.5rem", background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "12px" }}>
-                <h4 style={{ margin: "0 0 1rem 0", fontSize: "0.95rem", fontWeight: 800, color: "#0284c7", display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <h4 style={{ margin: "0 0 1rem 0", fontSize: "0.95rem", fontWeight: 800, color: "var(--accent-primary)", display: "flex", alignItems: "center", gap: "0.35rem" }}>
                   <span>📊 AI Pharmacy Stock Forecasting & Expiry Alerts</span>
                   <span style={{ fontSize: "0.65rem", padding: "0.1rem 0.35rem", background: "#e0f2fe", color: "#0369a1", borderRadius: "4px" }}>Active</span>
                 </h4>
                 
                 {aiForecastLoading ? (
-                  <p style={{ color: "#64748b", fontSize: "0.85rem", margin: 0 }}>Compiling inventory data and running prediction algorithms...</p>
+                  <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", margin: 0 }}>Compiling inventory data and running prediction algorithms...</p>
                 ) : aiForecast ? (
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
                     {/* Stockout risks */}
-                    <div style={{ padding: "0.85rem", background: "white", border: "1px solid #e2e8f0", borderRadius: "10px" }}>
+                    <div style={{ padding: "0.85rem", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)", borderRadius: "10px" }}>
                       <span style={{ fontSize: "0.75rem", color: "#f59e0b", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>⚠️ CRITICAL STOCKOUT FORECAST</span>
                       {(!aiForecast.stockoutRisks || aiForecast.stockoutRisks.length === 0) ? (
-                        <p style={{ fontSize: "0.75rem", margin: 0, color: "#64748b" }}>All medication stocks stable.</p>
+                        <p style={{ fontSize: "0.75rem", margin: 0, color: "var(--text-secondary)" }}>All medication stocks stable.</p>
                       ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                           {(aiForecast.stockoutRisks || []).map((risk, i) => (
@@ -398,10 +398,10 @@ const Pharmacy = () => {
                     </div>
 
                     {/* Expiry Warnings */}
-                    <div style={{ padding: "0.85rem", background: "white", border: "1px solid #e2e8f0", borderRadius: "10px" }}>
+                    <div style={{ padding: "0.85rem", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)", borderRadius: "10px" }}>
                       <span style={{ fontSize: "0.75rem", color: "#ef4444", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>🚨 UPCOMING BATCH EXPIRIES</span>
                       {(!aiForecast.expiryWarnings || aiForecast.expiryWarnings.length === 0) ? (
-                        <p style={{ fontSize: "0.75rem", margin: 0, color: "#64748b" }}>No batches expiring within 6 months.</p>
+                        <p style={{ fontSize: "0.75rem", margin: 0, color: "var(--text-secondary)" }}>No batches expiring within 6 months.</p>
                       ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                           {(aiForecast.expiryWarnings || []).map((exp, i) => (
@@ -415,10 +415,10 @@ const Pharmacy = () => {
                     </div>
 
                     {/* Replenishments */}
-                    <div style={{ padding: "0.85rem", background: "white", border: "1px solid #e2e8f0", borderRadius: "10px" }}>
+                    <div style={{ padding: "0.85rem", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)", borderRadius: "10px" }}>
                       <span style={{ fontSize: "0.75rem", color: "#10b981", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>📦 REPLENISHMENT ADVICE</span>
                       {(!aiForecast.replenishmentRecommendations || aiForecast.replenishmentRecommendations.length === 0) ? (
-                        <p style={{ fontSize: "0.75rem", margin: 0, color: "#64748b" }}>Stocks meet standard demand thresholds.</p>
+                        <p style={{ fontSize: "0.75rem", margin: 0, color: "var(--text-secondary)" }}>Stocks meet standard demand thresholds.</p>
                       ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                           {(aiForecast.replenishmentRecommendations || []).slice(0, 3).map((rec, i) => (
@@ -431,7 +431,7 @@ const Pharmacy = () => {
                     </div>
                   </div>
                 ) : (
-                  <p style={{ color: "#64748b", fontSize: "0.85rem", margin: 0 }}>Click refresh to fetch AI forecasting suggestions.</p>
+                  <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", margin: 0 }}>Click refresh to fetch AI forecasting suggestions.</p>
                 )}
               </div>
 
@@ -522,7 +522,7 @@ const Pharmacy = () => {
                         <td><code>{bill.billNumber}</code></td>
                         <td>
                           <strong>{bill.patient?.firstName} {bill.patient?.lastName}</strong>
-                          <div style={{ fontSize: "0.75rem", color: "#64748b" }}>UHID: {bill.patient?.uhid}</div>
+                          <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>UHID: {bill.patient?.uhid}</div>
                         </td>
                         <td>
                           <div style={{ display: "flex", flexDirection: "column", gap: "0.15rem" }}>
@@ -534,7 +534,7 @@ const Pharmacy = () => {
                           </div>
                         </td>
                         <td>
-                          <strong style={{ color: "#0f172a" }}>${bill.totalAmount}.00</strong>
+                          <strong style={{ color: "var(--text-primary)" }}>${bill.totalAmount}.00</strong>
                         </td>
                         <td>
                           <span className="badge" style={{
@@ -725,10 +725,10 @@ const Pharmacy = () => {
                 <div style={{ background: "#0ea5e9", color: "white", padding: "0.35rem", borderRadius: "8px" }}>
                   <Pill size={20} />
                 </div>
-                <strong style={{ fontSize: "1.2rem", color: "#0f172a" }}>MEDICORE PHARMACY OUTLET</strong>
+                <strong style={{ fontSize: "1.2rem", color: "var(--text-primary)" }}>MEDICORE PHARMACY OUTLET</strong>
               </div>
-              <p style={{ margin: 0, fontSize: "0.8rem", color: "#64748b" }}>AI-HOS Digital Pharmacy Systems</p>
-              <p style={{ margin: "0.25rem 0 0 0", fontSize: "0.8rem", color: "#64748b" }}>24x7 Diagnostic & Prescription Settle Counter</p>
+              <p style={{ margin: 0, fontSize: "0.8rem", color: "var(--text-secondary)" }}>AI-HOS Digital Pharmacy Systems</p>
+              <p style={{ margin: "0.25rem 0 0 0", fontSize: "0.8rem", color: "var(--text-secondary)" }}>24x7 Diagnostic & Prescription Settle Counter</p>
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", marginBottom: "1rem", color: "#334155" }}>
@@ -776,8 +776,8 @@ const Pharmacy = () => {
                 </span>
               </div>
               <div style={{ textAlign: "right" }}>
-                <span style={{ fontSize: "0.85rem", color: "#64748b", marginRight: "0.5rem" }}>Grand Total:</span>
-                <strong style={{ fontSize: "1.2rem", color: "#0f172a" }}>₹{selectedBill.totalAmount}.00</strong>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginRight: "0.5rem" }}>Grand Total:</span>
+                <strong style={{ fontSize: "1.2rem", color: "var(--text-primary)" }}>₹{selectedBill.totalAmount}.00</strong>
               </div>
             </div>
 

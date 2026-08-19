@@ -88,7 +88,7 @@ const MedicationsDue = ({ onBackToDashboard }) => {
       ) : meds.length === 0 ? (
         <div className="table-container" style={{ padding: "4rem 2rem", textAlign: "center" }}>
           <CheckCircle size={48} style={{ color: "#10b981", margin: "0 auto 1rem" }} />
-          <h3 style={{ fontSize: "1.2rem", fontWeight: 700, color: "#0f172a", marginBottom: "0.5rem" }}>All Doses Administered</h3>
+          <h3 style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "0.5rem" }}>All Doses Administered</h3>
           <p style={{ color: "var(--text-secondary)", margin: 0 }}>There are no pending medication administration requirements at this time.</p>
         </div>
       ) : (
@@ -113,14 +113,14 @@ const MedicationsDue = ({ onBackToDashboard }) => {
                       <strong style={{ color: "var(--text-primary)" }}>
                         {med.patient?.firstName} {med.patient?.lastName}
                       </strong>
-                      <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.1rem" }}>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "0.1rem" }}>
                         UHID: {med.patient?.uhid || "N/A"}
                       </div>
                     </div>
                   </td>
                   <td>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.85rem", fontWeight: 600 }}>
-                      <MapPin size={14} style={{ color: "#64748b" }} />
+                      <MapPin size={14} style={{ color: "var(--text-secondary)" }} />
                       <span>
                         {med.patient?.roomNo && med.patient?.roomNo !== "N/A" 
                           ? `Room ${med.patient?.roomNo} / Bed ${med.patient?.bedNo || "N/A"}` 
@@ -129,7 +129,7 @@ const MedicationsDue = ({ onBackToDashboard }) => {
                     </div>
                   </td>
                   <td>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontWeight: 700, color: "#0f172a" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontWeight: 700, color: "var(--text-primary)" }}>
                       <Pill size={16} style={{ color: isOverdue(med.createdAt) ? "#ef4444" : "#f59e0b" }} />
                       <span>{med.medicationName}</span>
                     </div>

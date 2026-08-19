@@ -1974,7 +1974,7 @@ const PatientManagement = () => {
                   className="patient-row"
                 >
                   <td>
-                    <span className="badge" style={{ background: "#e0f2fe", color: "#0284c7", fontWeight: 700 }}>
+                    <span className="badge" style={{ background: "#e0f2fe", color: "var(--accent-primary)", fontWeight: 700 }}>
                       {p.uhid || `UHID-2026-${p._id.slice(-4)}`}
                     </span>
                   </td>
@@ -1998,7 +1998,7 @@ const PatientManagement = () => {
                       <img
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=45x45&data=${encodeURIComponent("http://" + systemIp + ":5173/patients?search=" + p.uhid)}`}
                         alt="Patient QR Code"
-                        style={{ width: "45px", height: "45px", border: "1px solid #e2e8f0", borderRadius: "6px", background: "#fff", padding: "2px" }}
+                        style={{ width: "45px", height: "45px", border: "1px solid var(--border-glass)", borderRadius: "6px", background: "#fff", padding: "2px" }}
                       />
                     </div>
                   </td>
@@ -2024,7 +2024,7 @@ const PatientManagement = () => {
                       }}>
                         {p.registrationType || "WALK_IN"}
                       </span>
-                      <div style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "0.15rem" }}>By: {p.registeredBy || "Self"}</div>
+                      <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)", marginTop: "0.15rem" }}>By: {p.registeredBy || "Self"}</div>
                     </div>
                   </td>
                   <td>
@@ -2067,14 +2067,14 @@ const PatientManagement = () => {
               display: "flex",
               flexDirection: "column",
               boxShadow: "-8px 0 24px rgba(0,0,0,0.12)",
-              background: "#ffffff",
+              background: "var(--bg-secondary)",
               overflow: "hidden"
             }}
           >
             {/* Drawer Header */}
             <div 
               style={{ 
-                borderBottom: "1px solid #e2e8f0", 
+                borderBottom: "1px solid var(--border-glass)", 
                 padding: "1.25rem 1.75rem", 
                 display: "flex", 
                 justifyContent: "space-between", 
@@ -2112,7 +2112,7 @@ const PatientManagement = () => {
                       top: "70px",
                       left: 0,
                       background: "#fff",
-                      border: "1px solid #e2e8f0",
+                      border: "1px solid var(--border-glass)",
                       borderRadius: "8px",
                       boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                       zIndex: 110,
@@ -2177,7 +2177,7 @@ const PatientManagement = () => {
                 </div>
                 <div>
                   <div style={{ display: "flex", gap: "0.35rem", alignItems: "center" }}>
-                    <span className="badge" style={{ background: "#e0f2fe", color: "#0284c7", fontSize: "0.75rem", fontWeight: 700 }}>
+                    <span className="badge" style={{ background: "#e0f2fe", color: "var(--accent-primary)", fontSize: "0.75rem", fontWeight: 700 }}>
                       UHID: {selectedPatient.uhid || "N/A"}
                     </span>
                     {selectedPatient.patientId && (
@@ -2186,7 +2186,7 @@ const PatientManagement = () => {
                       </span>
                     )}
                   </div>
-                  <h2 style={{ margin: "0.25rem 0 0", fontSize: "1.35rem", fontWeight: 800, color: "#0f172a" }}>
+                  <h2 style={{ margin: "0.25rem 0 0", fontSize: "1.35rem", fontWeight: 800, color: "var(--text-primary)" }}>
                     {selectedPatient.firstName} {selectedPatient.lastName}
                   </h2>
                   <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
@@ -2219,7 +2219,7 @@ const PatientManagement = () => {
                       display: "flex", 
                       flexDirection: "column", 
                       alignItems: "center", 
-                      background: "#ffffff", 
+                      background: "var(--bg-secondary)", 
                       padding: "0.6rem", 
                       borderRadius: "10px", 
                       border: "2px solid #0284c7",
@@ -2237,12 +2237,12 @@ const PatientManagement = () => {
                       alt="Patient UHID QR"
                       style={{ width: "90px", height: "90px" }}
                     />
-                    <span style={{ fontSize: "0.55rem", color: "#0284c7", fontWeight: 800, marginTop: "0.2rem" }}>ZOOM QR CODE</span>
+                    <span style={{ fontSize: "0.55rem", color: "var(--accent-primary)", fontWeight: 800, marginTop: "0.2rem" }}>ZOOM QR CODE</span>
                   </div>
                   <button
                     onClick={() => handlePrintIdCard(selectedPatient)}
                     className="btn btn-secondary"
-                    style={{ padding: "0.3rem 0.5rem", fontSize: "0.7rem", display: "flex", alignItems: "center", gap: "0.25rem", color: "#0284c7", borderColor: "#0284c7", background: "none", cursor: "pointer", width: "100%", justifyContent: "center" }}
+                    style={{ padding: "0.3rem 0.5rem", fontSize: "0.7rem", display: "flex", alignItems: "center", gap: "0.25rem", color: "var(--accent-primary)", bordercolor: "var(--accent-primary)", background: "none", cursor: "pointer", width: "100%", justifyContent: "center" }}
                   >
                     🪪 Print ID Card
                   </button>
@@ -2268,7 +2268,7 @@ const PatientManagement = () => {
                   justifyContent: "center", 
                   cursor: "pointer", 
                   fontSize: "1.2rem", 
-                  color: "#64748b",
+                  color: "var(--text-secondary)",
                   fontWeight: "bold"
                 }}
               >
@@ -2281,7 +2281,7 @@ const PatientManagement = () => {
               style={{ 
                 display: "flex", 
                 background: "#f8fafc", 
-                borderBottom: "1px solid #e2e8f0", 
+                borderBottom: "1px solid var(--border-glass)", 
                 padding: "0 1rem", 
                 overflowX: "auto" 
               }}
@@ -2358,7 +2358,7 @@ const PatientManagement = () => {
             <div style={{ flex: 1, overflowY: "auto", padding: "1.75rem", background: "#f8fafc" }}>
               {chartLoading ? (
                 <div style={{ textAlign: "center", padding: "4rem 0" }}>
-                  <p style={{ color: "#64748b" }}>Loading patient clinical summaries...</p>
+                  <p style={{ color: "var(--text-secondary)" }}>Loading patient clinical summaries...</p>
                 </div>
               ) : (
                 <>
@@ -2418,8 +2418,8 @@ const PatientManagement = () => {
                         </div>
                       )}
 
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Log Clinical Diagnosis & Consultation</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Log Clinical Diagnosis & Consultation</h4>
                         <form onSubmit={handleSaveConsultation} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                           <div className="form-group">
                             <label>Current Diagnosis / Assessment *</label>
@@ -2459,8 +2459,8 @@ const PatientManagement = () => {
                       </div>
 
                       {user?.role === "DOCTOR" && (
-                        <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                          <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Update EMR Warning Tags & Alerts</h4>
+                        <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                          <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Update EMR Warning Tags & Alerts</h4>
                           <form onSubmit={handleSaveClinicalTags} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                             <div className="form-group">
                               <label>Allergies (comma separated)</label>
@@ -2492,7 +2492,7 @@ const PatientManagement = () => {
                                 placeholder="E.g. Covid-19 Booster, BCG, Hep B"
                               />
                             </div>
-                            <button type="submit" className="btn btn-secondary" style={{ width: "fit-content", borderColor: "#0284c7", color: "#0284c7" }} disabled={submittingAction}>
+                            <button type="submit" className="btn btn-secondary" style={{ width: "fit-content", bordercolor: "var(--accent-primary)", color: "var(--accent-primary)" }} disabled={submittingAction}>
                               <Save size={16} />
                               <span>Update Warning Tags</span>
                             </button>
@@ -2505,18 +2505,18 @@ const PatientManagement = () => {
                   {/* DOCTOR EMR TAB 2: MEDICAL HISTORY */}
                   {activeDrawerTab === "history" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                      <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "1.1rem", color: "#0f172a" }}>Patient Medical History Timeline</h4>
+                      <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "1.1rem", color: "var(--text-primary)" }}>Patient Medical History Timeline</h4>
                       {clinicalData?.consultations?.length === 0 ? (
-                        <p style={{ color: "#64748b" }}>No previous consultation diagnosis logged.</p>
+                        <p style={{ color: "var(--text-secondary)" }}>No previous consultation diagnosis logged.</p>
                       ) : (
                         clinicalData?.consultations?.map((c) => (
-                          <div key={c._id} style={{ background: "white", border: "1px solid #e2e8f0", padding: "1.25rem", borderRadius: "10px", borderLeft: "4px solid #0284c7" }}>
+                          <div key={c._id} style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-glass)", padding: "1.25rem", borderRadius: "10px", borderLeft: "4px solid #0284c7" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                              <strong style={{ fontSize: "0.95rem", color: "#0f172a" }}>Diagnosis: {c.diagnosis}</strong>
-                              <span style={{ fontSize: "0.75rem", color: "#64748b" }}>{new Date(c.createdAt).toLocaleDateString()}</span>
+                              <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)" }}>Diagnosis: {c.diagnosis}</strong>
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>{new Date(c.createdAt).toLocaleDateString()}</span>
                             </div>
                             <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "#334155" }}>{c.clinicalNotes || "No notes added."}</p>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "#64748b", borderTop: "1px solid #f1f5f9", paddingTop: "0.5rem" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "var(--text-secondary)", borderTop: "1px solid #f1f5f9", paddingTop: "0.5rem" }}>
                               <span>Consultant: Dr. {c.doctor?.firstName} {c.doctor?.lastName}</span>
                               {c.followUpDate && (
                                 <span>Follow-up: <strong>{new Date(c.followUpDate).toLocaleDateString()}</strong></span>
@@ -2531,8 +2531,8 @@ const PatientManagement = () => {
                   {/* DOCTOR EMR TAB 3: PRESCRIBE MEDS */}
                   {activeDrawerTab === "prescriptions" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Prescribe New Medication</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Prescribe New Medication</h4>
                         <form onSubmit={handleSavePrescription} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                           <div className="form-group">
                             <label>Medication Name (Generic/Brand) *</label>
@@ -2551,7 +2551,7 @@ const PatientManagement = () => {
                                 onClick={handleCheckPrescription}
                                 disabled={aiPrescriptionChecking}
                                 className="btn btn-secondary"
-                                style={{ padding: "0.35rem 0.65rem", fontSize: "0.75rem", color: "#0284c7", borderColor: "#0284c7" }}
+                                style={{ padding: "0.35rem 0.65rem", fontSize: "0.75rem", color: "var(--accent-primary)", bordercolor: "var(--accent-primary)" }}
                               >
                                 {aiPrescriptionChecking ? "Screening..." : "🔍 Run AI Safety Screen"}
                               </button>
@@ -2609,18 +2609,18 @@ const PatientManagement = () => {
                         </form>
                       </div>
 
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1.05rem", color: "#0f172a" }}>Prescription History Log</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1.05rem", color: "var(--text-primary)" }}>Prescription History Log</h4>
                         {clinicalData?.medications?.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No prescriptions registered yet.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No prescriptions registered yet.</p>
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                             {clinicalData?.medications?.map((m) => (
-                              <div key={m._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #e2e8f0", padding: "0.85rem", borderRadius: "8px" }}>
+                              <div key={m._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid var(--border-glass)", padding: "0.85rem", borderRadius: "8px" }}>
                                 <div>
                                   <strong style={{ fontSize: "0.9rem" }}>{m.medicationName}</strong>
-                                  <div style={{ fontSize: "0.75rem", color: "#64748b" }}>{m.dosage} - {m.frequency}</div>
-                                  <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Prescribed by: Dr. {m.prescribedBy?.firstName || "Unknown"}</div>
+                                  <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>{m.dosage} - {m.frequency}</div>
+                                  <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Prescribed by: Dr. {m.prescribedBy?.firstName || "Unknown"}</div>
                                 </div>
                                 <span className="badge" style={{
                                   background: m.status === "GIVEN" ? "#dcfce7" : "#fee2e2",
@@ -2640,8 +2640,8 @@ const PatientManagement = () => {
                   {/* DOCTOR EMR TAB 4: NURSE INSTRUCTIONS */}
                   {activeDrawerTab === "instructions" && user?.role === "DOCTOR" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Assign Nurse Instruction Task</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Assign Nurse Instruction Task</h4>
                         <form onSubmit={handleSaveInstruction} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                           <div className="form-group">
                             <label>Instruction Description *</label>
@@ -2674,14 +2674,14 @@ const PatientManagement = () => {
                         </form>
                       </div>
 
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1.05rem", color: "#0f172a" }}>Care Tasks Log</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1.05rem", color: "var(--text-primary)" }}>Care Tasks Log</h4>
                         {clinicalData?.instructions?.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No nurse tasks logged.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No nurse tasks logged.</p>
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                             {clinicalData?.instructions?.map((inst) => (
-                              <div key={inst._id} style={{ border: "1px solid #e2e8f0", padding: "0.85rem", borderRadius: "8px" }}>
+                              <div key={inst._id} style={{ border: "1px solid var(--border-glass)", padding: "0.85rem", borderRadius: "8px" }}>
                                 <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem" }}>{inst.instruction}</p>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                   <span className="badge" style={{
@@ -2710,8 +2710,8 @@ const PatientManagement = () => {
                   {/* DOCTOR EMR TAB 5: ORDER LABS */}
                   {activeDrawerTab === "labs" && user?.role === "DOCTOR" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Order Lab Diagnostic Test</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Order Lab Diagnostic Test</h4>
                         <form onSubmit={handleSaveLabOrder} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                           <div className="form-group">
                             <label>Test Name *</label>
@@ -2731,10 +2731,10 @@ const PatientManagement = () => {
                         </form>
                       </div>
 
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1.05rem", color: "#0f172a" }}>Laboratory Diagnostic Requests</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1.05rem", color: "var(--text-primary)" }}>Laboratory Diagnostic Requests</h4>
                         {clinicalData?.labs?.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No lab tests requested yet.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No lab tests requested yet.</p>
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                             {clinicalData?.labs?.map((l) => {
@@ -2754,11 +2754,11 @@ const PatientManagement = () => {
                                 badgeColor = "#16a34a";
                               }
                               return (
-                                <div key={l._id} style={{ display: "flex", flexDirection: "column", gap: "0.5rem", border: "1px solid #e2e8f0", padding: "1rem", borderRadius: "10px", background: "white" }}>
+                                <div key={l._id} style={{ display: "flex", flexDirection: "column", gap: "0.5rem", border: "1px solid var(--border-glass)", padding: "1rem", borderRadius: "10px", background: "var(--bg-secondary)" }}>
                                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                     <div>
-                                      <strong style={{ fontSize: "0.95rem", color: "#0f172a" }}>{l.testName}</strong>
-                                      <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.15rem" }}>Order Date: {new Date(l.createdAt).toLocaleDateString()}</div>
+                                      <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)" }}>{l.testName}</strong>
+                                      <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "0.15rem" }}>Order Date: {new Date(l.createdAt).toLocaleDateString()}</div>
                                     </div>
                                     <span className="badge" style={{ background: badgeBg, color: badgeColor, fontWeight: 700 }}>
                                       {l.status}
@@ -2766,7 +2766,7 @@ const PatientManagement = () => {
                                   </div>
                                   
                                   {l.status === "COMPLETED" && (
-                                    <div style={{ marginTop: "0.5rem", padding: "0.75rem", background: "#f8fafc", borderRadius: "8px", border: "1px solid #f1f5f9" }}>
+                                    <div style={{ marginTop: "0.5rem", padding: "0.75rem", background: "#f8fafc", borderRadius: "8px", border: "1px solid var(--border-glass)" }}>
                                       <div style={{ fontSize: "0.8rem", color: "#475569", fontWeight: 600 }}>Results:</div>
                                       <div style={{ fontSize: "0.85rem", color: "#1e293b", marginTop: "0.15rem" }}>{l.results || "Diagnostic parameters normal."}</div>
                                       
@@ -2794,7 +2794,7 @@ const PatientManagement = () => {
                                             href={`http://localhost:8086/uploads/${l.reportFile}`} 
                                             target="_blank" 
                                             rel="noopener noreferrer"
-                                            style={{ fontSize: "0.75rem", color: "#0284c7", fontWeight: 700, textDecoration: "underline" }}
+                                            style={{ fontSize: "0.75rem", color: "var(--accent-primary)", fontWeight: 700, textDecoration: "underline" }}
                                           >
                                             View Diagnostics Report File ({l.reportFile})
                                           </a>
@@ -2819,10 +2819,10 @@ const PatientManagement = () => {
                   {/* DOCTOR EMR TAB 6: VITALS & NOTES LOGS */}
                   {activeDrawerTab === "vitals" && user?.role === "DOCTOR" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Patient Vitals History Log</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Patient Vitals History Log</h4>
                         {clinicalData?.vitals?.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No vital records registered yet.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No vital records registered yet.</p>
                         ) : (
                           <table className="custom-table" style={{ fontSize: "0.85rem" }}>
                             <thead>
@@ -2851,16 +2851,16 @@ const PatientManagement = () => {
                         )}
                       </div>
 
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Nursing Observation logs</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Nursing Observation logs</h4>
                         {clinicalData?.notes?.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No notes logged by nursing crew.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No notes logged by nursing crew.</p>
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                             {clinicalData?.notes?.map((n) => (
                               <div key={n._id} style={{ borderLeft: "3px solid #10b981", paddingLeft: "0.75rem" }}>
                                 <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.85rem" }}>{n.note}</p>
-                                <span style={{ fontSize: "0.7rem", color: "#64748b" }}>Logged by: Nurse {n.recordedBy?.firstName || "Unknown"} on {new Date(n.createdAt).toLocaleDateString()}</span>
+                                <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>Logged by: Nurse {n.recordedBy?.firstName || "Unknown"} on {new Date(n.createdAt).toLocaleDateString()}</span>
                               </div>
                             ))}
                           </div>
@@ -2901,14 +2901,14 @@ const PatientManagement = () => {
                             )}
                           </div>
                         ) : (
-                          <p style={{ color: "#64748b", fontSize: "0.85rem", margin: 0 }}>No AI summary compiled for this profile.</p>
+                          <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", margin: 0 }}>No AI summary compiled for this profile.</p>
                         )}
                       </div>
 
                       {/* Patient Demographics & Insurance Details Card */}
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem", marginBottom: "1rem" }}>
-                          <h4 style={{ margin: 0, fontSize: "1rem", color: "#0f172a", fontWeight: 700 }}>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-glass)", paddingBottom: "0.5rem", marginBottom: "1rem" }}>
+                          <h4 style={{ margin: 0, fontSize: "1rem", color: "var(--text-primary)", fontWeight: 700 }}>
                             📋 Patient Demographics & Insurance
                           </h4>
                           {user?.role !== "PATIENT" && (
@@ -2927,7 +2927,7 @@ const PatientManagement = () => {
                           <form onSubmit={handleSaveDemographics} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
                               <div>
-                                <h5 style={{ margin: "0 0 0.75rem 0", fontSize: "0.85rem", color: "#64748b", fontWeight: 700 }}>Contact & Demographics</h5>
+                                <h5 style={{ margin: "0 0 0.75rem 0", fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 700 }}>Contact & Demographics</h5>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                                   <div className="form-group">
                                     <label style={{ fontSize: "0.75rem", marginBottom: "0.25rem" }}>Date of Birth</label>
@@ -2992,7 +2992,7 @@ const PatientManagement = () => {
                                 </div>
                               </div>
                               <div style={{ borderLeft: "1px solid #f1f5f9", paddingLeft: "1.5rem" }}>
-                                <h5 style={{ margin: "0 0 0.75rem 0", fontSize: "0.85rem", color: "#64748b", fontWeight: 700 }}>Insurance Policy Details</h5>
+                                <h5 style={{ margin: "0 0 0.75rem 0", fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 700 }}>Insurance Policy Details</h5>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                                   <div className="form-group">
                                     <label style={{ fontSize: "0.75rem", marginBottom: "0.25rem" }}>Insurance Provider</label>
@@ -3071,7 +3071,7 @@ const PatientManagement = () => {
                         ) : (
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
                             <div>
-                              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "#64748b", fontWeight: 700 }}>Contact & Demographics</h5>
+                              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 700 }}>Contact & Demographics</h5>
                               <div style={{ fontSize: "0.85rem", color: "#334155", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                                 <div><strong>DOB:</strong> {selectedPatient.dob ? new Date(selectedPatient.dob).toLocaleDateString() : "N/A"}</div>
                                 <div><strong>Age:</strong> {selectedPatient.age ? `${selectedPatient.age} years` : (selectedPatient.dob ? "Calculated" : "N/A")}</div>
@@ -3079,21 +3079,21 @@ const PatientManagement = () => {
                                 <div><strong>Mobile:</strong> {selectedPatient.mobile}</div>
                                 <div><strong>Email:</strong> {selectedPatient.email}</div>
                                 <div><strong>Emergency Contact:</strong> {selectedPatient.emergencyContact || "N/A"}</div>
-                                <div style={{ marginTop: "0.25rem" }}><strong>Address:</strong><br /><span style={{ color: "#64748b" }}>{selectedPatient.address || "No address on file"}</span></div>
+                                <div style={{ marginTop: "0.25rem" }}><strong>Address:</strong><br /><span style={{ color: "var(--text-secondary)" }}>{selectedPatient.address || "No address on file"}</span></div>
                               </div>
                             </div>
                             <div style={{ borderLeft: "1px solid #f1f5f9", paddingLeft: "1.5rem" }}>
-                              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "#64748b", fontWeight: 700 }}>Insurance Policy Details</h5>
+                              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 700 }}>Insurance Policy Details</h5>
                               {selectedPatient.insurance && selectedPatient.insurance.provider ? (
                                 <div style={{ fontSize: "0.85rem", color: "#334155", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                                  <div><strong>Provider:</strong> <span style={{ color: "#0284c7", fontWeight: 700 }}>{selectedPatient.insurance.provider}</span></div>
+                                  <div><strong>Provider:</strong> <span style={{ color: "var(--accent-primary)", fontWeight: 700 }}>{selectedPatient.insurance.provider}</span></div>
                                   <div><strong>Policy #:</strong> {selectedPatient.insurance.policyNumber || "N/A"}</div>
                                   <div><strong>Coverage Limit:</strong> ${selectedPatient.insurance.coverageAmount || 0}</div>
                                   <div><strong>Expiry Date:</strong> {selectedPatient.insurance.expiryDate ? new Date(selectedPatient.insurance.expiryDate).toLocaleDateString() : "N/A"}</div>
                                   <span className="badge" style={{ width: "fit-content", background: "#ecfdf5", color: "#059669", fontSize: "0.7rem", fontWeight: 700, marginTop: "0.5rem" }}>ACTIVE POLICY</span>
                                 </div>
                               ) : (
-                                <div style={{ color: "#64748b", fontSize: "0.85rem" }}>
+                                <div style={{ color: "var(--text-secondary)", fontSize: "0.85rem" }}>
                                   No insurance coverage logged. Patient is on self-pay status.
                                 </div>
                               )}
@@ -3102,8 +3102,8 @@ const PatientManagement = () => {
                         )}
                       </div>
 
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Bed Allocation & Doctor Assignment</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Bed Allocation & Doctor Assignment</h4>
                         <form onSubmit={handleSaveAllocation} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                           <div className="form-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
                             <div className="form-group">
@@ -3148,24 +3148,24 @@ const PatientManagement = () => {
                       </div>
 
                       {/* Current Vitals Box */}
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Current Vitals Summary</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Current Vitals Summary</h4>
                         {clinicalData?.vitals && clinicalData.vitals.length > 0 ? (
                           (() => {
                             const latest = clinicalData.vitals[0];
                             return (
                               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "1rem" }}>
-                                <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                                  <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Temperature</div>
-                                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "#0f172a" }}>{latest.temperature}°F</div>
+                                <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid var(--border-glass)" }}>
+                                  <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Temperature</div>
+                                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)" }}>{latest.temperature}°F</div>
                                 </div>
-                                <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                                  <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Blood Pressure</div>
-                                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "#0f172a" }}>{latest.bp} mmHg</div>
+                                <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid var(--border-glass)" }}>
+                                  <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Blood Pressure</div>
+                                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)" }}>{latest.bp} mmHg</div>
                                 </div>
-                                <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                                  <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Heart Rate</div>
-                                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "#0f172a" }}>{latest.heartRate || "N/A"} bpm</div>
+                                <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid var(--border-glass)" }}>
+                                  <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Heart Rate</div>
+                                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)" }}>{latest.heartRate || "N/A"} bpm</div>
                                 </div>
                                 <div style={{ background: latest.spo2 && latest.spo2 < 95 ? "#fef2f2" : "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: latest.spo2 && latest.spo2 < 95 ? "1px solid #fecaca" : "1px solid #e2e8f0" }}>
                                   <div style={{ fontSize: "0.75rem", color: latest.spo2 && latest.spo2 < 95 ? "#dc2626" : "#64748b" }}>SpO2 Level</div>
@@ -3174,19 +3174,19 @@ const PatientManagement = () => {
                                     {latest.spo2 && latest.spo2 < 95 && <ShieldAlert size={16} className="text-red-500" />}
                                   </div>
                                 </div>
-                                <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                                  <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Respiratory Rate</div>
-                                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "#0f172a" }}>{latest.respiratoryRate || "N/A"}/min</div>
+                                <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid var(--border-glass)" }}>
+                                  <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Respiratory Rate</div>
+                                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)" }}>{latest.respiratoryRate || "N/A"}/min</div>
                                 </div>
-                                <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                                  <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Blood Sugar</div>
-                                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "#0f172a" }}>{latest.sugar || "N/A"} mg/dL</div>
+                                <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid var(--border-glass)" }}>
+                                  <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Blood Sugar</div>
+                                  <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)" }}>{latest.sugar || "N/A"} mg/dL</div>
                                 </div>
                               </div>
                             );
                           })()
                         ) : (
-                          <p style={{ color: "#64748b", margin: 0, fontSize: "0.9rem" }}>No vitals recorded yet. Go to the Vitals tab to record vitals.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.9rem" }}>No vitals recorded yet. Go to the Vitals tab to record vitals.</p>
                         )}
                       </div>
                     </div>
@@ -3195,8 +3195,8 @@ const PatientManagement = () => {
                   {/* TAB 2: VITALS MANAGEMENT */}
                   {activeDrawerTab === "vitals" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Record New Patient Vitals</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Record New Patient Vitals</h4>
                         <form onSubmit={handleSaveVitals}>
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", marginBottom: "1rem" }}>
                             <div className="form-group">
@@ -3268,15 +3268,15 @@ const PatientManagement = () => {
                       </div>
 
                       {/* Vitals History */}
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Vitals History Log</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Vitals History Log</h4>
                         {!clinicalData?.vitals || clinicalData.vitals.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No vitals history logged.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No vitals history logged.</p>
                         ) : (
                           <div style={{ overflowX: "auto" }}>
                             <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
                               <thead>
-                                <tr style={{ borderBottom: "1px solid #e2e8f0", background: "#f8fafc", textAlign: "left" }}>
+                                <tr style={{ borderBottom: "1px solid var(--border-glass)", background: "#f8fafc", textAlign: "left" }}>
                                   <th style={{ padding: "0.5rem" }}>Date/Time</th>
                                   <th style={{ padding: "0.5rem" }}>Temp</th>
                                   <th style={{ padding: "0.5rem" }}>BP</th>
@@ -3288,14 +3288,14 @@ const PatientManagement = () => {
                               </thead>
                               <tbody>
                                 {clinicalData.vitals.map((v) => (
-                                  <tr key={v._id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                                    <td style={{ padding: "0.5rem", color: "#64748b" }}>{new Date(v.createdAt).toLocaleString()}</td>
+                                  <tr key={v._id} style={{ borderBottom: "1px solid var(--border-glass)" }}>
+                                    <td style={{ padding: "0.5rem", color: "var(--text-secondary)" }}>{new Date(v.createdAt).toLocaleString()}</td>
                                     <td style={{ padding: "0.5rem", fontWeight: 600 }}>{v.temperature}°F</td>
                                     <td style={{ padding: "0.5rem" }}>{v.bp}</td>
                                     <td style={{ padding: "0.5rem" }}>{v.heartRate || "N/A"} bpm</td>
                                     <td style={{ padding: "0.5rem", color: v.spo2 && v.spo2 < 95 ? "#dc2626" : "inherit", fontWeight: v.spo2 && v.spo2 < 95 ? 700 : "normal" }}>{v.spo2 || "N/A"}%</td>
                                     <td style={{ padding: "0.5rem" }}>{v.sugar || "N/A"}</td>
-                                    <td style={{ padding: "0.5rem", color: "#64748b" }}>{v.recordedBy ? `${v.recordedBy.firstName} ${v.recordedBy.lastName}` : "Staff"}</td>
+                                    <td style={{ padding: "0.5rem", color: "var(--text-secondary)" }}>{v.recordedBy ? `${v.recordedBy.firstName} ${v.recordedBy.lastName}` : "Staff"}</td>
                                   </tr>
                                 ))}
                               </tbody>
@@ -3309,20 +3309,20 @@ const PatientManagement = () => {
                   {/* TAB 3: MEDICATION MANAGEMENT (MAR) */}
                   {activeDrawerTab === "medications" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Medication Administration Record (MAR)</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Medication Administration Record (MAR)</h4>
                         {!clinicalData?.medications || clinicalData.medications.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No medication prescriptions logged for this patient.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No medication prescriptions logged for this patient.</p>
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                             {clinicalData.medications.map((med) => (
-                              <div key={med._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #e2e8f0", padding: "1rem", borderRadius: "8px", background: med.status === "GIVEN" ? "#f0fdf4" : "white" }}>
+                              <div key={med._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid var(--border-glass)", padding: "1rem", borderRadius: "8px", background: med.status === "GIVEN" ? "#f0fdf4" : "white" }}>
                                 <div>
-                                  <strong style={{ fontSize: "0.95rem", color: "#0f172a" }}>{med.medicationName}</strong>
-                                  <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.2rem" }}>
+                                  <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)" }}>{med.medicationName}</strong>
+                                  <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: "0.2rem" }}>
                                     Dosage: <strong>{med.dosage}</strong> | Frequency: <strong>{med.frequency}</strong>
                                   </div>
-                                  <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.2rem" }}>
+                                  <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "0.2rem" }}>
                                     Prescribed by Dr. {med.prescribedBy ? `${med.prescribedBy.firstName} ${med.prescribedBy.lastName}` : "Doctor"}
                                   </div>
                                 </div>
@@ -3340,7 +3340,7 @@ const PatientManagement = () => {
                                       <span className="badge" style={{ background: "#ecfdf5", color: "#059669", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>
                                         <CheckCircle size={14} /> GIVEN
                                       </span>
-                                      <span style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "0.2rem" }}>
+                                      <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)", marginTop: "0.2rem" }}>
                                         By {med.givenBy ? `${med.givenBy.firstName} ${med.givenBy.lastName}` : "Nurse"} on {new Date(med.givenAt).toLocaleTimeString()}
                                       </span>
                                     </div>
@@ -3357,14 +3357,14 @@ const PatientManagement = () => {
                   {/* TAB 4: DOCTOR CLINICAL INSTRUCTIONS */}
                   {activeDrawerTab === "instructions" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Doctor's Care Instructions & Tasks</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Doctor's Care Instructions & Tasks</h4>
                         {!clinicalData?.instructions || clinicalData.instructions.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No doctor instructions found.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No doctor instructions found.</p>
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                             {clinicalData.instructions.map((inst) => (
-                              <div key={inst._id} style={{ border: "1px solid #e2e8f0", padding: "1rem", borderRadius: "8px", background: inst.status === "COMPLETED" ? "#f8fafc" : "white" }}>
+                              <div key={inst._id} style={{ border: "1px solid var(--border-glass)", padding: "1rem", borderRadius: "8px", background: inst.status === "COMPLETED" ? "#f8fafc" : "white" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem" }}>
                                   <span className={`badge`} style={{ 
                                     background: inst.priority === "HIGH" ? "#fee2e2" : inst.priority === "MEDIUM" ? "#fef3c7" : "#f1f5f9", 
@@ -3382,13 +3382,13 @@ const PatientManagement = () => {
                                       Mark Completed
                                     </button>
                                   ) : (
-                                    <span className="badge" style={{ background: "#f1f5f9", color: "#64748b", fontWeight: 700 }}>
+                                    <span className="badge" style={{ background: "#f1f5f9", color: "var(--text-secondary)", fontWeight: 700 }}>
                                       COMPLETED
                                     </span>
                                   )}
                                 </div>
-                                <p style={{ fontSize: "0.9rem", color: "#0f172a", margin: "0.25rem 0" }}>{inst.instruction}</p>
-                                <div style={{ fontSize: "0.75rem", color: "#64748b", borderTop: "1px dashed #e2e8f0", paddingTop: "0.5rem", marginTop: "0.5rem" }}>
+                                <p style={{ fontSize: "0.9rem", color: "var(--text-primary)", margin: "0.25rem 0" }}>{inst.instruction}</p>
+                                <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", borderTop: "1px dashed #e2e8f0", paddingTop: "0.5rem", marginTop: "0.5rem" }}>
                                   {inst.status === "PENDING" ? (
                                     <span>Prescribed by Dr. {inst.prescribedBy ? `${inst.prescribedBy.firstName} ${inst.prescribedBy.lastName}` : "Doctor"}</span>
                                   ) : (
@@ -3406,11 +3406,11 @@ const PatientManagement = () => {
                   {/* TAB 5: NURSING NOTES */}
                   {activeDrawerTab === "notes" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                          <h4 style={{ margin: 0, fontSize: "1rem", color: "#0f172a" }}>Log Nursing Note</h4>
+                          <h4 style={{ margin: 0, fontSize: "1rem", color: "var(--text-primary)" }}>Log Nursing Note</h4>
                           <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                            <span style={{ fontSize: "0.75rem", color: "#0284c7", fontWeight: 600 }}>🎙️ AI Voice Dictate:</span>
+                            <span style={{ fontSize: "0.75rem", color: "var(--accent-primary)", fontWeight: 600 }}>🎙️ AI Voice Dictate:</span>
                             <AIVoiceAssistant mode="stt" onTranscript={(text) => setNoteText(prev => prev ? prev + " " + text : text)} />
                           </div>
                         </div>
@@ -3435,9 +3435,9 @@ const PatientManagement = () => {
                       </div>
 
                       {/* Notes log */}
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                          <h4 style={{ margin: 0, fontSize: "1rem", color: "#0f172a" }}>Observations History Log</h4>
+                          <h4 style={{ margin: 0, fontSize: "1rem", color: "var(--text-primary)" }}>Observations History Log</h4>
                           {clinicalData?.notes?.length > 0 && (
                             <div style={{ display: "flex", gap: "0.5rem" }}>
                               <button 
@@ -3458,13 +3458,13 @@ const PatientManagement = () => {
                           )}
                         </div>
                         {!clinicalData?.notes || clinicalData.notes.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No nursing notes logged yet.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No nursing notes logged yet.</p>
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                             {clinicalData.notes.map((note) => (
                               <div key={note._id} style={{ borderLeft: "3px solid #0284c7", paddingLeft: "1rem", paddingBottom: "0.25rem" }}>
-                                <p style={{ fontSize: "0.9rem", color: "#0f172a", margin: "0 0 0.25rem 0" }}>{note.note}</p>
-                                <div style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                                <p style={{ fontSize: "0.9rem", color: "var(--text-primary)", margin: "0 0 0.25rem 0" }}>{note.note}</p>
+                                <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
                                   Logged by {note.recordedBy ? `${note.recordedBy.firstName} ${note.recordedBy.lastName}` : "Staff"} on {new Date(note.createdAt).toLocaleString()}
                                 </div>
                               </div>
@@ -3478,17 +3478,17 @@ const PatientManagement = () => {
                   {/* TAB 6: LAB SUPPORT */}
                   {activeDrawerTab === "labs" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Laboratory Test Request Tracking</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Laboratory Test Request Tracking</h4>
                         {!clinicalData?.labs || clinicalData.labs.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No lab test requests logged for this patient.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No lab test requests logged for this patient.</p>
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                             {clinicalData.labs.map((lab) => (
-                              <div key={lab._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #e2e8f0", padding: "1rem", borderRadius: "8px", background: lab.status === "SAMPLE_COLLECTED" ? "#f0fdf4" : "white" }}>
+                              <div key={lab._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid var(--border-glass)", padding: "1rem", borderRadius: "8px", background: lab.status === "SAMPLE_COLLECTED" ? "#f0fdf4" : "white" }}>
                                 <div>
-                                  <strong style={{ fontSize: "0.95rem", color: "#0f172a" }}>{lab.testName}</strong>
-                                  <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.2rem" }}>
+                                  <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)" }}>{lab.testName}</strong>
+                                  <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "0.2rem" }}>
                                     Ordered by Dr. {lab.prescribedBy ? `${lab.prescribedBy.firstName} ${lab.prescribedBy.lastName}` : "Doctor"}
                                   </div>
                                 </div>
@@ -3529,10 +3529,10 @@ const PatientManagement = () => {
                                     </div>
                                   ) : lab.status === "SAMPLE_COLLECTED" ? (
                                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-                                      <span className="badge" style={{ background: "#e0f2fe", color: "#0284c7", fontWeight: 700 }}>
+                                      <span className="badge" style={{ background: "#e0f2fe", color: "var(--accent-primary)", fontWeight: 700 }}>
                                         SAMPLE COLLECTED (PROCESSING)
                                       </span>
-                                      <span style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "0.2rem" }}>
+                                      <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)", marginTop: "0.2rem" }}>
                                         By Nurse {lab.sampleCollectedBy ? `${lab.sampleCollectedBy.firstName} ${lab.sampleCollectedBy.lastName}` : "Staff"}
                                       </span>
                                     </div>
@@ -3564,19 +3564,19 @@ const PatientManagement = () => {
                   {activeDrawerTab === "documents" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                       {/* Document List */}
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Patient Attachments & Scanned Documents</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Patient Attachments & Scanned Documents</h4>
                         {!selectedPatient.documents || selectedPatient.documents.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No files or attachments uploaded yet.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No files or attachments uploaded yet.</p>
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                             {selectedPatient.documents.map((doc, idx) => (
-                              <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #e2e8f0", padding: "0.85rem 1.25rem", borderRadius: "8px", background: "#f8fafc" }}>
+                              <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid var(--border-glass)", padding: "0.85rem 1.25rem", borderRadius: "8px", background: "#f8fafc" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                                  <FileText size={20} style={{ color: "#64748b" }} />
+                                  <FileText size={20} style={{ color: "var(--text-secondary)" }} />
                                   <div>
-                                    <strong style={{ fontSize: "0.9rem", color: "#0f172a" }}>{doc.name}</strong>
-                                    <div style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "0.15rem" }}>
+                                    <strong style={{ fontSize: "0.9rem", color: "var(--text-primary)" }}>{doc.name}</strong>
+                                    <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)", marginTop: "0.15rem" }}>
                                       Uploaded on {new Date(doc.uploadedAt).toLocaleString()}
                                     </div>
                                   </div>
@@ -3588,14 +3588,14 @@ const PatientManagement = () => {
                                       e.preventDefault();
                                       showToast("success", `Opening mock file: ${doc.url}`);
                                     }}
-                                    style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 700, textDecoration: "none" }}
+                                    style={{ fontSize: "0.8rem", color: "var(--text-secondary)", fontWeight: 700, textDecoration: "none" }}
                                   >
                                     View File
                                   </a>
                                   <button
                                     onClick={() => handleSummarizeDocument(doc.name)}
                                     className="btn btn-secondary"
-                                    style={{ padding: "0.25rem 0.5rem", fontSize: "0.7rem", color: "#0284c7", borderColor: "#bae6fd" }}
+                                    style={{ padding: "0.25rem 0.5rem", fontSize: "0.7rem", color: "var(--accent-primary)", borderColor: "#bae6fd" }}
                                   >
                                     Summarize
                                   </button>
@@ -3609,7 +3609,7 @@ const PatientManagement = () => {
                           <div style={{ marginTop: "1rem", padding: "1rem", background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "12px" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #cbd5e1", paddingBottom: "0.4rem", marginBottom: "0.5rem" }}>
                               <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#475569" }}>📄 AI DOCUMENT REPORT SUMMARY</span>
-                              <button onClick={() => setAiReportSummary(null)} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: "0.8rem" }}>Clear</button>
+                              <button onClick={() => setAiReportSummary(null)} style={{ background: "none", border: "none", color: "var(--text-secondary)", cursor: "pointer", fontSize: "0.8rem" }}>Clear</button>
                             </div>
                             <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.75rem", color: "#334155", lineHeight: 1.4 }}>
                               {aiReportSummary.summary}
@@ -3639,8 +3639,8 @@ const PatientManagement = () => {
 
                       {/* Upload Form (Visible to staff) */}
                       {user?.role !== "PATIENT" && (
-                        <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                          <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Upload Scanned Document / Report</h4>
+                        <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                          <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Upload Scanned Document / Report</h4>
                           <form onSubmit={handleAddDocument} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                             <div className="form-group">
                               <label>Document Name *</label>
@@ -3666,8 +3666,8 @@ const PatientManagement = () => {
                   {/* TAB 8: FAMILY & RELATIONS */}
                   {activeDrawerTab === "family" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a", fontWeight: 700 }}>Map Family Member Relationship</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)", fontWeight: 700 }}>Map Family Member Relationship</h4>
                         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                           <div className="form-group">
                             <label>Search Patient by Name, UHID, or Mobile</label>
@@ -3680,7 +3680,7 @@ const PatientManagement = () => {
                             />
                             {familySearchResults.length > 0 && (
                               <div style={{
-                                background: "white",
+                                background: "var(--bg-secondary)",
                                 border: "1px solid #cbd5e1",
                                 borderRadius: "8px",
                                 marginTop: "0.25rem",
@@ -3701,12 +3701,12 @@ const PatientManagement = () => {
                                     style={{
                                       padding: "0.5rem 0.75rem",
                                       cursor: "pointer",
-                                      borderBottom: "1px solid #f1f5f9",
+                                      borderBottom: "1px solid var(--border-glass)",
                                       background: selectedFamilyMember?._id === res._id ? "#f0f9ff" : "transparent"
                                     }}
                                   >
-                                    <strong style={{ fontSize: "0.85rem", color: "#0f172a" }}>{res.firstName} {res.lastName}</strong>
-                                    <div style={{ fontSize: "0.75rem", color: "#64748b" }}>UHID: {res.uhid} | Mobile: {res.mobile}</div>
+                                    <strong style={{ fontSize: "0.85rem", color: "var(--text-primary)" }}>{res.firstName} {res.lastName}</strong>
+                                    <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>UHID: {res.uhid} | Mobile: {res.mobile}</div>
                                   </div>
                                 ))}
                               </div>
@@ -3714,10 +3714,10 @@ const PatientManagement = () => {
                           </div>
 
                           {selectedFamilyMember && (
-                            <div style={{ background: "#f8fafc", padding: "0.75rem 1rem", borderRadius: "8px", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <div style={{ background: "#f8fafc", padding: "0.75rem 1rem", borderRadius: "8px", border: "1px solid var(--border-glass)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <div>
-                                <span style={{ fontSize: "0.75rem", color: "#64748b" }}>Selected Patient:</span>
-                                <h5 style={{ margin: "0.15rem 0 0 0", color: "#0f172a" }}>{selectedFamilyMember.firstName} {selectedFamilyMember.lastName}</h5>
+                                <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Selected Patient:</span>
+                                <h5 style={{ margin: "0.15rem 0 0 0", color: "var(--text-primary)" }}>{selectedFamilyMember.firstName} {selectedFamilyMember.lastName}</h5>
                               </div>
                               <button onClick={() => setSelectedFamilyMember(null)} style={{ background: "none", border: "none", color: "#dc2626", fontSize: "0.8rem", cursor: "pointer", fontWeight: 700 }}>Clear</button>
                             </div>
@@ -3752,10 +3752,10 @@ const PatientManagement = () => {
                       </div>
 
                       {/* Mapped Family Members List */}
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a", fontWeight: 700 }}>Mapped Family Members</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)", fontWeight: 700 }}>Mapped Family Members</h4>
                         {!selectedPatient.familyMapping || selectedPatient.familyMapping.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No family members mapped to this patient profile.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No family members mapped to this patient profile.</p>
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                             {selectedPatient.familyMapping.map((fam, idx) => {
@@ -3768,7 +3768,7 @@ const PatientManagement = () => {
                                     display: "flex", 
                                     justifyContent: "space-between", 
                                     alignItems: "center", 
-                                    border: "1px solid #e2e8f0", 
+                                    border: "1px solid var(--border-glass)", 
                                     padding: "0.85rem 1rem", 
                                     borderRadius: "8px",
                                     background: "#f8fafc"
@@ -3776,12 +3776,12 @@ const PatientManagement = () => {
                                 >
                                   <div>
                                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                      <span className="badge" style={{ background: "#e0f2fe", color: "#0284c7", fontSize: "0.7rem", fontWeight: 700 }}>
+                                      <span className="badge" style={{ background: "#e0f2fe", color: "var(--accent-primary)", fontSize: "0.7rem", fontWeight: 700 }}>
                                         {fam.relation.toUpperCase()}
                                       </span>
-                                      <strong style={{ fontSize: "0.9rem", color: "#0f172a" }}>{relative.firstName} {relative.lastName}</strong>
+                                      <strong style={{ fontSize: "0.9rem", color: "var(--text-primary)" }}>{relative.firstName} {relative.lastName}</strong>
                                     </div>
-                                    <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.2rem" }}>
+                                    <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "0.2rem" }}>
                                       UHID: {relative.uhid || relative.patientId} | Mobile: {relative.mobile}
                                     </div>
                                   </div>
@@ -3789,14 +3789,14 @@ const PatientManagement = () => {
                                     <button
                                       onClick={() => handleOpenChart(relative)}
                                       className="btn btn-secondary"
-                                      style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem", color: "#0284c7", borderColor: "#bae6fd", background: "white", cursor: "pointer" }}
+                                      style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem", color: "var(--accent-primary)", borderColor: "#bae6fd", background: "var(--bg-secondary)", cursor: "pointer" }}
                                     >
                                       Open Chart
                                     </button>
                                     <button
                                       onClick={() => handleRemoveFamilyMember(relative._id)}
                                       className="btn btn-secondary"
-                                      style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem", color: "#ef4444", borderColor: "#fecaca", background: "white", cursor: "pointer" }}
+                                      style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem", color: "#ef4444", borderColor: "#fecaca", background: "var(--bg-secondary)", cursor: "pointer" }}
                                     >
                                       Unlink
                                     </button>
@@ -3848,9 +3848,9 @@ const PatientManagement = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                          <h4 style={{ margin: "0 0 1rem 0", fontSize: "1.05rem", color: "#0f172a" }}>Draft Patient Discharge Summary</h4>
-                          <p style={{ color: "#64748b", fontSize: "0.8rem", margin: "0 0 1rem 0" }}>
+                        <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                          <h4 style={{ margin: "0 0 1rem 0", fontSize: "1.05rem", color: "var(--text-primary)" }}>Draft Patient Discharge Summary</h4>
+                          <p style={{ color: "var(--text-secondary)", fontSize: "0.8rem", margin: "0 0 1rem 0" }}>
                             Verify patient vitals are stable, outstanding laboratory reports have been reviewed, and prepare take-home medication dosage instructions.
                           </p>
 
@@ -3868,7 +3868,7 @@ const PatientManagement = () => {
                             </div>
 
                             {/* Take home meds list builder */}
-                            <div style={{ border: "1px solid #e2e8f0", padding: "1rem", borderRadius: "8px", background: "#f8fafc" }}>
+                            <div style={{ border: "1px solid var(--border-glass)", padding: "1rem", borderRadius: "8px", background: "#f8fafc" }}>
                               <strong style={{ fontSize: "0.85rem", color: "#475569", display: "block", marginBottom: "0.75rem" }}>Add Take-Home Medications</strong>
                               
                               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem", marginBottom: "0.75rem" }}>
@@ -3909,7 +3909,7 @@ const PatientManagement = () => {
                               </div>
 
                               {takeHomeMedsInput.length > 0 && (
-                                <table className="custom-table" style={{ fontSize: "0.8rem", background: "white" }}>
+                                <table className="custom-table" style={{ fontSize: "0.8rem", background: "var(--bg-secondary)" }}>
                                   <thead>
                                     <tr>
                                       <th>Medication</th>
@@ -4292,7 +4292,7 @@ const PatientManagement = () => {
                       />
                       {primarySearchResults.length > 0 && (
                         <div style={{
-                          background: "white",
+                          background: "var(--bg-secondary)",
                           border: "1px solid #cbd5e1",
                           borderRadius: "8px",
                           marginTop: "0.25rem",
@@ -4313,11 +4313,11 @@ const PatientManagement = () => {
                               style={{
                                 padding: "0.5rem 0.75rem",
                                 cursor: "pointer",
-                                borderBottom: "1px solid #f1f5f9"
+                                borderBottom: "1px solid var(--border-glass)"
                               }}
                             >
-                              <strong style={{ fontSize: "0.85rem", color: "#0f172a" }}>{res.firstName} {res.lastName}</strong>
-                              <div style={{ fontSize: "0.75rem", color: "#64748b" }}>UHID: {res.uhid} | Mobile: {res.mobile}</div>
+                              <strong style={{ fontSize: "0.85rem", color: "var(--text-primary)" }}>{res.firstName} {res.lastName}</strong>
+                              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>UHID: {res.uhid} | Mobile: {res.mobile}</div>
                             </div>
                           ))}
                         </div>
@@ -4337,7 +4337,7 @@ const PatientManagement = () => {
                         </div>
                       </div>
                     ) : (
-                      <div style={{ padding: "2rem 1rem", border: "1px dashed #cbd5e1", borderRadius: "8px", textAlign: "center", color: "#64748b", fontSize: "0.85rem" }}>
+                      <div style={{ padding: "2rem 1rem", border: "1px dashed #cbd5e1", borderRadius: "8px", textAlign: "center", color: "var(--text-secondary)", fontSize: "0.85rem" }}>
                         Select the primary patient record to keep
                       </div>
                     )}
@@ -4356,7 +4356,7 @@ const PatientManagement = () => {
                       />
                       {secondarySearchResults.length > 0 && (
                         <div style={{
-                          background: "white",
+                          background: "var(--bg-secondary)",
                           border: "1px solid #cbd5e1",
                           borderRadius: "8px",
                           marginTop: "0.25rem",
@@ -4377,11 +4377,11 @@ const PatientManagement = () => {
                               style={{
                                 padding: "0.5rem 0.75rem",
                                 cursor: "pointer",
-                                borderBottom: "1px solid #f1f5f9"
+                                borderBottom: "1px solid var(--border-glass)"
                               }}
                             >
-                              <strong style={{ fontSize: "0.85rem", color: "#0f172a" }}>{res.firstName} {res.lastName}</strong>
-                              <div style={{ fontSize: "0.75rem", color: "#64748b" }}>UHID: {res.uhid} | Mobile: {res.mobile}</div>
+                              <strong style={{ fontSize: "0.85rem", color: "var(--text-primary)" }}>{res.firstName} {res.lastName}</strong>
+                              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>UHID: {res.uhid} | Mobile: {res.mobile}</div>
                             </div>
                           ))}
                         </div>
@@ -4401,7 +4401,7 @@ const PatientManagement = () => {
                         </div>
                       </div>
                     ) : (
-                      <div style={{ padding: "2rem 1rem", border: "1px dashed #cbd5e1", borderRadius: "8px", textAlign: "center", color: "#64748b", fontSize: "0.85rem" }}>
+                      <div style={{ padding: "2rem 1rem", border: "1px dashed #cbd5e1", borderRadius: "8px", textAlign: "center", color: "var(--text-secondary)", fontSize: "0.85rem" }}>
                         Select the duplicate patient record to merge
                       </div>
                     )}
@@ -4448,7 +4448,7 @@ const PatientManagement = () => {
           justifyContent: "center"
         }}>
           <div style={{
-            background: "white",
+            background: "var(--bg-secondary)",
             padding: "2rem",
             borderRadius: "16px",
             boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
@@ -4459,7 +4459,7 @@ const PatientManagement = () => {
             alignItems: "center",
             gap: "1.5rem"
           }}>
-            <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <Camera size={20} color="#0284c7" />
               <span>Capture Profile Photo</span>
             </h3>
@@ -4502,7 +4502,7 @@ const PatientManagement = () => {
                 type="button"
                 className="btn btn-primary"
                 onClick={handleCaptureSnapshot}
-                style={{ flex: 1, justifyContent: "center", background: "#0284c7", borderColor: "#0284c7" }}
+                style={{ flex: 1, justifyContent: "center", background: "#0284c7", bordercolor: "var(--accent-primary)" }}
                 disabled={submittingAction}
               >
                 Capture Photo

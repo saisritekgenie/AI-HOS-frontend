@@ -300,7 +300,7 @@ const Appointments = () => {
                   <td>
                     <div>
                       <strong style={{ color: "var(--text-primary)" }}>{appt.patient?.firstName} {appt.patient?.lastName}</strong>
-                      <div style={{ fontSize: "0.75rem", color: "#64748b" }}>UHID: {appt.patient?.uhid || "N/A"}</div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>UHID: {appt.patient?.uhid || "N/A"}</div>
                     </div>
                   </td>
                   <td>
@@ -335,12 +335,12 @@ const Appointments = () => {
                         </span>
                       )}
                       {appt.checkInTime && (
-                        <span style={{ fontSize: "0.7rem", color: "#64748b" }}>
+                        <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>
                           In: {new Date(appt.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       )}
                       {appt.completionTime && (
-                        <span style={{ fontSize: "0.7rem", color: "#64748b" }}>
+                        <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>
                           Out: {new Date(appt.completionTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       )}
@@ -507,7 +507,7 @@ const Appointments = () => {
 
                       {/* 1. Wait Time Prediction */}
                       {aiWaitPredictionLoading ? (
-                        <span style={{ fontSize: "0.75rem", color: "#64748b" }}>Analyzing doctor queue load...</span>
+                        <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Analyzing doctor queue load...</span>
                       ) : aiWaitPrediction ? (
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.75rem" }}>
                           <div>
@@ -516,7 +516,7 @@ const Appointments = () => {
                           <div>
                             <strong>Predicted Wait Time:</strong> <span style={{ color: "#d97706", fontWeight: 700 }}>{aiWaitPrediction.estimatedWaitTime}</span> (Confidence: {aiWaitPrediction.confidence})
                           </div>
-                          <div style={{ color: "#64748b", fontStyle: "italic", marginTop: "0.15rem", fontSize: "0.7rem" }}>
+                          <div style={{ color: "var(--text-secondary)", fontStyle: "italic", marginTop: "0.15rem", fontSize: "0.7rem" }}>
                             {aiWaitPrediction.optimizationAdvice}
                           </div>
                         </div>
@@ -526,7 +526,7 @@ const Appointments = () => {
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                         <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "#334155" }}>AI Suggested Time Slots (Click to auto-fill):</span>
                         {aiRecommenderLoading ? (
-                          <span style={{ fontSize: "0.75rem", color: "#64748b" }}>Generating optimal slots...</span>
+                          <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Generating optimal slots...</span>
                         ) : aiRecommendedSlots.length > 0 ? (
                           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.2rem" }}>
                             {aiRecommendedSlots.map((slot) => (
@@ -551,10 +551,10 @@ const Appointments = () => {
                             ))}
                           </div>
                         ) : (
-                          <span style={{ fontSize: "0.75rem", color: "#64748b" }}>No custom recommendations.</span>
+                          <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>No custom recommendations.</span>
                         )}
                         {aiRecommenderNote && (
-                          <p style={{ fontSize: "0.7rem", color: "#64748b", margin: "0.25rem 0 0 0" }}>{aiRecommenderNote}</p>
+                          <p style={{ fontSize: "0.7rem", color: "var(--text-secondary)", margin: "0.25rem 0 0 0" }}>{aiRecommenderNote}</p>
                         )}
                       </div>
                     </div>
@@ -595,14 +595,14 @@ const Appointments = () => {
               <div className="modal-body">
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-                    <div style={{ background: "#e0f2fe", color: "#0284c7", padding: "0.5rem", borderRadius: "50%", display: "flex" }}>
+                    <div style={{ background: "#e0f2fe", color: "var(--accent-primary)", padding: "0.5rem", borderRadius: "50%", display: "flex" }}>
                       <Calendar size={24} />
                     </div>
                     <div>
                       <strong style={{ display: "block" }}>
                         {rescheduleAppointment.patient?.firstName} {rescheduleAppointment.patient?.lastName}
                       </strong>
-                      <span style={{ fontSize: "0.8rem", color: "#64748b" }}>
+                      <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
                         UHID: {rescheduleAppointment.patient?.uhid} | Current Token: {rescheduleAppointment.tokenNumber}
                       </span>
                     </div>

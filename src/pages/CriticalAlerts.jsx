@@ -256,7 +256,7 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
       ) : alerts.length === 0 ? (
         <div className="table-container" style={{ padding: "4rem 2rem", textAlign: "center" }}>
           <CheckCircle size={48} style={{ color: "#10b981", margin: "0 auto 1rem" }} />
-          <h3 style={{ fontSize: "1.2rem", fontWeight: 700, color: "#0f172a", marginBottom: "0.5rem" }}>Hospital Status Normal</h3>
+          <h3 style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "0.5rem" }}>Hospital Status Normal</h3>
           <p style={{ color: "var(--text-secondary)", margin: 0 }}>There are no patients with critical vital status alerts at the moment.</p>
         </div>
       ) : (
@@ -265,7 +265,7 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
             <div 
               key={alert._id} 
               style={{ 
-                background: "white", 
+                background: "var(--bg-secondary)", 
                 border: "1px solid #fee2e2", 
                 borderLeft: "5px solid #ef4444", 
                 padding: "1.25rem", 
@@ -281,10 +281,10 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
                   <ShieldAlert size={24} />
                 </div>
                 <div>
-                  <h3 style={{ margin: "0 0 0.25rem 0", fontSize: "1.1rem", fontWeight: 700, color: "#0f172a" }}>
+                  <h3 style={{ margin: "0 0 0.25rem 0", fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)" }}>
                     {alert.patient?.firstName} {alert.patient?.lastName}
                   </h3>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", fontSize: "0.8rem", color: "#64748b", alignItems: "center" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", fontSize: "0.8rem", color: "var(--text-secondary)", alignItems: "center" }}>
                     <span>UHID: <strong>{alert.patient?.uhid}</strong></span>
                     <span>|</span>
                     <span style={{ display: "inline-flex", alignItems: "center", gap: "0.2rem" }}>
@@ -352,13 +352,13 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
               display: "flex",
               flexDirection: "column",
               boxShadow: "-8px 0 24px rgba(0,0,0,0.12)",
-              background: "#ffffff",
+              background: "var(--bg-secondary)",
               overflow: "hidden"
             }}
           >
             <div 
               style={{ 
-                borderBottom: "1px solid #e2e8f0", 
+                borderBottom: "1px solid var(--border-glass)", 
                 padding: "1.25rem 1.75rem", 
                 display: "flex", 
                 justifyContent: "space-between", 
@@ -366,10 +366,10 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
               }}
             >
               <div>
-                <span className="badge" style={{ background: "#e0f2fe", color: "#0284c7", fontSize: "0.75rem", fontWeight: 700 }}>
+                <span className="badge" style={{ background: "#e0f2fe", color: "var(--accent-primary)", fontSize: "0.75rem", fontWeight: 700 }}>
                   {selectedPatient.uhid || "PATIENT UHID"}
                 </span>
-                <h2 style={{ margin: "0.25rem 0 0", fontSize: "1.35rem", fontWeight: 800, color: "#0f172a" }}>
+                <h2 style={{ margin: "0.25rem 0 0", fontSize: "1.35rem", fontWeight: 800, color: "var(--text-primary)" }}>
                   {selectedPatient.firstName} {selectedPatient.lastName}
                 </h2>
               </div>
@@ -386,7 +386,7 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
                   justifyContent: "center", 
                   cursor: "pointer", 
                   fontSize: "1.2rem", 
-                  color: "#64748b",
+                  color: "var(--text-secondary)",
                   fontWeight: "bold"
                 }}
               >
@@ -398,7 +398,7 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
               style={{ 
                 display: "flex", 
                 background: "#f8fafc", 
-                borderBottom: "1px solid #e2e8f0", 
+                borderBottom: "1px solid var(--border-glass)", 
                 padding: "0 1rem", 
                 overflowX: "auto" 
               }}
@@ -442,14 +442,14 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
             <div style={{ flex: 1, overflowY: "auto", padding: "1.75rem", background: "#f8fafc" }}>
               {chartLoading ? (
                 <div style={{ textAlign: "center", padding: "4rem 0" }}>
-                  <p style={{ color: "#64748b" }}>Loading clinical history...</p>
+                  <p style={{ color: "var(--text-secondary)" }}>Loading clinical history...</p>
                 </div>
               ) : (
                 <>
                   {activeDrawerTab === "overview" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Bed Allocation & Doctor Assignment</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Bed Allocation & Doctor Assignment</h4>
                         <form onSubmit={handleSaveAllocation} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                           <div className="form-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
                             <div className="form-group">
@@ -497,8 +497,8 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
 
                   {activeDrawerTab === "vitals" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Record New Patient Vitals</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Record New Patient Vitals</h4>
                         <form onSubmit={handleSaveVitals}>
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", marginBottom: "1rem" }}>
                             <div className="form-group">
@@ -569,15 +569,15 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
                         </form>
                       </div>
 
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Vitals History Log</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Vitals History Log</h4>
                         {!clinicalData?.vitals || clinicalData.vitals.length === 0 ? (
-                          <p style={{ color: "#64748b", margin: 0 }}>No vitals history logged.</p>
+                          <p style={{ color: "var(--text-secondary)", margin: 0 }}>No vitals history logged.</p>
                         ) : (
                           <div style={{ overflowX: "auto" }}>
                             <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
                               <thead>
-                                <tr style={{ borderBottom: "1px solid #e2e8f0", background: "#f8fafc", textAlign: "left" }}>
+                                <tr style={{ borderBottom: "1px solid var(--border-glass)", background: "#f8fafc", textAlign: "left" }}>
                                   <th style={{ padding: "0.5rem" }}>Date/Time</th>
                                   <th style={{ padding: "0.5rem" }}>Temp</th>
                                   <th style={{ padding: "0.5rem" }}>BP</th>
@@ -588,8 +588,8 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
                               </thead>
                               <tbody>
                                 {clinicalData.vitals.map((v) => (
-                                  <tr key={v._id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                                    <td style={{ padding: "0.5rem", color: "#64748b" }}>{new Date(v.createdAt).toLocaleString()}</td>
+                                  <tr key={v._id} style={{ borderBottom: "1px solid var(--border-glass)" }}>
+                                    <td style={{ padding: "0.5rem", color: "var(--text-secondary)" }}>{new Date(v.createdAt).toLocaleString()}</td>
                                     <td style={{ padding: "0.5rem", fontWeight: 600 }}>{v.temperature}°F</td>
                                     <td style={{ padding: "0.5rem" }}>{v.bp}</td>
                                     <td style={{ padding: "0.5rem" }}>{v.heartRate || "N/A"} bpm</td>
@@ -607,13 +607,13 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
 
                   {activeDrawerTab === "medications" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Medication Administration Record</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Medication Administration Record</h4>
                         {clinicalData?.medications?.map((med) => (
-                          <div key={med._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #e2e8f0", padding: "1rem", borderRadius: "8px", marginBottom: "0.75rem" }}>
+                          <div key={med._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid var(--border-glass)", padding: "1rem", borderRadius: "8px", marginBottom: "0.75rem" }}>
                             <div>
-                              <strong style={{ fontSize: "0.95rem", color: "#0f172a" }}>{med.medicationName}</strong>
-                              <div style={{ fontSize: "0.8rem", color: "#64748b" }}>{med.dosage} - {med.frequency}</div>
+                              <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)" }}>{med.medicationName}</strong>
+                              <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>{med.dosage} - {med.frequency}</div>
                             </div>
                             {med.status === "PENDING" ? (
                               <button onClick={() => handleAdministerMed(med._id)} className="btn btn-primary" style={{ padding: "0.4rem 0.85rem", fontSize: "0.8rem", background: "#10b981", border: "1px solid #10b981" }}>
@@ -633,14 +633,14 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
                   {activeDrawerTab === "instructions" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                       {clinicalData?.instructions?.map((inst) => (
-                        <div key={inst._id} style={{ border: "1px solid #e2e8f0", padding: "1rem", borderRadius: "8px", marginBottom: "0.75rem", background: "white" }}>
+                        <div key={inst._id} style={{ border: "1px solid var(--border-glass)", padding: "1rem", borderRadius: "8px", marginBottom: "0.75rem", background: "var(--bg-secondary)" }}>
                           <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem" }}>{inst.instruction}</p>
                           {inst.status === "PENDING" ? (
                             <button onClick={() => handleCompleteInstruction(inst._id)} className="btn btn-secondary" style={{ padding: "0.35rem 0.75rem", fontSize: "0.75rem" }}>
                               Mark Completed
                             </button>
                           ) : (
-                            <span className="badge" style={{ background: "#f1f5f9", color: "#64748b" }}>COMPLETED</span>
+                            <span className="badge" style={{ background: "#f1f5f9", color: "var(--text-secondary)" }}>COMPLETED</span>
                           )}
                         </div>
                       ))}
@@ -649,8 +649,8 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
 
                   {activeDrawerTab === "notes" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "#0f172a" }}>Add Observation Note</h4>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", fontSize: "1rem", color: "var(--text-primary)" }}>Add Observation Note</h4>
                         <form onSubmit={handleSaveNote}>
                           <textarea 
                             className="form-control" 
@@ -666,11 +666,11 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
                           </button>
                         </form>
                       </div>
-                      <div className="modal-card" style={{ background: "white", padding: "1.5rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                      <div className="modal-card" style={{ background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
                         {clinicalData?.notes?.map((n) => (
                           <div key={n._id} style={{ borderLeft: "3px solid #0284c7", paddingLeft: "0.75rem", marginBottom: "1rem" }}>
                             <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.9rem" }}>{n.note}</p>
-                            <span style={{ fontSize: "0.75rem", color: "#64748b" }}>Logged on {new Date(n.createdAt).toLocaleString()}</span>
+                            <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Logged on {new Date(n.createdAt).toLocaleString()}</span>
                           </div>
                         ))}
                       </div>
@@ -680,7 +680,7 @@ const CriticalAlerts = ({ onBackToDashboard }) => {
                   {activeDrawerTab === "labs" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                       {clinicalData?.labs?.map((lab) => (
-                        <div key={lab._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #e2e8f0", padding: "1rem", borderRadius: "8px", marginBottom: "0.75rem", background: "white" }}>
+                        <div key={lab._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid var(--border-glass)", padding: "1rem", borderRadius: "8px", marginBottom: "0.75rem", background: "var(--bg-secondary)" }}>
                           <div>
                             <strong style={{ fontSize: "0.95rem" }}>{lab.testName}</strong>
                           </div>

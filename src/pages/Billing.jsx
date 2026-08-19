@@ -149,14 +149,14 @@ const Billing = () => {
                   <td>
                     <div>
                       <strong style={{ color: "var(--text-primary)" }}>{inv.patient?.firstName} {inv.patient?.lastName}</strong>
-                      <div style={{ fontSize: "0.75rem", color: "#64748b" }}>UHID: {inv.patient?.uhid}</div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>UHID: {inv.patient?.uhid}</div>
                     </div>
                   </td>
                   <td>
                     <span>Dr. {inv.doctor?.firstName} {inv.doctor?.lastName}</span>
                   </td>
                   <td>
-                    <strong style={{ color: "#0f172a" }}>₹{inv.billAmount}.00</strong>
+                    <strong style={{ color: "var(--text-primary)" }}>₹{inv.billAmount}.00</strong>
                   </td>
                   <td>
                     <span className="badge" style={{ background: "#f1f5f9", color: "#475569" }}>
@@ -302,7 +302,7 @@ const Billing = () => {
             </div>
             <div className="modal-body">
               <p>Settling Consultation Bill for <strong>{selectedInvoice.patient?.firstName} {selectedInvoice.patient?.lastName}</strong></p>
-              <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "8px", margin: "1rem 0", border: "1px solid #e2e8f0" }}>
+              <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "8px", margin: "1rem 0", border: "1px solid var(--border-glass)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
                   <span>Bill Amount:</span>
                   <strong>₹{selectedInvoice.billAmount}.00</strong>
@@ -338,16 +338,16 @@ const Billing = () => {
       {/* Printable Receipt Modal */}
       {receiptInvoice && (
         <div className="modal-overlay" style={{ background: "rgba(15,23,42,0.6)" }}>
-          <div className="modal-card" style={{ maxWidth: "500px", padding: "2rem", background: "white", borderRadius: "16px" }}>
+          <div className="modal-card" style={{ maxWidth: "500px", padding: "2rem", background: "var(--bg-secondary)", borderRadius: "16px" }}>
             <div style={{ textAlign: "center", borderBottom: "2px dashed #cbd5e1", paddingBottom: "1.5rem", marginBottom: "1.5rem" }}>
-              <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>MediCore AI Clinics</h2>
-              <p style={{ color: "#64748b", fontSize: "0.8rem", margin: "0.25rem 0 0" }}>Main Outpatient Billing Receipt</p>
+              <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>MediCore AI Clinics</h2>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.8rem", margin: "0.25rem 0 0" }}>Main Outpatient Billing Receipt</p>
             </div>
             
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.85rem", color: "#334155" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span>Invoice Ref:</span>
-                <strong style={{ color: "#0f172a" }}>{receiptInvoice.invoiceNumber}</strong>
+                <strong style={{ color: "var(--text-primary)" }}>{receiptInvoice.invoiceNumber}</strong>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span>Date of Issue:</span>
@@ -369,7 +369,7 @@ const Billing = () => {
                 <span>Payment Mode:</span>
                 <span style={{ fontWeight: 700 }}>{receiptInvoice.paymentMethod}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem", fontWeight: 800, borderTop: "2px dashed #cbd5e1", paddingTop: "0.75rem", marginTop: "0.5rem", color: "#0f172a" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem", fontWeight: 800, borderTop: "2px dashed #cbd5e1", paddingTop: "0.75rem", marginTop: "0.5rem", color: "var(--text-primary)" }}>
                 <span>Grand Total:</span>
                 <span>₹{receiptInvoice.billAmount}.00</span>
               </div>

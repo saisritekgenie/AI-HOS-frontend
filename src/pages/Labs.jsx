@@ -306,13 +306,13 @@ const Labs = () => {
                         <span>STAT EMERGENCY</span>
                       </span>
                     ) : (
-                      <span className="badge" style={{ background: "#f1f5f9", color: "#64748b" }}>ROUTINE</span>
+                      <span className="badge" style={{ background: "#f1f5f9", color: "var(--text-secondary)" }}>ROUTINE</span>
                     )}
                   </td>
                   <td>
                     <div>
                       <strong style={{ color: "var(--text-primary)" }}>{lab.patient?.firstName} {lab.patient?.lastName}</strong>
-                      <div style={{ fontSize: "0.75rem", color: "#64748b" }}>UHID: {lab.patient?.uhid} (Room {lab.patient?.roomNo || "N/A"})</div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>UHID: {lab.patient?.uhid} (Room {lab.patient?.roomNo || "N/A"})</div>
                     </div>
                   </td>
                   <td>
@@ -340,7 +340,7 @@ const Labs = () => {
                     {lab.status === "COMPLETED" || lab.status === "SAMPLE_COLLECTED" ? (
                       <div style={{ fontSize: "0.8rem" }}>
                         <div>Logged by {lab.sampleCollectedBy?.firstName || "Technician"}</div>
-                        <span style={{ fontSize: "0.7rem", color: "#64748b" }}>{new Date(lab.sampleCollectedAt).toLocaleString()}</span>
+                        <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>{new Date(lab.sampleCollectedAt).toLocaleString()}</span>
                       </div>
                     ) : (
                       <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>Awaiting collection</span>
@@ -403,7 +403,7 @@ const Labs = () => {
                           </div>
                           <span 
                             onClick={() => setViewingLab(lab)}
-                            style={{ fontSize: "0.7rem", color: "#64748b", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.15rem", textDecoration: "underline" }}
+                            style={{ fontSize: "0.7rem", color: "var(--text-secondary)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.15rem", textDecoration: "underline" }}
                           >
                             <FileText size={10} />
                             <span>{lab.reportFile}</span>
@@ -471,8 +471,8 @@ const Labs = () => {
               
               <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 <div style={{ border: "1px dashed #0284c7", padding: "1rem", borderRadius: "8px", background: "#f0f9ff" }}>
-                  <strong style={{ fontSize: "0.8rem", color: "#0284c7", display: "block", marginBottom: "0.4rem" }}>📄 Simulated OCR Document Parser</strong>
-                  <span style={{ fontSize: "0.7rem", color: "#64748b", display: "block", marginBottom: "0.5rem" }}>Paste raw scanned report text below. The AI will extract clinical results.</span>
+                  <strong style={{ fontSize: "0.8rem", color: "var(--accent-primary)", display: "block", marginBottom: "0.4rem" }}>📄 Simulated OCR Document Parser</strong>
+                  <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.5rem" }}>Paste raw scanned report text below. The AI will extract clinical results.</span>
                   
                   <textarea 
                     className="form-control"
@@ -512,7 +512,7 @@ const Labs = () => {
                     onClick={handleRunAIAnalysis} 
                     disabled={aiLoading} 
                     className="btn btn-secondary"
-                    style={{ flex: 1, padding: "0.5rem", fontSize: "0.8rem", color: "#0284c7", borderColor: "#0284c7", background: "#f0f9ff" }}
+                    style={{ flex: 1, padding: "0.5rem", fontSize: "0.8rem", color: "var(--accent-primary)", bordercolor: "var(--accent-primary)", background: "#f0f9ff" }}
                   >
                     {aiLoading ? "AI is analyzing findings..." : "🔍 Run AI Diagnostic Screening"}
                   </button>
@@ -520,7 +520,7 @@ const Labs = () => {
 
                 {/* AI Screening Card */}
                 {aiAnalysis && (
-                  <div style={{ padding: "1rem", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", marginTop: "0.5rem" }}>
+                  <div style={{ padding: "1rem", background: "#f8fafc", border: "1px solid var(--border-glass)", borderRadius: "12px", marginTop: "0.5rem" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #cbd5e1", paddingBottom: "0.4rem", marginBottom: "0.5rem" }}>
                       <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#475569" }}>AI TEST INTERPRETATION</span>
                       <span className="badge" style={{ 
@@ -546,7 +546,7 @@ const Labs = () => {
                       </ul>
                     </div>
 
-                    <div style={{ marginTop: "0.75rem", borderTop: "1px dashed #cbd5e1", paddingTop: "0.5rem", fontSize: "0.65rem", color: "#94a3b8", fontWeight: 600, textAlign: "right" }}>
+                    <div style={{ marginTop: "0.75rem", borderTop: "1px dashed #cbd5e1", paddingTop: "0.5rem", fontSize: "0.65rem", color: "var(--text-secondary)", fontWeight: 600, textAlign: "right" }}>
                       * Advisory screening only. Final results verified by doctor.
                     </div>
                   </div>
@@ -577,10 +577,10 @@ const Labs = () => {
       {/* View Lab Details Modal */}
       {viewingLab && (
         <div className="modal-overlay">
-          <div className="modal-card" style={{ maxWidth: "500px", padding: "2rem", borderRadius: "16px", background: "white" }}>
+          <div className="modal-card" style={{ maxWidth: "500px", padding: "2rem", borderRadius: "16px", background: "var(--bg-secondary)" }}>
             <div style={{ textAlign: "center", borderBottom: "1px dashed #cbd5e1", paddingBottom: "1rem", marginBottom: "1rem" }}>
-              <h4 style={{ margin: 0, fontSize: "1.2rem", color: "#0f172a" }}>LABORATORY REPORT DETAILS</h4>
-              <span style={{ fontSize: "0.8rem", color: "#64748b" }}>Test Request ID: {viewingLab._id.slice(-6).toUpperCase()}</span>
+              <h4 style={{ margin: 0, fontSize: "1.2rem", color: "var(--text-primary)" }}>LABORATORY REPORT DETAILS</h4>
+              <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Test Request ID: {viewingLab._id.slice(-6).toUpperCase()}</span>
             </div>
             
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.9rem", color: "#334155", marginBottom: "1rem" }}>
@@ -621,8 +621,8 @@ const Labs = () => {
               </div>
             )}
 
-            <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1rem" }}>
-              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "#0f172a" }}>DIAGNOSTIC FINDINGS / RESULTS</h5>
+            <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "8px", border: "1px solid var(--border-glass)", marginBottom: "1rem" }}>
+              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "var(--text-primary)" }}>DIAGNOSTIC FINDINGS / RESULTS</h5>
               <p style={{ margin: 0, fontSize: "0.8rem", color: "#475569", lineHeight: 1.4 }}>
                 {viewingLab.status === "COMPLETED" 
                   ? (viewingLab.results || "Standard physiological values fall within reference ranges.") 

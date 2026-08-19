@@ -578,11 +578,11 @@ const CashierBilling = () => {
 
     const total = consultation + lab + pharmacy + discharge + other || 1;
     return [
-      { name: "Consultation", value: consultation, pct: (consultation / total) * 100, color: "#0284c7" },
+      { name: "Consultation", value: consultation, pct: (consultation / total) * 100, color: "var(--accent-primary)" },
       { name: "Lab Tests", value: lab, pct: (lab / total) * 100, color: "#16a34a" },
       { name: "Pharmacy", value: pharmacy, pct: (pharmacy / total) * 100, color: "#7c3aed" },
       { name: "Inpatient Discharge", value: discharge, pct: (discharge / total) * 100, color: "#ea580c" },
-      { name: "Other charges", value: other, pct: (other / total) * 100, color: "#64748b" }
+      { name: "Other charges", value: other, pct: (other / total) * 100, color: "var(--text-secondary)" }
     ];
   };
 
@@ -709,7 +709,7 @@ const CashierBilling = () => {
       <div style={{
         display: "flex",
         gap: "0.5rem",
-        borderBottom: "1px solid #e2e8f0",
+        borderBottom: "1px solid var(--border-glass)",
         marginBottom: "1.75rem",
         overflowX: "auto",
         paddingBottom: "1px"
@@ -763,10 +763,10 @@ const CashierBilling = () => {
               {/* Left Column: Settle Queue */}
               <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: 0 }}>
                 {/* Search and Filters Drawer */}
-                <div className="card shadow-sm" style={{ padding: "1.25rem", borderRadius: "16px", background: "white", border: "1px solid #e2e8f0" }}>
+                <div className="card shadow-sm" style={{ padding: "1.25rem", borderRadius: "16px", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)" }}>
                   <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
                     <div style={{ position: "relative", flex: 1, minWidth: "240px" }}>
-                      <Search size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
+                      <Search size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-secondary)" }} />
                       <input
                         type="text"
                         className="form-control"
@@ -806,7 +806,7 @@ const CashierBilling = () => {
                   </div>
 
                   <div style={{ display: "flex", gap: "1rem", marginTop: "1rem", flexWrap: "wrap", alignItems: "center" }}>
-                    <span style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 700 }}>Date Range:</span>
+                    <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", fontWeight: 700 }}>Date Range:</span>
                     <input
                       type="date"
                       className="form-control"
@@ -814,7 +814,7 @@ const CashierBilling = () => {
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                     />
-                    <span style={{ fontSize: "0.85rem", color: "#94a3b8" }}>to</span>
+                    <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>to</span>
                     <input
                       type="date"
                       className="form-control"
@@ -858,7 +858,7 @@ const CashierBilling = () => {
                     <tbody>
                       {invoices.length === 0 ? (
                         <tr>
-                          <td colSpan="9" style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>
+                          <td colSpan="9" style={{ textAlign: "center", padding: "3rem", color: "var(--text-secondary)" }}>
                             <ClipboardList size={30} style={{ margin: "0 auto 0.5rem", display: "block" }} />
                             <span>No invoice charges found matching filters.</span>
                           </td>
@@ -869,7 +869,7 @@ const CashierBilling = () => {
                             <td><code>{inv.billNumber}</code></td>
                             <td>
                               <strong>{inv.patient?.firstName} {inv.patient?.lastName}</strong>
-                              <div style={{ fontSize: "0.75rem", color: "#64748b" }}>UHID: {inv.patient?.uhid}</div>
+                              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>UHID: {inv.patient?.uhid}</div>
                             </td>
                             <td>
                               <span className="badge" style={{
@@ -956,7 +956,7 @@ const CashierBilling = () => {
                     >
                       Prev
                     </button>
-                    <span style={{ alignSelf: "center", color: "#64748b", fontSize: "0.9rem" }}>Page {currentPage} of {totalPages}</span>
+                    <span style={{ alignSelf: "center", color: "var(--text-secondary)", fontSize: "0.9rem" }}>Page {currentPage} of {totalPages}</span>
                     <button
                       className="btn btn-secondary"
                       disabled={currentPage === totalPages}
@@ -978,19 +978,19 @@ const CashierBilling = () => {
                   </h4>
 
                   {aiLoading ? (
-                    <p style={{ color: "#64748b", fontSize: "0.85rem", margin: 0 }}>Querying collection trends...</p>
+                    <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", margin: 0 }}>Querying collection trends...</p>
                   ) : aiCashierReport ? (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                       <div style={{ background: "#f0fdfa", padding: "0.85rem", borderRadius: "12px", border: "1px solid #ccfbf1" }}>
                         <span style={{ fontSize: "0.75rem", color: "#0d9488", fontWeight: 700, display: "block", marginBottom: "0.25rem" }}>FORECAST INSIGHTS</span>
                         <p style={{ margin: 0, fontSize: "0.8rem", color: "#115e59", lineHeight: 1.4 }}>{aiCashierReport.revenueSummary}</p>
-                        <p style={{ margin: "0.4rem 0 0 0", fontSize: "0.75rem", color: "#64748b", lineHeight: 1.4 }}>{aiCashierReport.revenueInsights}</p>
+                        <p style={{ margin: "0.4rem 0 0 0", fontSize: "0.75rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>{aiCashierReport.revenueInsights}</p>
                       </div>
 
-                      <div style={{ background: "white", padding: "0.85rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                      <div style={{ background: "var(--bg-secondary)", padding: "0.85rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
                         <span style={{ fontSize: "0.75rem", color: "#475569", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>PENDING REMINDERS SUGGESTION</span>
                         {(!aiCashierReport.pendingReminders || aiCashierReport.pendingReminders.length === 0) ? (
-                          <p style={{ fontSize: "0.75rem", margin: 0, color: "#64748b" }}>No unpaid alerts today.</p>
+                          <p style={{ fontSize: "0.75rem", margin: 0, color: "var(--text-secondary)" }}>No unpaid alerts today.</p>
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                             {aiCashierReport.pendingReminders.slice(0, 2).map((rem, i) => (
@@ -1017,7 +1017,7 @@ const CashierBilling = () => {
                       </div>
                     </div>
                   ) : (
-                    <p style={{ color: "#64748b", fontSize: "0.85rem", margin: 0 }}>Click refresh to fetch AI collection forecasts.</p>
+                    <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", margin: 0 }}>Click refresh to fetch AI collection forecasts.</p>
                   )}
                 </div>
               </div>
@@ -1027,7 +1027,7 @@ const CashierBilling = () => {
           {/* TAB 2: DISCHARGE BILLING */}
           {activeTab === "discharge" && (
             <div style={{ maxWidth: "750px", margin: "0 auto" }}>
-              <div className="card shadow-sm" style={{ padding: "2rem", borderRadius: "20px", background: "white", border: "1px solid #e2e8f0" }}>
+              <div className="card shadow-sm" style={{ padding: "2rem", borderRadius: "20px", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)" }}>
                 <h3 style={{ margin: "0 0 1.5rem 0", fontSize: "1.25rem", fontWeight: 800, color: "#e11d48", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <ShieldCheck size={24} />
                   <span>IPD Discharge Clearance Calculator</span>
@@ -1050,24 +1050,24 @@ const CashierBilling = () => {
                 </div>
 
                 {dischargeLoading ? (
-                  <p style={{ textAlign: "center", padding: "2rem", color: "#64748b" }}>Compiling clinical diagnostics, bed stay days, and pharmacy prescription bills...</p>
+                  <p style={{ textAlign: "center", padding: "2rem", color: "var(--text-secondary)" }}>Compiling clinical diagnostics, bed stay days, and pharmacy prescription bills...</p>
                 ) : dischargeSummary ? (
                   <div>
                     {/* Stay details summary */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", padding: "1.25rem", background: "#f8fafc", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", padding: "1.25rem", background: "#f8fafc", borderRadius: "12px", border: "1px solid var(--border-glass)", marginBottom: "1.5rem" }}>
                       <div>
-                        <span style={{ fontSize: "0.8rem", color: "#64748b", display: "block" }}>Bed Allocation:</span>
+                        <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", display: "block" }}>Bed Allocation:</span>
                         <strong>Room {dischargeSummary.roomNo} / Bed {dischargeSummary.bedNo} ({dischargeSummary.wardNo || "General Ward"})</strong>
 
-                        <span style={{ fontSize: "0.8rem", color: "#64748b", display: "block", marginTop: "0.75rem" }}>Admission Date:</span>
+                        <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", display: "block", marginTop: "0.75rem" }}>Admission Date:</span>
                         <strong>{new Date(dischargeSummary.admissionDate).toLocaleDateString()}</strong>
                       </div>
 
                       <div>
-                        <span style={{ fontSize: "0.8rem", color: "#64748b", display: "block" }}>Occupied Bed Stay:</span>
+                        <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", display: "block" }}>Occupied Bed Stay:</span>
                         <strong>{dischargeSummary.occupiedDays} Days @ ₹{dischargeSummary.bedRate}/day</strong>
 
-                        <span style={{ fontSize: "0.8rem", color: "#64748b", display: "block", marginTop: "0.75rem" }}>Current Date:</span>
+                        <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", display: "block", marginTop: "0.75rem" }}>Current Date:</span>
                         <strong>{new Date().toLocaleDateString()}</strong>
                       </div>
                     </div>
@@ -1130,7 +1130,7 @@ const CashierBilling = () => {
                           onChange={(e) => setDischargeInsurance(Math.min(parseInt(e.target.value) || 0, dischargeSummary.totalAmount))}
                           placeholder="e.g. 15000"
                         />
-                        <small style={{ color: "#64748b" }}>TPA pre-authorized cover</small>
+                        <small style={{ color: "var(--text-secondary)" }}>TPA pre-authorized cover</small>
                       </div>
                     </div>
 
@@ -1184,7 +1184,7 @@ const CashierBilling = () => {
 
                   </div>
                 ) : (
-                  <p style={{ textAlign: "center", color: "#94a3b8", padding: "1.5rem" }}>Select an admitted inpatient profile from the dropdown list to run bed days stay rate aggregation.</p>
+                  <p style={{ textAlign: "center", color: "var(--text-secondary)", padding: "1.5rem" }}>Select an admitted inpatient profile from the dropdown list to run bed days stay rate aggregation.</p>
                 )}
               </div>
             </div>
@@ -1194,7 +1194,7 @@ const CashierBilling = () => {
           {activeTab === "advances" && (
             <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "2rem" }}>
               {/* Left Column: Log Deposit Form */}
-              <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "white", border: "1px solid #e2e8f0" }}>
+              <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)" }}>
                 <h3 style={{ margin: "0 0 1.25rem 0", fontSize: "1.1rem", fontWeight: 800, color: "#0ea5e9", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <QrCode size={20} />
                   <span>Deposit Patient Advance Payment Credits</span>
@@ -1260,7 +1260,7 @@ const CashierBilling = () => {
               </div>
 
               {/* Right Column: Search Patient Ledger */}
-              <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "white", border: "1px solid #e2e8f0" }}>
+              <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)" }}>
                 <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.1rem", fontWeight: 800, color: "#334155" }}>
                   <span>Patient Advance Deposit Log</span>
                 </h3>
@@ -1285,30 +1285,30 @@ const CashierBilling = () => {
                 {selectedAdvancePatient ? (
                   <div>
                     <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", padding: "0.85rem 1.25rem", borderRadius: "12px", marginBottom: "1rem" }}>
-                      <span style={{ fontSize: "0.8rem", color: "#64748b" }}>UHID: <strong>{selectedAdvancePatient.uhid}</strong></span><br />
+                      <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>UHID: <strong>{selectedAdvancePatient.uhid}</strong></span><br />
                       <span style={{ fontSize: "0.85rem", fontWeight: 700 }}>Name: {selectedAdvancePatient.firstName} {selectedAdvancePatient.lastName}</span>
                     </div>
 
                     {advanceLoading ? (
                       <p>Loading ledger entries...</p>
                     ) : advanceLedger.length === 0 ? (
-                      <p style={{ color: "#64748b", fontStyle: "italic", fontSize: "0.85rem" }}>No advance deposits registered for this patient.</p>
+                      <p style={{ color: "var(--text-secondary)", fontStyle: "italic", fontSize: "0.85rem" }}>No advance deposits registered for this patient.</p>
                     ) : (
                       <div style={{ maxHeight: "250px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                         {advanceLedger.map((adv) => (
-                          <div key={adv._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.6rem 0.75rem", borderBottom: "1px solid #e2e8f0", fontSize: "0.8rem" }}>
+                          <div key={adv._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.6rem 0.75rem", borderBottom: "1px solid var(--border-glass)", fontSize: "0.8rem" }}>
                             <div>
                               <strong>₹{adv.amount.toLocaleString()}</strong> via <code>{adv.paymentMethod}</code>
-                              <div style={{ fontSize: "0.7rem", color: "#64748b" }}>Receipt: {adv.receiptNumber}</div>
+                              <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>Receipt: {adv.receiptNumber}</div>
                             </div>
-                            <span style={{ color: "#64748b" }}>{new Date(adv.createdAt).toLocaleDateString()}</span>
+                            <span style={{ color: "var(--text-secondary)" }}>{new Date(adv.createdAt).toLocaleDateString()}</span>
                           </div>
                         ))}
                       </div>
                     )}
                   </div>
                 ) : (
-                  <p style={{ color: "#94a3b8", fontStyle: "italic", fontSize: "0.85rem", textAlign: "center", padding: "2rem" }}>Select a patient from the dropdown above to pull up their complete advance deposit transaction logs.</p>
+                  <p style={{ color: "var(--text-secondary)", fontStyle: "italic", fontSize: "0.85rem", textAlign: "center", padding: "2rem" }}>Select a patient from the dropdown above to pull up their complete advance deposit transaction logs.</p>
                 )}
               </div>
             </div>
@@ -1316,8 +1316,8 @@ const CashierBilling = () => {
 
           {/* TAB 4: DAILY SHIFT REPORTS */}
           {activeTab === "reports" && (
-            <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "white", border: "1px solid #e2e8f0" }}>
-              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "1rem", borderBottom: "1px solid #f1f5f9", paddingBottom: "1rem", marginBottom: "1.5rem", alignItems: "center" }}>
+            <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "1rem", borderBottom: "1px solid var(--border-glass)", paddingBottom: "1rem", marginBottom: "1.5rem", alignItems: "center" }}>
                 <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800, color: "#1e293b", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <FileSpreadsheet size={20} className="text-blue-500" />
                   <span>Daily Shift Cash Collections Ledger</span>
@@ -1339,28 +1339,28 @@ const CashierBilling = () => {
               </div>
 
               {reportLoading ? (
-                <p style={{ textAlign: "center", padding: "2rem", color: "#64748b" }}>Running daily cash shift breakdown totals...</p>
+                <p style={{ textAlign: "center", padding: "2rem", color: "var(--text-secondary)" }}>Running daily cash shift breakdown totals...</p>
               ) : (
                 <div>
                   <div className="grid-cards" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
-                    <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                      <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 700, display: "block" }}>TOTAL COLLECTED</span>
-                      <strong style={{ fontSize: "1.25rem", color: "#0f172a" }}>₹{cashReport.totalCollected.toLocaleString()}</strong>
+                    <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                      <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 700, display: "block" }}>TOTAL COLLECTED</span>
+                      <strong style={{ fontSize: "1.25rem", color: "var(--text-primary)" }}>₹{cashReport.totalCollected.toLocaleString()}</strong>
                     </div>
-                    <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                      <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 700, display: "block" }}>UPI TOTAL</span>
+                    <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                      <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 700, display: "block" }}>UPI TOTAL</span>
                       <strong style={{ fontSize: "1.25rem", color: "#0ea5e9" }}>₹{cashReport.totalUPI.toLocaleString()}</strong>
                     </div>
-                    <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                      <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 700, display: "block" }}>CASH COUNTER</span>
+                    <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                      <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 700, display: "block" }}>CASH COUNTER</span>
                       <strong style={{ fontSize: "1.25rem", color: "#10b981" }}>₹{cashReport.totalCash.toLocaleString()}</strong>
                     </div>
-                    <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                      <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 700, display: "block" }}>CARD TOTAL</span>
+                    <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                      <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 700, display: "block" }}>CARD TOTAL</span>
                       <strong style={{ fontSize: "1.25rem", color: "#a855f7" }}>₹{cashReport.totalCard.toLocaleString()}</strong>
                     </div>
-                    <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                      <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 700, display: "block" }}>INSURANCE APPROVED</span>
+                    <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "12px", border: "1px solid var(--border-glass)" }}>
+                      <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 700, display: "block" }}>INSURANCE APPROVED</span>
                       <strong style={{ fontSize: "1.25rem", color: "#eab308" }}>₹{cashReport.totalInsurance.toLocaleString()}</strong>
                     </div>
                   </div>
@@ -1383,7 +1383,7 @@ const CashierBilling = () => {
                       <tbody>
                         {cashReport.transactions.length === 0 ? (
                           <tr>
-                            <td colSpan="8" style={{ textAlign: "center", color: "#64748b", padding: "2rem" }}>No payment collections logged on this date.</td>
+                            <td colSpan="8" style={{ textAlign: "center", color: "var(--text-secondary)", padding: "2rem" }}>No payment collections logged on this date.</td>
                           </tr>
                         ) : (
                           cashReport.transactions.map((tx, idx) => (
@@ -1412,7 +1412,7 @@ const CashierBilling = () => {
             <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", alignItems: "start" }}>
                 {/* SVG Chart 1: Category Sales */}
-                <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "white", border: "1px solid #e2e8f0" }}>
+                <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)" }}>
                   <h3 style={{ margin: "0 0 1.5rem 0", fontSize: "1rem", fontWeight: 800, color: "#1e293b", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                     <PieChart size={18} className="text-emerald-500" />
                     <span>Revenue Share by Category (OPD vs. IPD vs. Lab vs. Drugs)</span>
@@ -1465,7 +1465,7 @@ const CashierBilling = () => {
                 </div>
 
                 {/* SVG Chart 2: Payment Mode split */}
-                <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "white", border: "1px solid #e2e8f0" }}>
+                <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)" }}>
                   <h3 style={{ margin: "0 0 1.5rem 0", fontSize: "1rem", fontWeight: 800, color: "#1e293b", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                     <TrendingUp size={18} className="text-blue-500" />
                     <span>Shift Payments Channels Allocation Breakdown</span>
@@ -1502,7 +1502,7 @@ const CashierBilling = () => {
           {activeTab === "profile" && currentUser && (
             <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "2rem" }}>
               {/* Cashier Info Card */}
-              <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "white", border: "1px solid #e2e8f0" }}>
+              <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)" }}>
                 <h3 style={{ margin: "0 0 1.25rem 0", fontSize: "1.1rem", fontWeight: 800, color: "#334155", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <User size={20} className="text-emerald-500" />
                   <span>My Profile Details</span>
@@ -1572,7 +1572,7 @@ const CashierBilling = () => {
               </div>
 
               {/* Change Password Card */}
-              <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "white", border: "1px solid #e2e8f0" }}>
+              <div className="card shadow-sm" style={{ padding: "1.5rem", borderRadius: "16px", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)" }}>
                 <h3 style={{ margin: "0 0 1.25rem 0", fontSize: "1.1rem", fontWeight: 800, color: "#334155", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <Key size={20} className="text-red-500" />
                   <span>Update Account Password</span>
@@ -1600,7 +1600,7 @@ const CashierBilling = () => {
                           background: "none",
                           border: "none",
                           cursor: "pointer",
-                          color: "#64748b",
+                          color: "var(--text-secondary)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -1633,7 +1633,7 @@ const CashierBilling = () => {
                           background: "none",
                           border: "none",
                           cursor: "pointer",
-                          color: "#64748b",
+                          color: "var(--text-secondary)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -1666,7 +1666,7 @@ const CashierBilling = () => {
                           background: "none",
                           border: "none",
                           cursor: "pointer",
-                          color: "#64748b",
+                          color: "var(--text-secondary)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -1774,13 +1774,13 @@ const CashierBilling = () => {
               <button className="action-btn" onClick={() => setPayModalOpen(false)}>×</button>
             </div>
             <div className="modal-body" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <div style={{ background: "#f8fafc", padding: "0.85rem", borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: "0.85rem" }}>
+              <div style={{ background: "#f8fafc", padding: "0.85rem", borderRadius: "10px", border: "1px solid var(--border-glass)", fontSize: "0.85rem" }}>
                 <span>Invoice ID: <strong>{selectedInvoice.billNumber}</strong></span><br />
                 <span>Patient: <strong>{selectedInvoice.patient?.firstName} {selectedInvoice.patient?.lastName}</strong></span>
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "0.9rem", color: "#64748b" }}>Remaining Dues:</span>
+                <span style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Remaining Dues:</span>
                 <strong style={{ fontSize: "1.2rem", color: "#ef4444" }}>₹{selectedInvoice.amountDue.toLocaleString()}</strong>
               </div>
 
@@ -1795,7 +1795,7 @@ const CashierBilling = () => {
                   onChange={(e) => setAmountPaidThisTime(Math.min(parseInt(e.target.value) || 0, selectedInvoice.amountDue))}
                   required
                 />
-                <small style={{ color: "#64748b" }}>Can adjust for partial payments</small>
+                <small style={{ color: "var(--text-secondary)" }}>Can adjust for partial payments</small>
               </div>
 
               <div className="form-group">
@@ -1878,7 +1878,7 @@ const CashierBilling = () => {
               </div>
 
               {unpaidChargesData.totalCount === 0 ? (
-                <p style={{ textAlign: "center", color: "#64748b", padding: "1.5rem" }}>No outstanding pharmacy bills or diagnostic lab orders found.</p>
+                <p style={{ textAlign: "center", color: "var(--text-secondary)", padding: "1.5rem" }}>No outstanding pharmacy bills or diagnostic lab orders found.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   <span style={{ fontSize: "0.85rem", color: "#475569", fontWeight: 700 }}>Select items to import into Settle Counter:</span>
@@ -1886,7 +1886,7 @@ const CashierBilling = () => {
                   <div style={{ maxHeight: "280px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                     {/* Pharmacy items */}
                     {unpaidChargesData.pharmacy.map(item => (
-                      <label key={item._id} style={{ display: "flex", gap: "0.75rem", alignItems: "center", padding: "0.5rem", border: "1px solid #cbd5e1", borderRadius: "8px", cursor: "pointer", background: "white" }}>
+                      <label key={item._id} style={{ display: "flex", gap: "0.75rem", alignItems: "center", padding: "0.5rem", border: "1px solid #cbd5e1", borderRadius: "8px", cursor: "pointer", background: "var(--bg-secondary)" }}>
                         <input
                           type="checkbox"
                           checked={selectedUnpaidCharges.some(c => c._id === item._id)}
@@ -1908,7 +1908,7 @@ const CashierBilling = () => {
 
                     {/* Lab items */}
                     {unpaidChargesData.labs.map(item => (
-                      <label key={item._id} style={{ display: "flex", gap: "0.75rem", alignItems: "center", padding: "0.5rem", border: "1px solid #cbd5e1", borderRadius: "8px", cursor: "pointer", background: "white" }}>
+                      <label key={item._id} style={{ display: "flex", gap: "0.75rem", alignItems: "center", padding: "0.5rem", border: "1px solid #cbd5e1", borderRadius: "8px", cursor: "pointer", background: "var(--bg-secondary)" }}>
                         <input
                           type="checkbox"
                           checked={selectedUnpaidCharges.some(c => c._id === item._id)}
@@ -1930,7 +1930,7 @@ const CashierBilling = () => {
 
                     {/* Consultation items */}
                     {unpaidChargesData.consultation.map(item => (
-                      <label key={item._id} style={{ display: "flex", gap: "0.75rem", alignItems: "center", padding: "0.5rem", border: "1px solid #cbd5e1", borderRadius: "8px", cursor: "pointer", background: "white" }}>
+                      <label key={item._id} style={{ display: "flex", gap: "0.75rem", alignItems: "center", padding: "0.5rem", border: "1px solid #cbd5e1", borderRadius: "8px", cursor: "pointer", background: "var(--bg-secondary)" }}>
                         <input
                           type="checkbox"
                           checked={selectedUnpaidCharges.some(c => c._id === item._id)}
@@ -1943,7 +1943,7 @@ const CashierBilling = () => {
                           }}
                         />
                         <div style={{ flex: 1, fontSize: "0.85rem" }}>
-                          <span className="badge" style={{ background: "#e0f2fe", color: "#0284c7", fontWeight: 700 }}>CONSULTATION</span>
+                          <span className="badge" style={{ background: "#e0f2fe", color: "var(--accent-primary)", fontWeight: 700 }}>CONSULTATION</span>
                           <span style={{ marginLeft: "0.5rem" }}>{item.itemName}</span>
                         </div>
                         <strong style={{ fontSize: "0.9rem" }}>₹{item.amount.toLocaleString()}</strong>
@@ -1975,9 +1975,9 @@ const CashierBilling = () => {
             {/* Printable Area Wrapper */}
             <div id="printable-receipt-area">
               <div style={{ textAlign: "center", borderBottom: "2px dashed #cbd5e1", paddingBottom: "1rem", marginBottom: "1.25rem" }}>
-                <h3 style={{ margin: 0, fontSize: "1.25rem", color: "#0f172a", fontWeight: 800 }}>MEDICORE AI HOSPITAL</h3>
-                <p style={{ margin: "0.25rem 0 0 0", fontSize: "0.75rem", color: "#64748b" }}>Billing counter digital receipt. Mumbai, India</p>
-                <div style={{ fontSize: "0.7rem", color: "#94a3b8", marginTop: "0.25rem" }}>IPD / OPD Clearance desk</div>
+                <h3 style={{ margin: 0, fontSize: "1.25rem", color: "var(--text-primary)", fontWeight: 800 }}>MEDICORE AI HOSPITAL</h3>
+                <p style={{ margin: "0.25rem 0 0 0", fontSize: "0.75rem", color: "var(--text-secondary)" }}>Billing counter digital receipt. Mumbai, India</p>
+                <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)", marginTop: "0.25rem" }}>IPD / OPD Clearance desk</div>
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", marginBottom: "1rem", color: "#334155" }}>
@@ -2014,9 +2014,9 @@ const CashierBilling = () => {
 
               {selectedInvoice.transactions && selectedInvoice.transactions.length > 0 && (
                 <div style={{ marginBottom: "1rem" }}>
-                  <strong style={{ fontSize: "0.75rem", color: "#475569", display: "block", borderBottom: "1px solid #f1f5f9", paddingBottom: "0.25rem", marginBottom: "0.4rem" }}>Payments settled log:</strong>
+                  <strong style={{ fontSize: "0.75rem", color: "#475569", display: "block", borderBottom: "1px solid var(--border-glass)", paddingBottom: "0.25rem", marginBottom: "0.4rem" }}>Payments settled log:</strong>
                   {selectedInvoice.transactions.map((tx, idx) => (
-                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "#64748b" }}>
+                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
                       <span>₹{tx.amount.toLocaleString()} settled via {tx.paymentMethod} (Ref: {tx.transactionId || "Counter"})</span>
                       <span>{new Date(tx.date).toLocaleDateString()}</span>
                     </div>
@@ -2034,9 +2034,9 @@ const CashierBilling = () => {
                 </div>
 
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: "0.8rem", color: "#64748b" }}>Gross Total: ₹{selectedInvoice.amount.toLocaleString()}.00</div>
+                  <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Gross Total: ₹{selectedInvoice.amount.toLocaleString()}.00</div>
                   <div style={{ fontSize: "0.8rem", color: "#16a34a", fontWeight: 700 }}>Amount Paid: ₹{selectedInvoice.amountPaid.toLocaleString()}.00</div>
-                  <div style={{ fontSize: "1rem", color: "#0f172a", fontWeight: 800, marginTop: "0.25rem" }}>
+                  <div style={{ fontSize: "1rem", color: "var(--text-primary)", fontWeight: 800, marginTop: "0.25rem" }}>
                     Dues Balance: ₹{selectedInvoice.amountDue.toLocaleString()}.00
                   </div>
                 </div>
@@ -2048,7 +2048,7 @@ const CashierBilling = () => {
                   <path fill="#fff" d="M0 0h29v29H0z" />
                   <path fill="#000" d="M0 0h7v7H0zm22 0h7v7h-7zM0 22h7v7H0zm9 0h2v2H9zm2 2h2v2h-2zm-2 2h2v2H9zm2 2h2v2h-2zm3-8h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm3-8h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm-8-6h2v2H9zm2 2h2v2h-2zm-2 2h2v2H9zm2 2h2v2h-2zm3-8h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zM1 1h5v5H1zm22 0h5v5h-5zM1 23h5v5H1z" />
                 </svg>
-                <span style={{ fontSize: "0.6rem", color: "#94a3b8" }}>Scan to verify hospital digital clearance status</span>
+                <span style={{ fontSize: "0.6rem", color: "var(--text-secondary)" }}>Scan to verify hospital digital clearance status</span>
               </div>
             </div>
 

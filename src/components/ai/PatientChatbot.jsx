@@ -26,6 +26,16 @@ export const PatientChatbot = () => {
     scrollToBottom();
   }, [messages, loading]);
 
+  const handleEmergencyMessage = (docName, docMobile) => {
+    const systemNotice = {
+      sender: "bot",
+      text: `📤 [SYSTEM ALERT]: An urgent notification was transmitted to ${docName} (${docMobile}) with your current symptoms and health records. A duty clinical nurse has also been paged.`,
+      takeaways: ["Urgent message dispatched successfully."],
+      recommendations: ["Keep your phone line free. A provider will contact you shortly."]
+    };
+    setMessages(prev => [...prev, systemNotice]);
+  };
+
   const handleSend = async (textToSend = inputVal) => {
     if (!textToSend.trim()) return;
     
@@ -41,7 +51,9 @@ export const PatientChatbot = () => {
         sender: "bot",
         text: res.data.reply || "I've processed your health query.",
         takeaways: res.data.keyTakeaways || [],
-        recommendations: res.data.recommendations || []
+        recommendations: res.data.recommendations || [],
+        isEmergency: res.data.isEmergency || false,
+        doctor: res.data.doctor || null
       };
       setMessages(prev => [...prev, botMsg]);
     } catch (err) {
@@ -59,6 +71,54 @@ export const PatientChatbot = () => {
 
   const handleVoiceInput = (transcript) => {
     setInputVal(prev => prev + " " + transcript);
+  };
+
+  const toggleTranslation = async (idx) => {
+    const msg = messages[idx];
+    if (!msg || msg.sender !== "bot") return;
+
+    if (msg.isTelugu) {
+      setMessages(prev => prev.map((m, i) => i === idx ? {
+        ...m,
+        text: m.enText || m.text,
+        takeaways: m.enTakeaways || m.takeaways,
+        recommendations: m.enRecommendations || m.recommendations,
+        isTelugu: false
+      } : m));
+    } else {
+      if (msg.teText) {
+        setMessages(prev => prev.map((m, i) => i === idx ? {
+          ...m,
+          text: m.teText,
+          takeaways: m.teTakeaways || m.takeaways,
+          recommendations: m.teRecommendations || m.recommendations,
+          isTelugu: true
+        } : m));
+      } else {
+        try {
+          const { translateText } = await import("../../services/api");
+          const res = await translateText(msg.text, "te", msg.takeaways, msg.recommendations);
+          const teTranslation = res.data?.translated || msg.text;
+          const teTakeaways = res.data?.takeaways || msg.takeaways;
+          const teRecommendations = res.data?.recommendations || msg.recommendations;
+          setMessages(prev => prev.map((m, i) => i === idx ? {
+            ...m,
+            enText: m.text,
+            enTakeaways: m.takeaways,
+            enRecommendations: m.recommendations,
+            teText: teTranslation,
+            teTakeaways: teTakeaways,
+            teRecommendations: teRecommendations,
+            text: teTranslation,
+            takeaways: teTakeaways,
+            recommendations: teRecommendations,
+            isTelugu: true
+          } : m));
+        } catch (err) {
+          console.error("Failed to translate text:", err);
+        }
+      }
+    }
   };
 
   return (
@@ -179,7 +239,28 @@ export const PatientChatbot = () => {
                     boxShadow: "0 2px 5px rgba(0,0,0,0.03)"
                   }}
                 >
-                  {m.text}
+                  {m.isTelugu && m.teText ? m.teText : m.text}
+                  
+                  {m.sender === "bot" && (
+                    <button
+                      onClick={() => toggleTranslation(idx)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#0891b2",
+                        fontSize: "0.7rem",
+                        cursor: "pointer",
+                        padding: "0.2rem 0",
+                        textAlign: "left",
+                        display: "block",
+                        textDecoration: "underline",
+                        fontWeight: 600,
+                        marginTop: "0.3rem"
+                      }}
+                    >
+                      {m.isTelugu ? "Show English" : "Translate to Telugu (తెలుగు)"}
+                    </button>
+                  )}
                   
                   {m.sender === "bot" && (m.takeaways?.length > 0 || m.recommendations?.length > 0) && (
                     <div style={{ marginTop: "0.6rem", borderTop: "1px solid #cbd5e1", paddingTop: "0.5rem", fontSize: "0.75rem" }}>
@@ -197,6 +278,128 @@ export const PatientChatbot = () => {
                           <ul style={{ margin: "0.15rem 0 0 0", paddingLeft: "1rem" }}>
                             {m.recommendations.map((r, i) => <li key={i} style={{ color: r.includes("🚨") || r.includes("Warning") ? "#ef4444" : "inherit" }}>{r}</li>)}
                           </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {m.sender === "bot" && m.isEmergency && (
+                    <div style={{
+                      marginTop: "0.75rem",
+                      padding: "0.85rem",
+                      borderRadius: "12px",
+                      background: "#fff5f5",
+                      border: "1px solid #fee2e2",
+                      color: "#991b1b",
+                      fontSize: "0.8rem",
+                      lineHeight: 1.4,
+                      boxShadow: "0 4px 12px rgba(239, 68, 68, 0.08)"
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontWeight: 700, marginBottom: "0.6rem", fontSize: "0.85rem", color: "#b91c1c" }}>
+                        <span>🚨</span> Emergency Assist Panel
+                      </div>
+
+                      <a 
+                        href="tel:108"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.4rem",
+                          width: "100%",
+                          padding: "0.55rem",
+                          borderRadius: "8px",
+                          background: "#dc2626",
+                          color: "white",
+                          fontWeight: 700,
+                          textDecoration: "none",
+                          textAlign: "center",
+                          boxShadow: "0 3px 8px rgba(220, 38, 38, 0.25)",
+                          marginBottom: "0.75rem",
+                          fontSize: "0.8rem",
+                          boxSizing: "border-box"
+                        }}
+                      >
+                        📞 Call Emergency Desk (108 / 911)
+                      </a>
+
+                      {m.doctor ? (
+                        <div style={{ borderTop: "1px dashed #fca5a5", paddingTop: "0.65rem", marginTop: "0.5rem" }}>
+                          <div style={{ fontSize: "0.75rem", color: "#7f1d1d", marginBottom: "0.5rem" }}>
+                            <strong>Assigned Doctor:</strong> {m.doctor.name}
+                            <br />
+                            <strong>Department:</strong> {m.doctor.department}
+                            <br />
+                            <strong>Availability:</strong> {m.doctor.availabilityText}
+                            <br />
+                            <strong>Current Status:</strong> {m.doctor.isAvailable ? (
+                              <span style={{ color: "#166534", fontWeight: 700 }}>🟢 Available Now (On-Duty)</span>
+                            ) : (
+                              <span style={{ color: "#b91c1c", fontWeight: 700 }}>🔴 Unavailable (Off-Duty)</span>
+                            )}
+                          </div>
+
+                          <div style={{ display: "flex", gap: "0.4rem", marginTop: "0.5rem" }}>
+                            {m.doctor.isAvailable ? (
+                              <a 
+                                href={`tel:${m.doctor.mobile}`}
+                                style={{
+                                  flex: 1,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  padding: "0.45rem",
+                                  borderRadius: "6px",
+                                  background: "#16a34a",
+                                  color: "white",
+                                  fontWeight: 700,
+                                  textDecoration: "none",
+                                  fontSize: "0.75rem",
+                                  textAlign: "center"
+                                }}
+                              >
+                                📞 Call Doctor
+                              </a>
+                            ) : (
+                              <button
+                                disabled
+                                style={{
+                                  flex: 1,
+                                  padding: "0.45rem",
+                                  borderRadius: "6px",
+                                  background: "#e2e8f0",
+                                  color: "#94a3b8",
+                                  border: "none",
+                                  fontWeight: 700,
+                                  fontSize: "0.75rem",
+                                  cursor: "not-allowed"
+                                }}
+                              >
+                                📞 Off-Duty
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => handleEmergencyMessage(m.doctor.name, m.doctor.mobile)}
+                              style={{
+                                flex: 1,
+                                padding: "0.45rem",
+                                borderRadius: "6px",
+                                background: "#0891b2",
+                                color: "white",
+                                fontWeight: 700,
+                                border: "none",
+                                cursor: "pointer",
+                                fontSize: "0.75rem"
+                              }}
+                            >
+                              💬 Send Message
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: "0.72rem", color: "#991b1b", fontStyle: "italic", marginTop: "0.4rem" }}>
+                          No physician assigned to your profile. Please contact the front desk immediately.
                         </div>
                       )}
                     </div>
