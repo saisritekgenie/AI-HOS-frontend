@@ -1526,7 +1526,7 @@ const PatientManagement = () => {
         <head>
           <title>Laboratory Report - ${lab.testName}</title>
           <style>
-            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 600px; margin: 0 auto; line-height: 1.5; position: relative; }
             .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 2px solid #10b981; padding-bottom: 15px; }
             .hospital-title { font-size: 20px; font-weight: 800; color: #10b981; text-transform: uppercase; margin: 0; }
             .doc-title { font-size: 13px; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin: 4px 0 0 0; }
@@ -1539,9 +1539,25 @@ const PatientManagement = () => {
             .result-text { font-size: 13px; color: #1e293b; line-height: 1.6; }
             
             .footer { border-top: 1px dashed #cbd5e1; margin-top: 40px; padding-top: 15px; text-align: center; font-size: 11px; color: #64748b; }
+            .watermark {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-45deg);
+              font-size: 55px;
+              color: rgba(239, 68, 68, 0.09);
+              font-weight: 900;
+              letter-spacing: 4px;
+              pointer-events: none;
+              white-space: nowrap;
+              user-select: none;
+              text-transform: uppercase;
+              z-index: -1;
+            }
           </style>
         </head>
         <body>
+          <div class="watermark">DUPLICATE REPORT</div>
           <table class="header-table">
             <tr>
               <td>
@@ -1549,6 +1565,7 @@ const PatientManagement = () => {
                 <h2 class="doc-title">Pathology & Diagnostic Lab Report</h2>
               </td>
               <td style="text-align: right; font-size: 11px; color: #64748b;">
+                <div style="font-size: 11px; font-weight: 800; color: #ef4444; border: 2px solid #ef4444; padding: 3px 6px; border-radius: 4px; display: inline-block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">DUPLICATE COPY</div>
                 <div>Report Date: ${lab.sampleCollectedAt ? new Date(lab.sampleCollectedAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
                 <div>Status: RELEASED</div>
               </td>
@@ -1593,7 +1610,7 @@ const PatientManagement = () => {
         <head>
           <title>Laboratory Report - ${lab.testName}</title>
           <style>
-            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #0f172a; max-width: 600px; margin: 0 auto; line-height: 1.5; position: relative; }
             .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 2px solid #10b981; padding-bottom: 15px; }
             .hospital-title { font-size: 20px; font-weight: 800; color: #10b981; text-transform: uppercase; margin: 0; }
             .doc-title { font-size: 13px; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin: 4px 0 0 0; }
@@ -1603,9 +1620,25 @@ const PatientManagement = () => {
             .result-card h3 { color: #15803d; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; }
             .result-text { font-size: 13px; color: #1e293b; line-height: 1.6; }
             .footer { border-top: 1px dashed #cbd5e1; margin-top: 40px; padding-top: 15px; text-align: center; font-size: 11px; color: #64748b; }
+            .watermark {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-45deg);
+              font-size: 55px;
+              color: rgba(239, 68, 68, 0.09);
+              font-weight: 900;
+              letter-spacing: 4px;
+              pointer-events: none;
+              white-space: nowrap;
+              user-select: none;
+              text-transform: uppercase;
+              z-index: -1;
+            }
           </style>
         </head>
         <body>
+          <div class="watermark">DUPLICATE REPORT</div>
           <table class="header-table">
             <tr>
               <td>
@@ -1613,6 +1646,7 @@ const PatientManagement = () => {
                 <h2 class="doc-title">Pathology & Diagnostic Lab Report</h2>
               </td>
               <td style="text-align: right; font-size: 11px; color: #64748b;">
+                <div style="font-size: 11px; font-weight: 800; color: #ef4444; border: 2px solid #ef4444; padding: 3px 6px; border-radius: 4px; display: inline-block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">DUPLICATE COPY</div>
                 <div>Report Date: ${lab.sampleCollectedAt ? new Date(lab.sampleCollectedAt).toLocaleDateString() : new Date().toLocaleDateString()}</div>
                 <div>Status: RELEASED</div>
               </td>
