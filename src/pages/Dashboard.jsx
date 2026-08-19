@@ -2309,12 +2309,12 @@ const Dashboard = ({
             </div>
 
             {/* Right Side: Consultation Schedule Timeline */}
-            <div className="table-container">
+            <div className="table-container" style={{ overflowX: "hidden" }}>
               <h3 style={{ fontSize: "1.1rem", fontWeight: 700, padding: "1.5rem 1.5rem 0", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <Clock size={20} style={{ color: "var(--accent-primary)" }} />
                 <span>Today's Consultation Schedule Timeline</span>
               </h3>
-              <div style={{ padding: "1.5rem" }}>
+              <div style={{ padding: "1.5rem", overflowX: "auto" }}>
                 {doctorAppointments.length === 0 ? (
                   <p style={{ color: "var(--text-secondary)", margin: 0 }}>No consultations scheduled for today.</p>
                 ) : (
