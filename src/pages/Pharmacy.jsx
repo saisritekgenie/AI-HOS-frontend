@@ -131,9 +131,9 @@ const Pharmacy = () => {
   }, []);
 
   const handleRestock = async () => {
-    if (newStockCount < 0) return;
+    if (newStockCount <= 0) return;
     try {
-      await updateMedicineStock(selectedMed._id, newStockCount);
+      await updateMedicineStock(selectedMed._id, selectedMed.stock + newStockCount);
       showToast("success", "Inventory stock refilled successfully");
       setRestockModalOpen(false);
       setSelectedMed(null);
@@ -481,7 +481,7 @@ const Pharmacy = () => {
                         </td>
                         <td style={{ textAlign: "right" }}>
                           <button 
-                            onClick={() => { setSelectedMed(item); setNewStockCount(item.stock); setRestockModalOpen(true); }}
+                            onClick={() => { setSelectedMed(item); setNewStockCount(50); setRestockModalOpen(true); }}
                             className="btn btn-secondary"
                             style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem" }}
                           >
@@ -585,15 +585,18 @@ const Pharmacy = () => {
               <button className="action-btn" onClick={() => setRestockModalOpen(false)}>×</button>
             </div>
             <div className="modal-body">
-              <p>Set stock units for <strong>{selectedMed.name}</strong></p>
-              <div className="form-group" style={{ marginTop: "1rem" }}>
-                <label>Inventory Quantity (Units)</label>
+              <p>Refilling stock for <strong>{selectedMed.name}</strong></p>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", margin: "0.5rem 0 1rem 0" }}>
+                Current Stock: <strong style={{ color: "var(--text-primary)" }}>{selectedMed.stock}</strong> Units
+              </p>
+              <div className="form-group">
+                <label>Quantity to Add (Units)</label>
                 <input 
                   type="number"
                   className="form-control"
                   value={newStockCount}
                   onChange={(e) => setNewStockCount(parseInt(e.target.value) || 0)}
-                  min="0"
+                  min="1"
                 />
               </div>
             </div>
