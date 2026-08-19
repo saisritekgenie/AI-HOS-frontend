@@ -1570,7 +1570,7 @@ const PatientPortal = () => {
                   rel="noopener noreferrer"
                   style={{ fontSize: "0.8rem", color: "#16a34a", fontWeight: 700 }}
                 >
-                  Download Complete Lab Report PDF
+                  View Complete Lab Report
                 </a>
               </div>
             )}

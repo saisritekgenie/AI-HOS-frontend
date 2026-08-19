@@ -73,7 +73,12 @@ const Labs = () => {
   const handleCompleteTest = async () => {
     if (!resultsInput.trim()) return;
     try {
-      const fileName = reportFileInput.trim() || `lab_report_${selectedLab.testName.replace(/\s+/g, "_").toLowerCase()}_${Date.now().toString().slice(-4)}.pdf`;
+      const fileName = reportFileInput.trim() 
+        ? (reportFileInput.trim().endsWith(".pdf") ? reportFileInput.trim().replace(/\.pdf$/, ".html") : reportFileInput.trim())
+        : `lab_report_${selectedLab.testName.replace(/\s+/g, "_").toLowerCase()}_${Date.now().toString().slice(-4)}.html`;
+      if (!fileName.endsWith(".html")) {
+        fileName += ".html";
+      }
       await completeLabTest(selectedLab._id, { results: resultsInput, reportFile: fileName });
       showToast("success", "Test results logged and reported successfully!");
       
@@ -587,13 +592,13 @@ const Labs = () => {
                 )}
  
                 <div className="form-group">
-                  <label style={{ fontSize: "0.85rem", fontWeight: 600 }}>Diagnostic PDF Document Name (Simulated Upload)</label>
+                  <label style={{ fontSize: "0.85rem", fontWeight: 600 }}>Diagnostic Report Document Name (Simulated Upload)</label>
                   <input 
                     type="text"
                     className="form-control"
                     value={reportFileInput}
                     onChange={(e) => setReportFileInput(e.target.value)}
-                    placeholder="E.g. cbc_panel_report.pdf"
+                    placeholder="E.g. cbc_panel_report.html"
                     style={{ width: "100%", padding: "0.5rem", borderRadius: "8px", border: "1px solid #cbd5e1" }}
                   />
                 </div>
@@ -679,7 +684,7 @@ const Labs = () => {
                   rel="noopener noreferrer"
                   style={{ fontSize: "0.8rem", color: "#16a34a", fontWeight: 700 }}
                 >
-                  Download Complete Lab Report PDF ({viewingLab.reportFile})
+                  View Complete Lab Report ({viewingLab.reportFile})
                 </a>
               </div>
             )}
