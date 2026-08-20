@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Hospital as HospitalIcon, Plus, CheckCircle, XCircle, Bell, Search, MapPin, Building, ShieldCheck, Eye, EyeOff } from "lucide-react";
-import { fetchHospitals, registerHospital, approveHospital, rejectHospital } from "../services/api";
+import { fetchHospitals, registerHospital, approveHospital, rejectHospital, uploadHospitalLogo } from "../services/api";
 
 const HospitalManagement = () => {
   const [hospitals, setHospitals] = useState([]);
@@ -23,6 +23,7 @@ const HospitalManagement = () => {
     hospitalName: "",
     hospitalCode: "",
     hospitalLocation: "",
+    logoUrl: "",
     adminFirstName: "",
     adminLastName: "",
     adminEmail: "",
@@ -73,6 +74,29 @@ const HospitalManagement = () => {
     }
   };
 
+  const handleRowLogoUpload = async (id, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          showToast("success", "Uploading hospital logo...");
+          await uploadHospitalLogo(id, reader.result);
+          showToast("success", "Logo updated successfully!");
+          loadHospitals();
+        } catch (err) {
+          showToast("error", err.response?.data?.message || "Failed to upload logo");
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error(err);
+      showToast("error", "Failed to process logo file");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -83,6 +107,7 @@ const HospitalManagement = () => {
         hospitalName: "",
         hospitalCode: "",
         hospitalLocation: "",
+        logoUrl: "",
         adminFirstName: "",
         adminLastName: "",
         adminEmail: "",
@@ -225,7 +250,29 @@ const HospitalManagement = () => {
                 <tr key={h._id}>
                   <td>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                      <Building size={20} className="text-sky-600" />
+                      <div style={{ position: "relative" }}>
+                        <div style={{ width: "32px", height: "32px", borderRadius: "6px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "#f1f5f9", border: "1px solid var(--border-glass)" }}>
+                          {h.logoUrl ? (
+                            <img src={h.logoUrl.startsWith("http") || h.logoUrl.startsWith("data:") ? h.logoUrl : `http://${window.location.hostname}:8086${h.logoUrl}`} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                          ) : (
+                            <Building size={18} className="text-sky-600" />
+                          )}
+                        </div>
+                        <label 
+                          htmlFor={`upload-logo-${h._id}`} 
+                          style={{ position: "absolute", bottom: "-4px", right: "-4px", background: "var(--accent-primary)", color: "white", borderRadius: "50%", width: "16px", height: "16px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: "10px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", border: "1px solid white" }}
+                          title="Change Logo"
+                        >
+                          ✎
+                        </label>
+                        <input 
+                          type="file" 
+                          id={`upload-logo-${h._id}`} 
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          onChange={(e) => handleRowLogoUpload(h._id, e)}
+                        />
+                      </div>
                       <strong style={{ color: "var(--text-primary)" }}>{h.name}</strong>
                     </div>
                   </td>
@@ -347,6 +394,32 @@ const HospitalManagement = () => {
                       placeholder="Hyderabad Campus"
                       required
                     />
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label>Hospital Logo File (Optional)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="form-control"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            setFormData({ ...formData, logoUrl: reader.result });
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      style={{ padding: "0.4rem" }}
+                    />
+                    {formData.logoUrl && (
+                      <div style={{ marginTop: "0.5rem" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", display: "block" }}>Logo Preview:</span>
+                        <img src={formData.logoUrl} alt="Preview" style={{ display: "block", width: "40px", height: "40px", borderRadius: "6px", marginTop: "0.25rem", objectFit: "contain", border: "1px solid var(--border-glass)", background: "#f8fafc" }} />
+                      </div>
+                    )}
                   </div>
 
                   <div className="form-group">

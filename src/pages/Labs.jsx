@@ -73,7 +73,7 @@ const Labs = () => {
   const handleCompleteTest = async () => {
     if (!resultsInput.trim()) return;
     try {
-      const fileName = reportFileInput.trim() 
+      let fileName = reportFileInput.trim() 
         ? (reportFileInput.trim().endsWith(".pdf") ? reportFileInput.trim().replace(/\.pdf$/, ".html") : reportFileInput.trim())
         : `lab_report_${selectedLab.testName.replace(/\s+/g, "_").toLowerCase()}_${Date.now().toString().slice(-4)}.html`;
       if (!fileName.endsWith(".html")) {

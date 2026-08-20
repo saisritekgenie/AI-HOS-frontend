@@ -160,10 +160,20 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
         </div>
 
         <div className="sidebar-logo">
-          <div className="logo-icon">
-            <Hospital size={22} />
+          <div className="logo-icon" style={{ overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {user?.hospital?.logoUrl ? (
+              <img 
+                src={user.hospital.logoUrl.startsWith("http") || user.hospital.logoUrl.startsWith("data:") 
+                  ? user.hospital.logoUrl 
+                  : `http://${window.location.hostname}:8086${user.hospital.logoUrl}`} 
+                alt="Hospital Logo" 
+                style={{ width: "24px", height: "24px", borderRadius: "4px", objectFit: "contain" }} 
+              />
+            ) : (
+              <Hospital size={22} />
+            )}
           </div>
-          <div className="logo-text">AI Hospital</div>
+          <div className="logo-text">{user?.hospital?.name || "AI Hospital"}</div>
         </div>
 
         <nav className="sidebar-nav">

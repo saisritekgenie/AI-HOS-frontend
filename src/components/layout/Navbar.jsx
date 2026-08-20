@@ -36,7 +36,19 @@ const Navbar = ({ onMenuClick }) => {
         </button>
 
         <div className="navbar-brand">
-          <Activity size={24} style={{ color: "var(--accent-primary)" }} />
+          {user?.hospital?.logoUrl ? (
+            <div style={{ width: "32px", height: "32px", borderRadius: "6px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img 
+                src={user.hospital.logoUrl.startsWith("http") || user.hospital.logoUrl.startsWith("data:") 
+                  ? user.hospital.logoUrl 
+                  : `http://${window.location.hostname}:8086${user.hospital.logoUrl}`} 
+                alt="Hospital Logo" 
+                style={{ width: "100%", height: "100%", objectFit: "contain" }} 
+              />
+            </div>
+          ) : (
+            <Activity size={24} style={{ color: "var(--accent-primary)" }} />
+          )}
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span className="brand-title-main">AI Hospital System</span>
             <span className="brand-title-sub" style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 600, display: "flex", alignItems: "center", gap: "0.25rem" }}>

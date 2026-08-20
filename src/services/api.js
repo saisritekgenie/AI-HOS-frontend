@@ -94,6 +94,11 @@ export const rejectHospital = async (id) => {
   return response.data;
 };
 
+export const uploadHospitalLogo = async (id, logoData) => {
+  const response = await api.put(`/super-admin/hospitals/${id}/logo`, { logoData });
+  return response.data;
+};
+
 /**
  * User Management APIs
  */

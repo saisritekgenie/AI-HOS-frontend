@@ -890,11 +890,23 @@ const PatientPortal = () => {
       <header style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border-glass)", padding: "1rem 2rem", position: "sticky", top: 0, zIndex: 10 }}>
         <div className="portal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "1280px", margin: "0 auto" }}>
           <div className="portal-header-left" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <div style={{ width: "40px", height: "40px", borderRadius: "12px", background: "linear-gradient(135deg, #0284c7 0%, #4f46e5 100%)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
-              <Activity size={24} />
+            <div style={{ width: "40px", height: "40px", borderRadius: "12px", background: (patient?.hospital || user?.hospital)?.logoUrl ? "transparent" : "linear-gradient(135deg, #0284c7 0%, #4f46e5 100%)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", overflow: "hidden" }}>
+              {(patient?.hospital || user?.hospital)?.logoUrl ? (
+                <img 
+                  src={(patient?.hospital || user?.hospital).logoUrl.startsWith("http") || (patient?.hospital || user?.hospital).logoUrl.startsWith("data:") 
+                    ? (patient?.hospital || user?.hospital).logoUrl 
+                    : `http://${window.location.hostname}:8086${(patient?.hospital || user?.hospital).logoUrl}`} 
+                  alt="Hospital Logo" 
+                  style={{ width: "100%", height: "100%", objectFit: "contain" }} 
+                />
+              ) : (
+                <Activity size={24} />
+              )}
             </div>
             <div style={{ textAlign: "left" }}>
-              <h1 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.5px" }}>MediCore Patient Portal</h1>
+              <h1 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.5px" }}>
+                {(patient?.hospital || user?.hospital)?.name || "MediCore"} Patient Portal
+              </h1>
               <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 500 }}>Secure Clinical Access</span>
             </div>
           </div>
