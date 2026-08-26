@@ -299,28 +299,14 @@ const Login = () => {
           .login-page-container {
             display: flex !important;
             flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
             overflow-y: auto !important;
+            padding: 1.5rem !important;
+            box-sizing: border-box !important;
           }
           .login-left-brand-container {
-            display: flex !important;
-            position: relative !important;
-            left: auto !important;
-            top: auto !important;
-            transform: none !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            padding: 3rem 1.5rem 1.5rem 1.5rem !important;
-            align-items: center !important;
-            text-align: center !important;
-          }
-          .login-left-title {
-            text-align: center !important;
-          }
-          .login-left-subtitle {
-            text-align: center !important;
-          }
-          .login-left-tagline {
-            text-align: center !important;
+            display: none !important;
           }
           .login-card-floating-wrapper {
             position: relative !important;
@@ -328,12 +314,16 @@ const Login = () => {
             top: auto !important;
             transform: none !important;
             width: 100% !important;
-            max-width: 100% !important;
-            padding: 1.5rem 1.5rem 3rem 1.5rem !important;
+            max-width: 400px !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
           }
           .login-card {
             max-height: none !important;
             background: rgba(240, 250, 252, 0.85) !important;
+            border-radius: 24px !important;
+            padding: 24px 20px !important;
+            box-sizing: border-box !important;
           }
         }
       `}</style>
