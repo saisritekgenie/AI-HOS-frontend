@@ -54,6 +54,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem("hospital_token");
     localStorage.removeItem("hospital_user");
+    document.body.classList.remove("light-theme", "dark-theme");
   };
 
   return (

@@ -40,6 +40,10 @@ const Login = () => {
     }
   }, []);
 
+  useEffect(() => {
+    document.body.classList.remove("light-theme", "dark-theme");
+  }, []);
+
   const handlePlaceholderClick = (featureName) => {
     setPlaceholderNotice(`${featureName} is configured as a UI placeholder for Phase 2 integration.`);
   };

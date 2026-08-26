@@ -1462,32 +1462,6 @@ body.light-theme {
   background: var(--bg-primary) !important;
 }
 
-.login-page-container {
-  background: radial-gradient(circle at 50% 50%, #0F172A 0%, #0A0F1D 100%) !important;
-}
-
-body.light-theme .login-page-container {
-  background: radial-gradient(circle at 50% 50%, #0F172A 0%, #0A0F1D 100%) !important;
-}
-
-.login-card {
-  background: rgba(15, 23, 42, 0.55) !important;
-  backdrop-filter: blur(20px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(120%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-  border-radius: 24px !important;
-  z-index: 2;
-  overflow: hidden;
-  position: relative;
-}
-
-body.light-theme .login-card {
-  background: rgba(15, 23, 42, 0.55) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-}
-
 /* Floating Glass Dropdowns & Chat panels */
 div[style*="fixed"][style*="bottom"][style*="right"],
 div[style*="width: 380px"],
