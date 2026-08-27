@@ -14,22 +14,7 @@ const Login = () => {
   const [activeTab, setActiveTab] = useState("staff"); // "staff" or "patient"
   const [placeholderNotice, setPlaceholderNotice] = useState(null);
 
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (window.innerWidth >= 1024) {
-        setMousePos({ x: e.clientX, y: e.clientY });
-        setIsHovering(true);
-      }
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

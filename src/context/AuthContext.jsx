@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     };
     verifySession();
-  }, [token]);
+  }, []);
 
   const login = async (credentials) => {
     const res = await loginUser(credentials);

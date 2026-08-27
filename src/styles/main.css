@@ -179,6 +179,7 @@ body.light-theme {
   top: 0;
   left: 0;
   pointer-events: none;
+  will-change: transform;
 }
 
 .orb {
@@ -187,6 +188,7 @@ body.light-theme {
   filter: blur(180px);
   opacity: 0.06 !important;
   transition: opacity 0.5s ease;
+  will-change: transform, opacity;
 }
 
 body.light-theme .orb {
@@ -1550,12 +1552,15 @@ body.dark-theme .wave-path-3 {
 /* Infinite fluid wave movement scroll animations */
 .wave-path-1 {
   animation: waveScroll1 24s linear infinite;
+  will-change: transform;
 }
 .wave-path-2 {
   animation: waveScroll2 16s linear infinite;
+  will-change: transform;
 }
 .wave-path-3 {
   animation: waveScroll3 30s linear infinite;
+  will-change: transform;
 }
 
 @keyframes waveScroll1 {

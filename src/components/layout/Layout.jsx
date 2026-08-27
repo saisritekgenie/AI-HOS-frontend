@@ -12,14 +12,17 @@ import { CashierChatbot } from "../ai/CashierChatbot";
 
 const Layout = ({ activeTab, setActiveTab, children }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const layoutRef = React.useRef(null);
   const { user } = useAuth();
 
   useEffect(() => {
     const handleMouseMove = (e) => {
       const x = (e.clientX / window.innerWidth) - 0.5;
       const y = (e.clientY / window.innerHeight) - 0.5;
-      setMousePos({ x, y });
+      if (layoutRef.current) {
+        layoutRef.current.style.setProperty("--mouse-x", x);
+        layoutRef.current.style.setProperty("--mouse-y", y);
+      }
     };
 
     if (window.matchMedia("(pointer: fine)").matches) {
@@ -31,13 +34,13 @@ const Layout = ({ activeTab, setActiveTab, children }) => {
   }, []);
 
   return (
-    <div className="app-layout">
+    <div className="app-layout" ref={layoutRef}>
       {/* Premium Glassmorphic Background Orbs with Cursor Parallax */}
       <div className="glass-orbs">
         <div 
           className="orb-wrapper" 
           style={{ 
-            transform: `translate(${mousePos.x * 20}px, ${mousePos.y * 20}px)`, 
+            transform: `translate(calc(var(--mouse-x, 0) * 20px), calc(var(--mouse-y, 0) * 20px))`, 
             transition: "transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1)" 
           }}
         >
@@ -46,7 +49,7 @@ const Layout = ({ activeTab, setActiveTab, children }) => {
         <div 
           className="orb-wrapper" 
           style={{ 
-            transform: `translate(${mousePos.x * -28}px, ${mousePos.y * -28}px)`, 
+            transform: `translate(calc(var(--mouse-x, 0) * -28px), calc(var(--mouse-y, 0) * -28px))`, 
             transition: "transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1)" 
           }}
         >
@@ -55,7 +58,7 @@ const Layout = ({ activeTab, setActiveTab, children }) => {
         <div 
           className="orb-wrapper" 
           style={{ 
-            transform: `translate(${mousePos.x * 12}px, ${mousePos.y * 12}px)`, 
+            transform: `translate(calc(var(--mouse-x, 0) * 12px), calc(var(--mouse-y, 0) * 12px))`, 
             transition: "transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1)" 
           }}
         >
