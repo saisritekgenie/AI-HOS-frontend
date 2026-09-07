@@ -131,29 +131,90 @@ const Pharmacy = () => {
   }, []);
 
   const handleRestock = async () => {
-    if (newStockCount <= 0) return;
+    if (!selectedMed) return;
+    const addCount = newStockCount > 0 ? newStockCount : 50;
     try {
-      await updateMedicineStock(selectedMed._id, selectedMed.stock + newStockCount);
-      showToast("success", "Inventory stock refilled successfully");
+      await updateMedicineStock(selectedMed._id, selectedMed.stock + addCount);
+      showToast("success", `Inventory stock refilled successfully (+${addCount} units)`);
       setRestockModalOpen(false);
       setSelectedMed(null);
       loadData();
     } catch (err) {
-      showToast("error", "Failed to update stock");
+      console.error(err);
+      showToast("error", err.response?.data?.message || "Failed to update stock");
+    }
+  };
+
+  const handleAutoFillAI = () => {
+    const sampleDrugs = [
+      { name: "Amoxicillin-Clavulanate 625mg (Augmentin)", price: 85, stock: 100 },
+      { name: "Azithromycin 500mg (Azee)", price: 95, stock: 120 },
+      { name: "Ciprofloxacin 500mg (Ciplox)", price: 45, stock: 80 },
+      { name: "Metformin 500mg (Glycomet)", price: 25, stock: 150 },
+      { name: "Omeprazole 20mg (Omez)", price: 35, stock: 200 },
+      { name: "Atorvastatin 20mg (Lipitor)", price: 110, stock: 90 },
+      { name: "Pantoprazole 40mg (Pan-D)", price: 18, stock: 100 }
+    ];
+    const pick = sampleDrugs[Math.floor(Math.random() * sampleDrugs.length)];
+    const nextYear = new Date();
+    nextYear.setFullYear(nextYear.getFullYear() + 1);
+    const dateStr = nextYear.toISOString().split("T")[0];
+
+    setNewMedForm({
+      name: pick.name,
+      stock: pick.stock,
+      price: pick.price,
+      batchNumber: `BAT-${Math.floor(100 + Math.random() * 900)}`,
+      expiryDate: dateStr
+    });
+    showToast("success", "✨ AI Auto-Filled Medicine Parameters!");
+  };
+
+  const handleAutoReplenishAllAI = async () => {
+    const lowStockItems = inventory.filter(i => i.stock < 20);
+    if (lowStockItems.length === 0) {
+      showToast("info", "All medication inventory levels are optimal!");
+      return;
+    }
+    try {
+      for (const item of lowStockItems) {
+        await updateMedicineStock(item._id, item.stock + 50);
+      }
+      showToast("success", `✨ AI Auto-Replenished ${lowStockItems.length} low stock items (+50 units each)!`);
+      loadData();
+    } catch (err) {
+      console.error(err);
+      showToast("error", "Failed to auto replenish inventory stock");
     }
   };
 
   const handleAddNewMedicine = async (e) => {
-    e.preventDefault();
-    if (!newMedForm.name.trim() || !newMedForm.batchNumber.trim()) return;
+    if (e) e.preventDefault();
+    if (!newMedForm.name.trim()) {
+      showToast("error", "Please provide a medicine name");
+      return;
+    }
     try {
-      await addMedicine(newMedForm);
+      const nextYear = new Date();
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
+      const defaultDate = nextYear.toISOString().split("T")[0];
+
+      const payload = {
+        name: newMedForm.name.trim(),
+        stock: typeof newMedForm.stock === "number" ? newMedForm.stock : (parseInt(newMedForm.stock) || 50),
+        price: typeof newMedForm.price === "number" ? newMedForm.price : (parseInt(newMedForm.price) || 20),
+        batchNumber: newMedForm.batchNumber?.trim() || `BAT-${Math.floor(100 + Math.random() * 900)}`,
+        expiryDate: newMedForm.expiryDate || defaultDate
+      };
+
+      await addMedicine(payload);
       showToast("success", "New pharmaceutical drug added to inventory");
       setAddModalOpen(false);
       setNewMedForm({ name: "", stock: 20, price: 15, expiryDate: "", batchNumber: "" });
       loadData();
     } catch (err) {
-      showToast("error", "Failed to register new medicine");
+      console.error(err);
+      showToast("error", err.response?.data?.message || "Failed to register new medicine");
     }
   };
 
@@ -612,9 +673,19 @@ const Pharmacy = () => {
       {addModalOpen && (
         <div className="modal-overlay">
           <div className="modal-card" style={{ maxWidth: "450px" }}>
-            <div className="modal-header">
+            <div className="modal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h3>Register New Medicine Catalog</h3>
               <button className="action-btn" onClick={() => setAddModalOpen(false)}>×</button>
+            </div>
+            <div style={{ padding: "0.5rem 1.5rem 0", textAlign: "right" }}>
+              <button 
+                type="button" 
+                onClick={handleAutoFillAI} 
+                className="btn btn-secondary"
+                style={{ fontSize: "0.75rem", padding: "0.25rem 0.6rem", color: "#6b21a8", borderColor: "#c084fc", background: "#faf5ff" }}
+              >
+                ✨ Fill Auto using AI
+              </button>
             </div>
             <form onSubmit={handleAddNewMedicine}>
               <div className="modal-body" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -677,9 +748,19 @@ const Pharmacy = () => {
                   </div>
                 </div>
               </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setAddModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Add Drug</button>
+              <div className="modal-footer" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={handleAutoFillAI}
+                  style={{ fontSize: "0.75rem" }}
+                >
+                  ✨ Fill Auto using AI
+                </button>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setAddModalOpen(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Add Drug</button>
+                </div>
               </div>
             </form>
           </div>
