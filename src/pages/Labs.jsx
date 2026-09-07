@@ -616,53 +616,62 @@ const Labs = () => {
       {/* View Lab Details Modal */}
       {viewingLab && (
         <div className="modal-overlay">
-          <div className="modal-card" style={{ maxWidth: "500px", padding: "2rem", borderRadius: "16px", background: "var(--bg-secondary)" }}>
-            <div style={{ textAlign: "center", borderBottom: "1px dashed #cbd5e1", paddingBottom: "1rem", marginBottom: "1rem" }}>
-              <h4 style={{ margin: 0, fontSize: "1.2rem", color: "var(--text-primary)" }}>LABORATORY REPORT DETAILS</h4>
-              <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Test Request ID: {viewingLab._id.slice(-6).toUpperCase()}</span>
+          <div className="modal-card" style={{ maxWidth: "520px", padding: "2rem", borderRadius: "20px", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)", boxShadow: "0 20px 40px rgba(0,0,0,0.4)" }}>
+            <div style={{ textAlign: "center", borderBottom: "1px dashed rgba(255,255,255,0.15)", paddingBottom: "1rem", marginBottom: "1.25rem" }}>
+              <h4 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "0.5px" }}>LABORATORY REPORT DETAILS</h4>
+              <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", fontWeight: 600 }}>Test Request ID: {viewingLab._id.slice(-6).toUpperCase()}</span>
             </div>
             
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.9rem", color: "#334155", marginBottom: "1rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Test Name:</span>
-                <strong>{viewingLab.testName}</strong>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", fontSize: "0.9rem", marginBottom: "1.25rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>Test Name:</span>
+                <strong style={{ color: "var(--text-primary)", fontWeight: 700 }}>{viewingLab.testName}</strong>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Patient Name:</span>
-                <strong>{viewingLab.patient?.firstName} {viewingLab.patient?.lastName}</strong>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>Patient Name:</span>
+                <strong style={{ color: "var(--text-primary)", fontWeight: 700 }}>{viewingLab.patient?.firstName} {viewingLab.patient?.lastName}</strong>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>UHID (Patient ID):</span>
-                <strong>{viewingLab.patient?.uhid || "N/A"}</strong>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>UHID (Patient ID):</span>
+                <strong style={{ color: "var(--text-primary)", fontWeight: 700 }}>{viewingLab.patient?.uhid || "N/A"}</strong>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Ordered By:</span>
-                <strong>Dr. {viewingLab.prescribedBy?.firstName} {viewingLab.prescribedBy?.lastName}</strong>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>Ordered By:</span>
+                <strong style={{ color: "var(--text-primary)", fontWeight: 700 }}>Dr. {viewingLab.prescribedBy?.firstName} {viewingLab.prescribedBy?.lastName}</strong>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Sample Collected At:</span>
-                <span>{viewingLab.sampleCollectedAt ? new Date(viewingLab.sampleCollectedAt).toLocaleString() : "Pending Collection"}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>Sample Collected At:</span>
+                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{viewingLab.sampleCollectedAt ? new Date(viewingLab.sampleCollectedAt).toLocaleString() : "Pending Collection"}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px dashed #cbd5e1", paddingBottom: "0.5rem" }}>
-                <span>Report Status:</span>
-                <strong style={{ color: viewingLab.status === "COMPLETED" ? "#15803d" : viewingLab.status === "REJECTED" ? "#ef4444" : viewingLab.status === "SAMPLE_COLLECTED" ? "#0284c7" : viewingLab.status === "ACCEPTED" ? "#16a34a" : "#d97706" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px dashed rgba(255,255,255,0.15)", paddingBottom: "0.75rem" }}>
+                <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>Report Status:</span>
+                <strong style={{ 
+                  padding: "0.2rem 0.6rem", 
+                  borderRadius: "6px", 
+                  fontSize: "0.75rem", 
+                  fontWeight: 800, 
+                  letterSpacing: "0.5px",
+                  background: viewingLab.status === "COMPLETED" ? "rgba(34, 197, 94, 0.15)" : viewingLab.status === "REJECTED" ? "rgba(239, 68, 68, 0.15)" : "rgba(234, 179, 8, 0.15)",
+                  color: viewingLab.status === "COMPLETED" ? "#4ade80" : viewingLab.status === "REJECTED" ? "#f87171" : "#facc15",
+                  border: viewingLab.status === "COMPLETED" ? "1px solid rgba(74, 222, 128, 0.3)" : viewingLab.status === "REJECTED" ? "1px solid rgba(248, 113, 113, 0.3)" : "1px solid rgba(250, 204, 21, 0.3)"
+                }}>
                   {viewingLab.status.replace("_", " ")}
                 </strong>
               </div>
             </div>
 
             {viewingLab.status === "REJECTED" && (
-              <div style={{ background: "#fee2e2", padding: "1rem", borderRadius: "8px", border: "1px solid #fecaca", marginBottom: "1rem" }}>
-                <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "#dc2626", fontWeight: 700 }}>REJECTION PROBLEM DETAILS</h5>
-                <p style={{ margin: 0, fontSize: "0.8rem", color: "#b91c1c", lineHeight: 1.4 }}>
+              <div style={{ background: "rgba(239, 68, 68, 0.1)", padding: "1rem", borderRadius: "10px", border: "1px solid rgba(239, 68, 68, 0.3)", marginBottom: "1.25rem" }}>
+                <h5 style={{ margin: "0 0 0.4rem 0", fontSize: "0.85rem", color: "#f87171", fontWeight: 700 }}>REJECTION PROBLEM DETAILS</h5>
+                <p style={{ margin: 0, fontSize: "0.8rem", color: "#fca5a5", lineHeight: 1.4 }}>
                   {viewingLab.rejectionReason || "No rejection reason specified."}
                 </p>
               </div>
             )}
 
-            <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "8px", border: "1px solid var(--border-glass)", marginBottom: "1rem" }}>
-              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "var(--text-primary)" }}>DIAGNOSTIC FINDINGS / RESULTS</h5>
-              <p style={{ margin: 0, fontSize: "0.8rem", color: "#475569", lineHeight: 1.4 }}>
+            <div style={{ background: "rgba(255, 255, 255, 0.04)", padding: "1rem", borderRadius: "12px", border: "1px solid var(--border-glass)", marginBottom: "1.25rem" }}>
+              <h5 style={{ margin: "0 0 0.5rem 0", fontSize: "0.85rem", color: "var(--accent-primary)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>DIAGNOSTIC FINDINGS / RESULTS</h5>
+              <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--text-primary)", lineHeight: 1.5, fontWeight: 500 }}>
                 {viewingLab.status === "COMPLETED" 
                   ? (viewingLab.results || "Standard physiological values fall within reference ranges.") 
                   : viewingLab.status === "REJECTED"
@@ -676,20 +685,20 @@ const Labs = () => {
             </div>
 
             {viewingLab.status === "COMPLETED" && viewingLab.reportFile && (
-              <div style={{ marginTop: "0.5rem", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.6rem", background: "#f0fdf4", borderRadius: "8px", border: "1px solid #bbf7d0" }}>
+              <div style={{ marginTop: "0.5rem", marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.6rem", padding: "0.75rem 1rem", background: "rgba(16, 185, 129, 0.12)", borderRadius: "10px", border: "1px solid rgba(16, 185, 129, 0.3)" }}>
                 <span style={{ fontSize: "1.2rem" }}>📄</span>
                 <a 
                   href={`http://localhost:8086/uploads/${viewingLab.reportFile}`} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  style={{ fontSize: "0.8rem", color: "#16a34a", fontWeight: 700 }}
+                  style={{ fontSize: "0.85rem", color: "#34d399", fontWeight: 700, textDecoration: "underline" }}
                 >
                   View Complete Lab Report ({viewingLab.reportFile})
                 </a>
               </div>
             )}
             
-            <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
+            <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
               {viewingLab.status === "COMPLETED" && (
                 <>
                   <button className="btn btn-secondary" onClick={() => handlePrintSingleLab(viewingLab)} style={{ flex: 1 }}>Print</button>
