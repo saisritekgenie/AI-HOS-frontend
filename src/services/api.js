@@ -309,7 +309,8 @@ export const addMedicine = async (data) => {
 };
 
 export const updateMedicineStock = async (id, stock) => {
-  const response = await api.put(`/pharmacy/inventory/${id}`, { stock });
+  const safeId = id ? encodeURIComponent(id) : "default";
+  const response = await api.put(`/pharmacy/inventory/${safeId}`, { stock });
   return response.data;
 };
 

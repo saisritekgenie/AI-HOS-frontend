@@ -58,13 +58,35 @@ const MainAppContent = () => {
         style={{
           minHeight: "100vh",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "var(--bg-primary)",
-          color: "var(--text-secondary)",
+          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          color: "white",
+          gap: "1.25rem"
         }}
       >
-        <p>Loading security session...</p>
+        <style>{`
+          @keyframes appSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+        <div
+          style={{
+            width: "60px",
+            height: "60px",
+            borderRadius: "50%",
+            border: "4px solid rgba(25, 181, 165, 0.2)",
+            borderTopColor: "#19B5A5",
+            animation: "appSpin 0.8s linear infinite",
+            boxShadow: "0 0 25px rgba(25, 181, 165, 0.4)"
+          }}
+        />
+        <div style={{ textAlign: "center" }}>
+          <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700, color: "#f8fafc" }}>AI-HOS Portal Initializing</h3>
+          <p style={{ margin: "0.35rem 0 0 0", fontSize: "0.825rem", color: "#94a3b8" }}>Securing user credentials & loading workspace...</p>
+        </div>
       </div>
     );
   }

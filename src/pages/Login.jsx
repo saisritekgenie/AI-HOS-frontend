@@ -302,8 +302,12 @@ const Login = () => {
             max-width: 400px !important;
             padding: 0 !important;
             box-sizing: border-box !important;
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
           }
           .login-card {
+            position: relative;
             max-height: none !important;
             background: rgba(240, 250, 252, 0.85) !important;
             border-radius: 24px !important;
@@ -334,7 +338,42 @@ const Login = () => {
 
       {/* Floating Right Login Card Wrapper */}
       <div className="login-card-floating-wrapper">
-        <div className="modal-card login-card">
+        <div className="modal-card login-card" style={{ position: "relative", overflow: "hidden" }}>
+          {/* Round Circle Loading Overlay during submission */}
+          {submitting && (
+            <div style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(255, 255, 255, 0.88)",
+              backdropFilter: "blur(6px)",
+              borderRadius: "24px",
+              zIndex: 50,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "1.25rem",
+              animation: "fadeIn 0.3s ease"
+            }}>
+              <div style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                border: "4px solid rgba(25, 181, 165, 0.18)",
+                borderTopColor: "#19B5A5",
+                animation: "spin 0.8s linear infinite",
+                boxShadow: "0 0 20px rgba(25, 181, 165, 0.3)"
+              }} />
+              <div style={{ textAlign: "center", padding: "0 1rem" }}>
+                <strong style={{ fontSize: "1rem", color: "#0f172a", display: "block", fontWeight: 800 }}>Authenticating Session...</strong>
+                <span style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 500, marginTop: "0.25rem", display: "block" }}>Connecting to AI-HOS Secure Network</span>
+              </div>
+            </div>
+          )}
+
           {/* Header Branding */}
           <div className="login-brand-header">
             <div
@@ -531,10 +570,26 @@ const Login = () => {
               type="submit"
               className="shimmer-button"
               disabled={submitting}
-              style={{ width: "100%" }}
+              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}
             >
-              <span>{submitting ? "Signing in..." : "LOGIN"}</span>
-              <LogIn size={20} />
+              {submitting ? (
+                <>
+                  <div style={{
+                    width: "18px",
+                    height: "18px",
+                    borderRadius: "50%",
+                    border: "2px solid rgba(255, 255, 255, 0.4)",
+                    borderTopColor: "#ffffff",
+                    animation: "spin 0.8s linear infinite"
+                  }} />
+                  <span>AUTHENTICATING...</span>
+                </>
+              ) : (
+                <>
+                  <span>LOGIN</span>
+                  <LogIn size={20} />
+                </>
+              )}
             </button>
           </form>
 

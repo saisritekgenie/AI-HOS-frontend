@@ -53,6 +53,7 @@ import {
   fetchLabRequests,
   fetchPharmacyStats,
   fetchInventory,
+  updateMedicineStock,
   fetchBillingStats,
   fetchBillingInvoices,
   fetchAIDashboardInsights,
@@ -2496,11 +2497,14 @@ const Dashboard = ({
               <button 
                 onClick={async () => {
                   try {
-                    await updateMedicineStock(lowStockList[0]._id, lowStockList[0].stock + 100);
-                    showToast("success", `Refilled ${lowStockList[0].name} buffer stock!`);
+                    const item = lowStockList[0];
+                    const targetId = item._id || item.id || item.batchNumber || item.name;
+                    await updateMedicineStock(targetId, (item.stock || 0) + 100);
+                    showToast("success", `Refilled ${item.name} buffer stock!`);
                     loadDashboardData();
                   } catch (err) {
-                    showToast("error", "Failed to update stock");
+                    console.error(err);
+                    showToast("error", err.response?.data?.message || "Failed to update stock");
                   }
                 }}
                 className="btn" 
@@ -2532,8 +2536,8 @@ const Dashboard = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {lowStockList.map((m) => (
-                      <tr key={m._id}>
+                    {lowStockList.map((m, idx) => (
+                      <tr key={m._id || m.id || idx}>
                         <td>
                           <strong style={{ color: "var(--text-primary)" }}>{m.name}</strong>
                         </td>
@@ -2546,11 +2550,13 @@ const Dashboard = ({
                           <button 
                             onClick={async () => {
                               try {
-                                await updateMedicineStock(m._id, m.stock + 50);
+                                const targetId = m._id || m.id || m.batchNumber || m.name;
+                                await updateMedicineStock(targetId, (m.stock || 0) + 50);
                                 showToast("success", `Successfully refilled 50 units of ${m.name} via AI Replenishment!`);
                                 loadDashboardData();
                               } catch (err) {
-                                showToast("error", "Failed to update stock");
+                                console.error(err);
+                                showToast("error", err.response?.data?.message || "Failed to update stock");
                               }
                             }}
                             className="btn btn-primary" 

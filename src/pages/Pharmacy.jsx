@@ -145,7 +145,8 @@ const Pharmacy = () => {
     }
   };
 
-  const handleAutoFillAI = () => {
+  const handleAutoFillAI = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     const sampleDrugs = [
       { name: "Amoxicillin-Clavulanate 625mg (Augmentin)", price: 85, stock: 100 },
       { name: "Azithromycin 500mg (Azee)", price: 95, stock: 120 },
@@ -153,7 +154,9 @@ const Pharmacy = () => {
       { name: "Metformin 500mg (Glycomet)", price: 25, stock: 150 },
       { name: "Omeprazole 20mg (Omez)", price: 35, stock: 200 },
       { name: "Atorvastatin 20mg (Lipitor)", price: 110, stock: 90 },
-      { name: "Pantoprazole 40mg (Pan-D)", price: 18, stock: 100 }
+      { name: "Pantoprazole 40mg (Pan-D)", price: 18, stock: 100 },
+      { name: "Paracetamol 650mg (Dolo)", price: 30, stock: 250 },
+      { name: "Ibuprofen 400mg (Brufen)", price: 22, stock: 140 }
     ];
     const pick = sampleDrugs[Math.floor(Math.random() * sampleDrugs.length)];
     const nextYear = new Date();
@@ -170,7 +173,8 @@ const Pharmacy = () => {
     showToast("success", "✨ AI Auto-Filled Medicine Parameters!");
   };
 
-  const handleAutoReplenishAllAI = async () => {
+  const handleAutoReplenishAllAI = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     const lowStockItems = inventory.filter(i => i.stock < 20);
     if (lowStockItems.length === 0) {
       showToast("info", "All medication inventory levels are optimal!");
@@ -286,7 +290,21 @@ const Pharmacy = () => {
           <h1>Pharmacy Inventory & Billing</h1>
           <p>Verify doctor prescriptions, dispense drugs, manage stock inventory levels, and process payments.</p>
         </div>
-        <div className="page-actions" style={{ display: "flex", gap: "1rem" }}>
+        <div className="page-actions" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          <button 
+            className="btn btn-secondary" 
+            onClick={handleAutoReplenishAllAI}
+            style={{ display: "flex", alignItems: "center", gap: "0.35rem", background: "#f0fdf4", color: "#16a34a", borderColor: "#86efac", fontWeight: 600, fontSize: "0.825rem" }}
+          >
+            ✨ AI Auto-Replenish Low Stock
+          </button>
+          <button 
+            className="btn btn-secondary" 
+            onClick={(e) => { setAddModalOpen(true); handleAutoFillAI(e); }}
+            style={{ display: "flex", alignItems: "center", gap: "0.35rem", background: "#faf5ff", color: "#6b21a8", borderColor: "#c084fc", fontWeight: 600, fontSize: "0.825rem" }}
+          >
+            ✨ Autofill Drug via AI
+          </button>
           <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>
             <Plus size={16} />
             <span>Add New Drug</span>
@@ -477,7 +495,16 @@ const Pharmacy = () => {
 
                     {/* Replenishments */}
                     <div style={{ padding: "0.85rem", background: "var(--bg-secondary)", border: "1px solid var(--border-glass)", borderRadius: "10px" }}>
-                      <span style={{ fontSize: "0.75rem", color: "#10b981", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>📦 REPLENISHMENT ADVICE</span>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
+                        <span style={{ fontSize: "0.75rem", color: "#10b981", fontWeight: 700 }}>📦 REPLENISHMENT ADVICE</span>
+                        <button 
+                          onClick={handleAutoReplenishAllAI}
+                          className="btn btn-primary"
+                          style={{ fontSize: "0.65rem", padding: "0.2rem 0.5rem", background: "#10b981", border: "none", cursor: "pointer" }}
+                        >
+                          ✨ Auto-Replenish All
+                        </button>
+                      </div>
                       {(!aiForecast.replenishmentRecommendations || aiForecast.replenishmentRecommendations.length === 0) ? (
                         <p style={{ fontSize: "0.75rem", margin: 0, color: "var(--text-secondary)" }}>Stocks meet standard demand thresholds.</p>
                       ) : (
